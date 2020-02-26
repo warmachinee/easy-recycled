@@ -1,0 +1,15 @@
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([["RouteCustomer"],{
+
+/***/ "./src/page/Customer/Customer.tsx":
+/*!****************************************!*\
+  !*** ./src/page/Customer/Customer.tsx ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _material_ui_styles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @material-ui/styles */ \"./node_modules/@material-ui/styles/esm/index.js\");\n/* harmony import */ var _material_ui_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @material-ui/core */ \"./node_modules/@material-ui/core/esm/index.js\");\n\r\n\r\n\r\nconst useStyles = Object(_material_ui_styles__WEBPACK_IMPORTED_MODULE_1__[\"makeStyles\"])(theme => ({}));\r\nconst liff = window.liff;\r\nconst Customer = () => {\r\n    const classes = useStyles();\r\n    const [profileData, setProfileData] = Object(react__WEBPACK_IMPORTED_MODULE_0__[\"useState\"])(null);\r\n    function getProfile() {\r\n        liff\r\n            .getProfile()\r\n            .then((profile) => {\r\n            setProfileData(profile);\r\n        })\r\n            .catch(err => console.error(err));\r\n    }\r\n    function handleLogout() {\r\n        liff.logout();\r\n    }\r\n    function handleFetch() {\r\n        const myLiffId = \"1653861118-DAld6Lv2\";\r\n        liff.init({ liffId: myLiffId }, async () => {\r\n            if (liff.isLoggedIn()) {\r\n                getProfile();\r\n            }\r\n            else {\r\n                liff.login();\r\n            }\r\n        });\r\n    }\r\n    Object(react__WEBPACK_IMPORTED_MODULE_0__[\"useEffect\"])(() => {\r\n        handleFetch();\r\n    }, []);\r\n    return (react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(\"div\", null,\r\n        \"Liff\",\r\n        react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(\"pre\", null, JSON.stringify(liff, null, 2)),\r\n        \"Profile data\",\r\n        react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(\"pre\", null, JSON.stringify(profileData, null, 2)),\r\n        react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_2__[\"Button\"], { onClick: handleLogout, variant: \"contained\", color: \"primary\" }, \"Logout\")));\r\n};\r\n/* harmony default export */ __webpack_exports__[\"default\"] = (Customer);\r\n\n\n//# sourceURL=webpack:///./src/page/Customer/Customer.tsx?");
+
+/***/ })
+
+}]);
