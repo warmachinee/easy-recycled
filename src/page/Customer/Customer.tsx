@@ -1,28 +1,161 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import socketIOClient from "socket.io-client";
+import Loadable from "react-loadable";
 import { makeStyles } from "@material-ui/styles";
-import { Button } from "@material-ui/core";
+import {
+  Paper,
+  Avatar,
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton
+} from "@material-ui/core";
+import { Menu as MenuIcon, Close as CloseIcon } from "@material-ui/icons";
+import { LineProfileData } from "apptype";
+import { green } from "@material-ui/core/colors";
+import { AppContext } from "../../AppContext";
+import { RouteComponentProps, withRouter } from "react-router-dom";
 
-const useStyles = makeStyles(theme => ({}));
+const CustomerRegister = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: 'CustomerRegister' */ "./CustomerRegister"),
+  loading: () => null
+});
+
+const CustomerDashboard = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: 'CustomerDashboard' */ "./CustomerDashboard"),
+  loading: () => null
+});
+
+const CustomerBackdrop = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: 'CustomerBackdrop' */ "./CustomerBackdrop"),
+  loading: () => null
+});
+
+const AppButton = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
+  loading: () => null
+});
+
+const useStyles = makeStyles(theme => ({
+  profileCard: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    margin: 36,
+    padding: 16,
+    width: 200
+  },
+  title: { flexGrow: 1 }
+}));
 
 const liff = window.liff;
 
-export interface CustomerProps {}
+export interface CustomerProps extends RouteComponentProps<{}> {}
 
-const Customer: React.FC<CustomerProps> = () => {
+const Header: React.FC = () => {
   const classes = useStyles();
-  const [profileData, setProfileData] = useState(null);
+  return (
+    <AppBar position="static" color="inherit">
+      <Toolbar>
+        <IconButton edge="start" color="primary">
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" className={classes.title} color="primary">
+          Customer
+        </Typography>
+        <AppButton
+          variant="contained"
+          buttonColor={green}
+          // onClick={addSnackbar}
+        >
+          Profile
+        </AppButton>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
+  const classes = useStyles();
+  const {
+    csrf,
+    setCsrf,
+    setDense,
+    enQSnackbar,
+    closeSnackbar,
+    _xhrPost,
+    _xhrGet,
+    _onLocalhost,
+    _onLocalhostFn
+  } = useContext(AppContext);
+  const [profileData, setProfileData] = useState<LineProfileData | null>(null);
+  const [sess, setSess] = useState<any | null>(null);
+  const [backDrop, setBackDrop] = useState<any | null>(null);
+  const [notifications, setNotifications] = useState<any | null>(null);
+  const [notiPage, setNotiPage] = React.useState(getHash());
+  const paginationChange = (event: any, value: any) => {
+    history.replace(`${match.path}/notifications#${value}`);
+    setNotiPage(value);
+  };
+  const passingProps: any = {
+    ...useContext(AppContext),
+    sess,
+    getSess,
+    profileData,
+    addSnackbar,
+    handleLogout,
+    checkSession,
+    notifications,
+    setNotifications,
+    notiPage,
+    paginationChange,
+    readNotifications
+  };
+
+  function getHash() {
+    const hash = location.hash;
+    if (hash === "") {
+      return 1;
+    } else {
+      return parseInt(hash.split("#")[1]);
+    }
+  }
+
+  function addSnackbar({ message, variant }: any) {
+    enQSnackbar({
+      message,
+      variant,
+      action
+    });
+  }
 
   function getProfile() {
     liff
       .getProfile()
       .then((profile: any) => {
         setProfileData(profile);
+        getSess(profile);
       })
       .catch(err => console.error(err));
   }
 
-  function handleLogout() {
-    liff.logout();
+  async function handleLogout() {
+    const res = await _xhrGet("logout");
+    setCsrf(res.csrf);
+    if (liff.isLoggedIn()) {
+      liff.logout();
+    }
+    window.location.reload();
+  }
+
+  async function checkSession() {
+    const res = await _xhrGet("logout");
+    setCsrf(res.csrf);
+    handleFetch();
   }
 
   function handleFetch() {
@@ -36,20 +169,181 @@ const Customer: React.FC<CustomerProps> = () => {
     });
   }
 
+  async function getInfo() {
+    const res = await _xhrPost({
+      csrf,
+      url: "loadusersystem",
+      body: { action: "info", type: "customer" }
+    });
+    setCsrf(res.csrf);
+    console.log(res.data);
+  }
+
+  async function getSess(profile: any) {
+    setSess(null);
+    setBackDrop(null);
+    const res = await _xhrPost({
+      csrf,
+      url: "session",
+      body: { linetoken: profile.userId, type: "customer" }
+    });
+    setCsrf(res.csrf);
+    setSess(res.data);
+    setBackDrop(res.data);
+  }
+
+  async function getNotifications(profile: any) {
+    const res = await _xhrPost({
+      csrf,
+      url: "loadusersystem",
+      body: {
+        action: "noti",
+        linetoken: profile.userId,
+        type: "customer",
+        startindex: (notiPage - 1) * 10,
+        lastindex: notiPage * 10
+      }
+    });
+    setCsrf(res.csrf);
+    console.log(res.data);
+    if (
+      ("status" in res.data &&
+        res.data.status ===
+          "this is not user account or have been delete account") ||
+      res.data.status === "need to login user account"
+    ) {
+      checkSession();
+    } else {
+      setNotifications(res.data);
+    }
+  }
+
+  async function readNotifications() {
+    const res = await _xhrPost({
+      csrf,
+      url: "usersystem",
+      body: {
+        action: "readnoti",
+        linetoken: profileData && profileData.userId,
+        type: "customer"
+      }
+    });
+    setCsrf(res.csrf);
+    console.log(res.data);
+    getNotifications(profileData);
+  }
+
+  function realtimeNoti(thisSess: any) {
+    const socket = socketIOClient(location.pathname, {
+      transports: ["websocket", "polling"]
+    });
+    socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
+      if (messageNew) {
+        console.log(messageNew);
+      }
+    });
+  }
+
   useEffect(() => {
-    handleFetch();
+    if (profileData && sess) {
+      _onLocalhostFn(
+        () => {
+          setNotifications([
+            {
+              activity: {
+                method: "create form",
+                data: { business_name: "PDS Co.,Ltd." }
+              },
+              reflink: 6174567,
+              read: 0,
+              createdate: "2020-03-25T18:47:43.000Z"
+            },
+            {
+              activity: {
+                method: "admin delete form",
+                data: { business_name: "TPGSA" }
+              },
+              reflink: 8069118,
+              read: 0,
+              createdate: "2020-03-25T18:46:04.000Z"
+            },
+            {
+              activity: {
+                method: "create form",
+                data: { business_name: "PDS" }
+              },
+              reflink: 2315022,
+              read: 0,
+              createdate: "2020-03-25T09:21:12.000Z"
+            },
+            {
+              activity: {
+                method: "edit form",
+                data: [
+                  { business_name: "TPGSA" },
+                  {
+                    fdocument:
+                      '{"document":["บิลเงินสด","ใบอนุญาตค้าของเก่า"],"etc":"none"}'
+                  },
+                  {
+                    transport:
+                      '{"transport":["แม็คโครปากคีบ/แม็คโครแม่เหล็ก"],"etc":"none"}'
+                  }
+                ]
+              },
+              reflink: 1756407,
+              read: 0,
+              createdate: "2020-03-21T05:27:06.000Z"
+            }
+          ]);
+        },
+        () => {
+          realtimeNoti(sess);
+          getNotifications(profileData);
+        }
+      );
+    }
+  }, [sess, profileData, notiPage]);
+
+  useEffect(() => {
+    if (/localhost/.test(window.location.href)) {
+      setProfileData({
+        userId: "U34854b16de48d84b63c751717c9d2771",
+        displayName: "P.R.E.M.I.O.R",
+        pictureUrl:
+          "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
+        statusMessage: "UI/UX Developer at PDS Co.,Ltd."
+      });
+    } else {
+      handleFetch();
+    }
+    setDense(true);
   }, []);
 
+  const action = (key: any) => (
+    <IconButton onClick={() => closeSnackbar(key)}>
+      <CloseIcon style={{ color: "white" }} />
+    </IconButton>
+  );
+
   return (
-    <div>
-      Liff
-      <pre>{JSON.stringify(liff, null, 2)}</pre>
-      Profile data
-      <pre>{JSON.stringify(profileData, null, 2)}</pre>
-      <Button onClick={handleLogout} variant="contained" color="primary">
-        Logout
-      </Button>
-    </div>
+    <AppContext.Provider value={...passingProps}>
+      <div>
+        {_onLocalhost(
+          <CustomerDashboard />,
+          <React.Fragment>
+            {sess &&
+              (sess.status !== "not member" ? (
+                <CustomerDashboard />
+              ) : (
+                <CustomerRegister {...{ profileData }} />
+              ))}
+            <CustomerBackdrop {...{ backDrop, setBackDrop }} />
+          </React.Fragment>
+        )}
+      </div>
+    </AppContext.Provider>
   );
 };
-export default Customer;
+
+export default withRouter(props => <Customer {...props} />);

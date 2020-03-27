@@ -1,0 +1,163 @@
+import React, { useContext, useEffect, useState } from "react";
+import Loadable from "react-loadable";
+import { makeStyles } from "@material-ui/styles";
+import { AppContext } from "../../../AppContext";
+
+const GeneralSetup = Loadable({
+  loader: () => import(/* webpackChunkName: 'GeneralSetup' */ "./GeneralSetup"),
+  loading: () => null
+});
+
+const OrganizeSize = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: 'OrganizeSize' */ "./Form/OrganizeSize"),
+  loading: () => null
+});
+
+const Document = Loadable({
+  loader: () => import(/* webpackChunkName: 'Document' */ "./Form/Document"),
+  loading: () => null
+});
+
+const Transport = Loadable({
+  loader: () => import(/* webpackChunkName: 'Transport' */ "./Form/Transport"),
+  loading: () => null
+});
+
+const useStyles = makeStyles(theme => ({}));
+
+const FormComponent: React.FC<any> = ({ form }) => {
+  const { org_size, document, transport } = form;
+  return (
+    <React.Fragment>
+      <GeneralSetup />
+      <OrganizeSize data={org_size} />
+      <Document data={document} />
+      <Transport data={transport} />
+    </React.Fragment>
+  );
+};
+
+const SetupForm: React.FC<any> = () => {
+  const classes = useStyles();
+  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const [form, setForm] = useState<any>(null);
+  const passingProps: any = {
+    ...useContext(AppContext),
+    form,
+    getCustomerRegister,
+    onInserForm,
+    onDeleteForm,
+    onEditForm
+  };
+
+  async function getCustomerRegister() {
+    const res = await _xhrPost({
+      csrf,
+      url: "aloadcustomer",
+      body: {
+        action: "customer_register"
+      }
+    });
+    console.log(res.data);
+    setCsrf(res.csrf);
+    setForm(res.data);
+  }
+
+  async function onInserForm({ state, setState, type }: any) {
+    const sendObj = {
+      action: "setup",
+      type,
+      setaction: "insert",
+      newtext: state
+    };
+    const res = await _xhrPost({
+      csrf,
+      url: "ausersystem",
+      body: sendObj
+    });
+    console.log(res.data);
+    setCsrf(res.csrf);
+    setState("");
+    getCustomerRegister();
+  }
+
+  async function onDeleteForm({ text, type }: any) {
+    const sendObj = {
+      action: "setup",
+      type,
+      setaction: "delete",
+      oldtext: text
+    };
+    const res = await _xhrPost({
+      csrf,
+      url: "ausersystem",
+      body: sendObj
+    });
+    console.log(res.data);
+    setCsrf(res.csrf);
+    getCustomerRegister();
+  }
+
+  async function onEditForm({ oldtext, newtext, type, afterEdit }: any) {
+    const sendObj = {
+      action: "setup",
+      type,
+      setaction: "edit",
+      oldtext,
+      newtext
+    };
+    const res = await _xhrPost({
+      csrf,
+      url: "ausersystem",
+      body: sendObj
+    });
+    console.log(res.data);
+    setCsrf(res.csrf);
+    afterEdit();
+    getCustomerRegister();
+  }
+
+  useEffect(() => {
+    _onLocalhostFn(() => {
+      setForm({
+        customer_condition: ["<แก้ไข เงื่อนไขและข้อตกลง>"],
+        business_type: [
+          "บุคคลธรรมดา",
+          "รถรับซื้อของเก่า/ซาเล้ง",
+          "ร้านรับซื้อของเก่า",
+          "นิติบุคคล(บริษัท/หจก)"
+        ],
+        org_size: [
+          "พนักงาน 1-5 คน",
+          "พนักงาน 6-20 คน",
+          "พนักงาน 21-40 คน",
+          "พนักงาน 41-100 คน",
+          "มากกว่า 100 คน"
+        ],
+        document: [
+          "บิลเงินสด",
+          "ใบอนุญาตค้าของเก่า",
+          "ภพ.20",
+          "หนังสือรับรองบริษัท",
+          "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
+          "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
+        ],
+        transport: [
+          "รถกะบะ Pickup",
+          "รถบรรทุก 6 ล้อ",
+          "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
+          "รถสไลด์(วางกะบะเหล็ก)",
+          "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
+        ]
+      });
+    }, getCustomerRegister);
+  }, []);
+
+  return (
+    <AppContext.Provider value={...passingProps}>
+      <div>{form && <FormComponent {...{ form }} />}</div>
+    </AppContext.Provider>
+  );
+};
+export default SetupForm;
