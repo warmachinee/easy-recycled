@@ -28,9 +28,12 @@ const useStyles = makeStyles(theme => ({ title: { flexGrow: 1 } }));
 
 const Header: React.FC<any> = ({ profileData, handleLogout }) => {
   const classes = useStyles();
-  const { useConfirmDeleteItem, notifications, readNotifications } = useContext(
-    AppContext
-  );
+  const {
+    useConfirmDeleteItem,
+    notifications,
+    readNotifications,
+    booleanDispatch
+  } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -46,30 +49,40 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
   return (
     <AppBar position="static" color="inherit">
       <Toolbar style={{ paddingRight: 0 }}>
-        {profileData && (
-          <Avatar src={profileData.pictureUrl} style={{ marginRight: 16 }} />
-        )}
+        <Link
+          to={"/business/profile"}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <IconButton style={{ padding: 0, marginRight: 16 }}>
+            {profileData && <Avatar src={profileData.pictureUrl} />}
+          </IconButton>
+        </Link>
+
         <Typography variant="h6" className={classes.title} color="primary">
-          Business
+          EasyRecycle
         </Typography>
-        {notifications && (
-          <Link to={"/business/notifications"}>
-            <IconButton onClick={readNotifications} style={{ marginRight: 16 }}>
-              <Badge
-                badgeContent={
-                  notifications.filter((item: any) => item.read === 0).length
-                }
-                color="secondary"
-              >
-                <Notifications />
-              </Badge>
-            </IconButton>
-          </Link>
+        {notifications && !("status" in notifications) && (
+          <IconButton
+            onClick={() => {
+              booleanDispatch({ type: "true", key: "noti" });
+              readNotifications();
+            }}
+            style={{ marginRight: 16 }}
+          >
+            <Badge
+              badgeContent={
+                notifications.filter((item: any) => item.read === 0).length
+              }
+              color="secondary"
+            >
+              <Notifications />
+            </Badge>
+          </IconButton>
         )}
 
-        <IconButton edge="start" color="primary" onClick={handleClick}>
+        {/* <IconButton edge="start" color="primary" onClick={handleClick}>
           <MoreVert style={{ color: grey[700] }} />
-        </IconButton>
+        </IconButton> */}
         {/* <ConfirmDialog
           type="delete"
           open={confirmState}

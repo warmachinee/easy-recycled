@@ -73,7 +73,8 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
     checkSession,
     phoneFormatToNumber,
     stringToPhone,
-    getInfo
+    getInfo,
+    realtimeAccess
   } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState<any>(false);
   const [thisData, setThisData] = useState<any>({
@@ -126,25 +127,19 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
       getInfo();
       setIsEditing(false);
     }
+    realtimeAccess();
   }
 
   return (
     <div style={{ position: "relative" }}>
-      {isEditing ? (
-        <IconButton
-          onClick={() => setIsEditing(false)}
-          style={{ top: -12, left: -12 }}
-        >
-          <ArrowBackIos />
-        </IconButton>
-      ) : (
+      {
         <IconButton
           style={{ position: "absolute", top: -12, right: 0 }}
           onClick={() => setIsEditing(true)}
         >
           <Settings />
         </IconButton>
-      )}
+      }
       {isEditing ? (
         <React.Fragment>
           <TextField

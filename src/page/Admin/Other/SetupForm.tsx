@@ -27,11 +27,28 @@ const Transport = Loadable({
 const useStyles = makeStyles(theme => ({}));
 
 const FormComponent: React.FC<any> = ({ form }) => {
+  const { sess } = useContext(AppContext);
   const { org_size, document, transport } = form;
+  const per1 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 1);
+  const per2 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 2);
+  const per3 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 3);
+  const per4 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 4);
+  const per5 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 5);
+
   return (
     <React.Fragment>
       <GeneralSetup />
-      <OrganizeSize data={org_size} />
+      {per4 && <OrganizeSize data={org_size} />}
       <Document data={document} />
       <Transport data={transport} />
     </React.Fragment>

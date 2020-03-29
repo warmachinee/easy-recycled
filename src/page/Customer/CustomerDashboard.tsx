@@ -33,10 +33,10 @@ const MarketHistory = Loadable({
   loading: () => null
 });
 
-const CustomerNotifications = Loadable({
+const NotificationsList = Loadable({
   loader: () =>
     import(
-      /* webpackChunkName: 'CustomerNotifications' */ "./CustomerNotifications"
+      /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
     ),
   loading: () => null
 });
@@ -154,6 +154,7 @@ const AppTopupChoice: React.FC<any> = ({ value, topup, setTopup }) => {
 
 const AddTopup: React.FC<any> = props => {
   const {
+    topupEtc,
     topup,
     setTopup,
     setTopupEtc,
@@ -196,11 +197,12 @@ const AddTopup: React.FC<any> = props => {
       {topup === "เลือกจำนวนเงิน" && (
         <TextField
           fullWidth
+          value={`${topupEtc}`}
           variant="outlined"
           size="small"
           type="number"
           label="จำนวนเงิน"
-          onChange={e => setTopupEtc(e.target.value)}
+          onChange={e => setTopupEtc(parseInt(e.target.value))}
         />
       )}
       <Divider style={{ margin: "16px 0" }} />
@@ -237,7 +239,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     handleLogout,
     booleanReducer,
     useConfirmDeleteItem,
-    checkSession
+    checkSession,
+    _onLocalhost,
+    realtimeAccess
   } = useContext(AppContext);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [
@@ -309,6 +313,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     });
     console.log(res.data);
     setCsrf(res.csrf);
+    realtimeAccess();
     if (res.data.status === "success") {
       const imgRes = await _fetchFile({
         url: "usersystem",
@@ -328,6 +333,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       getInfo();
       booleanDispatch({ type: "falseAll" });
       onCreate({ action: "cancel" });
+      realtimeAccess();
     }
   }
 
@@ -391,7 +397,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         }}
         onClick={() => history.replace("/market")}
       >
-        Market
+        บอร์ดสินค้า
       </AppButton>
       <MarketHistory />
       <ConfirmDialog
@@ -438,7 +444,16 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           }}
         />
       </GeneralDialog>
-      <CustomerNotifications {...{ noti, booleanDispatch }} />
+      <GeneralDialog
+        open={noti}
+        onClose={() => booleanDispatch({ type: "false", key: "noti" })}
+        title="การแจ้งเตือน"
+        fullScreen={true}
+        dividers={false}
+        contentStyle={{ padding: 0 }}
+      >
+        <NotificationsList />
+      </GeneralDialog>
       <GeneralDialog
         open={userProfile}
         fullScreen={true}

@@ -49,7 +49,7 @@ const GeneralDialog: React.FC<GeneralDialogProps> = props => {
   } = props;
   return (
     <Dialog
-      scroll="body"
+      scroll="paper"
       open={open}
       onClose={onClose}
       maxWidth={maxWidth}

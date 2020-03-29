@@ -36,6 +36,14 @@ import AppButton from "../../AppComponent/AppButton";
 import { green, red } from "@material-ui/core/colors";
 import { DatePicker } from "@material-ui/pickers";
 
+const PreviewImage = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'PreviewImage' */ "../../component/Utils/PreviewImage"
+    ),
+  loading: () => null
+});
+
 const UploadAlbum = Loadable({
   loader: () =>
     import(
@@ -243,11 +251,11 @@ const ComponentStep0: React.FC<any> = ({
       <TextField
         fullWidth
         name="sale_condition"
-        label="เงื่อนไข"
         value={form.sale_condition}
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 16, marginTop: 16 }}
         variant="outlined"
         multiline
+        size="small"
         rowsMax="10"
         onChange={e =>
           setForm({
@@ -375,48 +383,64 @@ const ComponentStep1: React.FC<any> = ({
           </IconButton>
         </div>
       ))}
-      {!editting && (
-        <div style={{ display: "flex", margin: "16px 0" }}>
-          <div style={{ flex: 1 }}>
-            <SelectProduct
-              label="วัสดุ"
-              value={productVal}
-              onChange={productChange}
-              menuArr={businessForm.product}
-            />
-            <div style={{ height: 8 }} />
-            <SelectProduct
-              label="ปริมาณ"
-              value={productAmount}
-              onChange={amountChange}
-              menuArr={businessForm.productvalue}
-            />
-          </div>
-          <div style={{ width: 8 }} />
-          <AppButton
-            size="large"
-            variant="contained"
-            buttonColor={green}
-            onClick={addProduct}
-          >
-            เพิ่ม
-          </AppButton>
+
+      <div style={{ display: "flex", margin: "16px 0" }}>
+        <div style={{ flex: 1 }}>
+          <SelectProduct
+            label="วัสดุ"
+            value={productVal}
+            onChange={productChange}
+            menuArr={businessForm.product}
+          />
+          <div style={{ height: 8 }} />
+          <SelectProduct
+            label="ปริมาณ"
+            value={productAmount}
+            onChange={amountChange}
+            menuArr={businessForm.productvalue}
+          />
         </div>
-      )}
+        <div style={{ width: 8 }} />
+        <AppButton
+          size="large"
+          variant="contained"
+          buttonColor={green}
+          onClick={addProduct}
+        >
+          เพิ่ม
+        </AppButton>
+      </div>
+
       <div style={{ marginTop: 16, display: "flex" }}>
         <UploadAlbum
           fullWidth
           label="อัพโหลดอัลบัมสินค้า"
           {...{ album, setAlbum, albumDisplay, setAlbumDisplay }}
         />
-        {album && album.length > 0 && (
-          <AppButton buttonColor={green} onClick={() => setAlbum(null)}>
+        {album && album.length > 0 && album.length <= 10 && (
+          <AppButton
+            buttonColor={green}
+            onClick={() => {
+              setAlbum(null);
+              setAlbumDisplay(null);
+            }}
+          >
             รีเซ็ต
           </AppButton>
         )}
       </div>
-      {album && album.length > 0 && (
-        <Typography>รูปทั้งหมด {album.length}</Typography>
+      {album &&
+        (album.length > 10 ? (
+          <Typography style={{ color: red[600], marginTop: 8 }} align="center">
+            ห้ามเกิน 10 รูป
+          </Typography>
+        ) : (
+          <Typography style={{ marginTop: 8 }} align="center">
+            รูปทั้งหมด {album.length}
+          </Typography>
+        ))}
+      {albumDisplay && albumDisplay.length <= 10 && (
+        <PreviewImage {...{ editting }} files={albumDisplay} />
       )}
       <Divider />
       <TextField
@@ -681,7 +705,8 @@ const ComponentStep3: React.FC<any> = ({
   businessForm,
   form,
   setForm,
-  setActiveStep
+  setActiveStep,
+  albumDisplay
 }) => {
   const { _dateToString } = useContext(AppContext);
   const MarginDivider = () => {
@@ -689,6 +714,7 @@ const ComponentStep3: React.FC<any> = ({
   };
   return (
     <div>
+      {albumDisplay && <PreviewImage files={albumDisplay} />}
       <Typography variant="h6" style={{ flex: 1 }}>
         ชื่อบริษัท
       </Typography>
@@ -808,6 +834,24 @@ const ComponentStep3: React.FC<any> = ({
         </MaterialLink>
       )}
       <MarginDivider />
+      <Typography variant="h6" style={{ flex: 1 }}>
+        เงื่อนไขการขาย
+      </Typography>
+      {form.sale_condition === "" ? (
+        <Typography gutterBottom style={{ flex: 1 }}>
+          <MaterialLink
+            style={{ color: red[600] }}
+            onClick={() => setActiveStep(0)}
+          >
+            กรุณากรอกข้อมูล
+          </MaterialLink>
+        </Typography>
+      ) : (
+        <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre" }}>
+          {form.sale_condition}
+        </Typography>
+      )}
+      <MarginDivider />
     </div>
   );
 };
@@ -817,12 +861,17 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   const {
     csrf,
     setCsrf,
+    sess,
     addSnackbar,
     _xhrPost,
     _fetchFile,
+    _fetchFileMultiple,
     profileData,
     _dateToAPI,
-    useConfirmDeleteItem
+    getFormImg,
+    useConfirmDeleteItem,
+    realtimeAccess,
+    realtimeEndOfSale
   } = useContext(AppContext);
   const [open, setOpen] = useState(
     window.location.pathname === "/business/create"
@@ -896,6 +945,17 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     });
     setCsrf(res.csrf);
     console.log(res.data);
+    if (res.data && res.data.filelist.length > 0) {
+      setAlbumDisplay(
+        res.data.filelist.map((file: any) =>
+          getFormImg({
+            userid: sess.userid,
+            formid,
+            file
+          })
+        )
+      );
+    }
   }
 
   function setInitialGoodsDetail(d: any, thisForm: any) {
@@ -925,7 +985,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
 
       document: [],
       docsetc: "",
-      transport: "0",
+      transport: [],
       transetc: ""
     });
     if (thisForm["position"].indexOf(d.position) !== -1) {
@@ -944,14 +1004,9 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
         document: document.document
       });
     }
-    if (
-      transport.transport &&
-      thisForm["transport"].indexOf(transport.transport[0]) !== -1
-    ) {
+    if (transport.transport && transport.transport.length > 0) {
       Object.assign(obj, {
-        transport: thisForm["transport"]
-          .indexOf(transport.transport[0])
-          .toString()
+        transport: transport.transport
       });
     }
     if (document.etc !== "none") {
@@ -1007,7 +1062,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: sendObj
     });
     if (res.data.status === "success") {
-      if (album) {
+      if (album && album.length <= 5) {
         uploadAlbum(res.data.formid, res.csrf);
       } else {
         history.push("/business");
@@ -1016,7 +1071,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   }
 
   async function uploadAlbum(formid: any, csrf: any) {
-    const imgRes = await _fetchFile({
+    const imgRes = await _fetchFileMultiple({
       url: "formsystem",
       csrf,
       headers: {
@@ -1035,6 +1090,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   }
 
   async function editForm() {
+    console.log({ albumDisplay, length: albumDisplay.length });
     const {
       business_name,
       sale_condition,
@@ -1045,7 +1101,9 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       document,
       transport,
       docsetc,
-      transetc
+      transetc,
+      product,
+      productvalue
     } = form;
     const { formid } = match.params;
     const sendObj = {
@@ -1054,6 +1112,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       formid: parseInt(formid),
       transport,
       document,
+      product,
+      productvalue,
       ...(docsetc !== "" && { docsetc }),
       ...(transetc !== "" && { transetc })
     };
@@ -1091,7 +1151,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     });
     setCsrf(res.csrf);
     console.log(res.data);
-    if (true) {
+    realtimeAccess();
+    if (album && album.length <= 5) {
       uploadAlbum(parseInt(formid), res.csrf);
     } else {
       history.push("/business");
@@ -1111,6 +1172,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     });
     setCsrf(res.csrf);
     console.log(res.data);
+    realtimeEndOfSale(profileData);
     if (res.data.status === "success") {
       addSnackbar({ message: "จบการขายสำเร็จ", variant: "success" });
     }
@@ -1169,6 +1231,28 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
           "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
         ]
       });
+      const al = {
+        filelist: [
+          "545905.jpg",
+          "704014176bc1f285c0c627b4910b64ae.jpg",
+          "817623.jpg",
+          "87172689_589578534931043_4570709075486048256_o.jpg",
+          "thumb-1920-764519.jpg",
+          "uchiha sasuke naruto shippuden naruto uzumaki 2560x1600 wallpaper_www.wallpaperhi.com_5.jpg"
+        ]
+      };
+      let thisAl;
+      if (al && al.filelist.length > 0) {
+        thisAl = al.filelist.map((file: any) =>
+          getFormImg({
+            userid: 8069118,
+            formid: 9259780,
+            file
+          })
+        );
+      }
+      console.log(thisAl);
+      setAlbumDisplay(thisAl);
     } else {
       loadBusinessForm();
     }
@@ -1223,6 +1307,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
               onClick={createForm}
               disabled={
                 form.business_name === "" ||
+                form.sale_condition === "" ||
                 form.product.length === 0 ||
                 form.location === "" ||
                 form.transport.length === 0 ||

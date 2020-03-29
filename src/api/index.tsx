@@ -107,6 +107,42 @@ function _fetchFile(props: _fetchFileProps) {
   });
 }
 
+interface _fetchFileMultipleProps {
+  url: string;
+  csrf: string;
+  headers?: any;
+  body?: any;
+}
+function _fetchFileMultiple(props: _fetchFileMultipleProps) {
+  return new Promise(async resolve => {
+    const { url, csrf, headers, body } = props;
+    const formData = new FormData();
+    const objKeys = Object.keys(body)[0];
+    // formData.append(objKeys, body[objKeys]);
+
+    const imageArr = Array.from(body[objKeys]);
+    imageArr.forEach((image: any) => {
+      formData.append(objKeys, image);
+    });
+
+    const options = {
+      async: true,
+      crossDomain: true,
+      method: "post",
+      headers,
+      body: formData
+    };
+    // console.log(options);
+    const res = await fetch(`${apiUrl(url)}?_csrf=${csrf}`, options);
+    const json = await res.json();
+    const thisCsrf: any = await getCSRF();
+    resolve({
+      csrf: thisCsrf,
+      data: json
+    });
+  });
+}
+
 function getCSRF() {
   return new Promise(resolve => {
     var req = new XMLHttpRequest();
@@ -121,5 +157,6 @@ export const exportApi = {
   apiUrl,
   _xhrGet,
   _xhrPost,
-  _fetchFile
+  _fetchFile,
+  _fetchFileMultiple
 };

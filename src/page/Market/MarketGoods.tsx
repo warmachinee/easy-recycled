@@ -8,6 +8,7 @@ import { AppContext } from "../../AppContext";
 import AppButton from "../../AppComponent/AppButton";
 import { green } from "@material-ui/core/colors";
 import ConfirmDialog from "../../component/Dialog/ConfirmDialog";
+import PreviewImage from "../../component/Utils/PreviewImage";
 
 const useStyles = makeStyles(theme => ({}));
 
@@ -28,7 +29,9 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
     checkSession,
     _onLocalhostFn,
     _dateToString,
-    stringToPhone
+    stringToPhone,
+    getFormImg,
+    sess
   } = useContext(AppContext);
   const { match, history, location } = props;
   const formid = parseInt(match.params.formid);
@@ -134,7 +137,12 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
 
       {data &&
         ("status" in data && data.status === "wrong formid" ? (
-          <Typography variant="h6" align="center" style={{ margin: "24px 0" }}>
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
             ไม่พบสินค้า ID {formid}
           </Typography>
         ) : Object.keys(data).length < 15 ? (
@@ -186,6 +194,19 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
           </div>
         ) : (
           <div style={{ padding: 12 }}>
+            {data.filelist &&
+              data.filelist.length > 0 &&
+              data.filelist.length <= 10 && (
+                <PreviewImage
+                  files={data.filelist.map((file: any) =>
+                    getFormImg({
+                      userid: data.userid,
+                      formid,
+                      file
+                    })
+                  )}
+                />
+              )}
             <Typography variant="h6" style={{ flex: 1 }}>
               ชื่อบริษัท
             </Typography>

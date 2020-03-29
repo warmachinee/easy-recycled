@@ -36,9 +36,14 @@ const GeneralDialog = Loadable({
 
 const StatusSetup: React.FC<any> = ({ value }) => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, getGoodsDetail, detail } = useContext(
-    AppContext
-  );
+  const {
+    csrf,
+    setCsrf,
+    _xhrPost,
+    getGoodsDetail,
+    detail,
+    realtimeEndOfSale
+  } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [state, setState] = useState<any>({
     status: value.status,
@@ -49,19 +54,28 @@ const StatusSetup: React.FC<any> = ({ value }) => {
     formcode_number: value.formcode ? value.formcode.number : ""
   });
 
-  async function handleSave({ value, keys }: { value: any; keys: string }) {
+  async function handleSave({
+    thisValue,
+    keys
+  }: {
+    thisValue: any;
+    keys: string;
+  }) {
     const res = await _xhrPost({
       csrf,
       url: "abusinesssystem",
       body: {
         action: "form_edit",
         formid: detail.formid,
-        [keys]: value
+        [keys]: thisValue
       }
     });
     console.log(res.data);
     setCsrf(res.csrf);
     getGoodsDetail();
+    if (keys === "endofsale") {
+      realtimeEndOfSale(value);
+    }
   }
 
   return (
@@ -110,7 +124,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               buttonColor={green}
               onClick={() =>
                 handleSave({
-                  value: state.formcode_sector,
+                  thisValue: state.formcode_sector,
                   keys: "formcode_sector"
                 })
               }
@@ -166,7 +180,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               buttonColor={green}
               onClick={() =>
                 handleSave({
-                  value: state.formcode_province,
+                  thisValue: state.formcode_province,
                   keys: "formcode_province"
                 })
               }
@@ -222,7 +236,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               buttonColor={green}
               onClick={() =>
                 handleSave({
-                  value: state.formcode_number,
+                  thisValue: state.formcode_number,
                   keys: "formcode_number"
                 })
               }
@@ -274,7 +288,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               {...(state.boarddisplay === 1 && { color: "primary" })}
               onClick={() => {
                 setState({ ...state, boarddisplay: 1 });
-                handleSave({ value: 1, keys: "boarddisplay" });
+                handleSave({ thisValue: 1, keys: "boarddisplay" });
               }}
             />
             <Chip
@@ -284,7 +298,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               {...(state.boarddisplay === 0 && { color: "primary" })}
               onClick={() => {
                 setState({ ...state, boarddisplay: 0 });
-                handleSave({ value: 0, keys: "boarddisplay" });
+                handleSave({ thisValue: 0, keys: "boarddisplay" });
               }}
             />
           </div>
@@ -317,7 +331,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               {...(state.endofsale === 0 && { color: "primary" })}
               onClick={() => {
                 setState({ ...state, endofsale: 0 });
-                handleSave({ value: 0, keys: "endofsale" });
+                handleSave({ thisValue: 0, keys: "endofsale" });
               }}
             />
             <Chip
@@ -327,7 +341,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               {...(state.endofsale === 1 && { color: "primary" })}
               onClick={() => {
                 setState({ ...state, endofsale: 1 });
-                handleSave({ value: 1, keys: "endofsale" });
+                handleSave({ thisValue: 1, keys: "endofsale" });
               }}
             />
           </div>
@@ -418,7 +432,8 @@ const BusinessName: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -437,6 +452,7 @@ const BusinessName: React.FC<any> = ({ value }) => {
     setCsrf(res.csrf);
     setEditing(false);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -494,7 +510,8 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>("0");
@@ -513,6 +530,7 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -587,7 +605,8 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -606,6 +625,7 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -668,7 +688,8 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -687,6 +708,7 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -745,7 +767,8 @@ const BusinessDate: React.FC<any> = ({ appointment, auctiondate }) => {
     getGoodsDetail,
     detail,
     _dateToString,
-    _dateToAPI
+    _dateToAPI,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<{ [keys: string]: boolean }>({
     appointment: false,
@@ -766,6 +789,7 @@ const BusinessDate: React.FC<any> = ({ appointment, auctiondate }) => {
     setCsrf(res.csrf);
     getGoodsDetail();
     setEditing({ ...editing, [keys]: false });
+    realtimeAccess();
   }
 
   return (
@@ -862,7 +886,8 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    businessForm
+    businessForm,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -881,6 +906,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -959,7 +985,8 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     businessForm,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<any>(value.transport);
@@ -1007,6 +1034,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -1127,7 +1155,8 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     businessForm,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<any>(value.document);
@@ -1175,6 +1204,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (
@@ -1294,7 +1324,8 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    _onEnter
+    _onEnter,
+    realtimeAccess
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -1313,6 +1344,7 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
     setCsrf(res.csrf);
     setEditing(false);
     getGoodsDetail();
+    realtimeAccess();
   }
 
   return (

@@ -30,12 +30,38 @@ export interface BusinessFormProps {}
 
 const FormComponent: React.FC<any> = ({ form }) => {
   const { form_condition, position, product, productvalue } = form;
+  const { sess } = useContext(AppContext);
+
+  const per1 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 1);
+  const per2 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 2);
+  const per3 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 3);
+  const per4 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 4);
+  const per5 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 5);
+
   return (
     <React.Fragment>
-      <Condition data={form_condition} />
-      <Position data={position} />
-      <Product data={product} />
-      <ProductValue data={productvalue} />
+      {per4 && (
+        <React.Fragment>
+          <Condition data={form_condition} />
+          <Position data={position} />
+        </React.Fragment>
+      )}
+      {per3 && (
+        <React.Fragment>
+          <Product data={product} />
+          <ProductValue data={productvalue} />
+        </React.Fragment>
+      )}
     </React.Fragment>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext, useState, useReducer } from "react";
 import socketIOClient from "socket.io-client";
 import { makeStyles } from "@material-ui/styles";
 import { AppContext } from "../../AppContext";
@@ -7,6 +7,7 @@ import { IconButton, Theme } from "@material-ui/core";
 import { Close as CloseIcon } from "@material-ui/icons";
 import { LineProfileData } from "apptype";
 import { RouteComponentProps, withRouter } from "react-router-dom";
+import { BooleanReducerState, BooleanReducerActions } from "apptype";
 
 const useStyles = makeStyles((theme: Theme) => ({}));
 
@@ -18,6 +19,22 @@ const liff = window.liff;
 
 const Header = Loadable({
   loader: () => import(/* webpackChunkName: 'Header' */ "./Header"),
+  loading: () => null
+});
+
+const GeneralDialog = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
+    ),
+  loading: () => null
+});
+
+const NotificationsList = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
+    ),
   loading: () => null
 });
 
@@ -49,20 +66,22 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     _xhrPost,
     _xhrGet,
     _onLocalhost,
-    _onLocalhostFn
+    _onLocalhostFn,
+    booleanReducer
   } = useContext(AppContext);
   const [profileData, setProfileData] = useState<LineProfileData | null>(null);
   const [sess, setSess] = useState<any | null>(null);
   const [userInfo, setUserInfo] = useState<any | null>(null);
   const [backDrop, setBackDrop] = useState<any | null>(null);
   const [notifications, setNotifications] = useState<any | null>(null);
-  const [notiPage, setNotiPage] = React.useState(getHash());
-  const paginationChange = (event: any, value: any) => {
-    history.replace(`${match.path}/notifications#${value}`);
-    setNotiPage(value);
-  };
+  const [notiPage, setNotiPage] = React.useState(0);
+  const [{ noti }, booleanDispatch] = useReducer<
+    React.Reducer<BooleanReducerState, BooleanReducerActions>
+  >(booleanReducer, { noti: false });
+
   const passingProps: any = {
     ...useContext(AppContext),
+    sess,
     getSess,
     profileData,
     addSnackbar,
@@ -71,20 +90,14 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     notifications,
     setNotifications,
     notiPage,
-    paginationChange,
+    setNotiPage,
     readNotifications,
     userInfo,
-    getInfo
+    getInfo,
+    booleanDispatch,
+    realtimeAccess,
+    realtimeEndOfSale
   };
-
-  function getHash() {
-    const hash = location.hash;
-    if (hash === "") {
-      return 1;
-    } else {
-      return parseInt(hash.split("#")[1]);
-    }
-  }
 
   function getProfile() {
     liff
@@ -169,8 +182,8 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
         action: "noti",
         linetoken: profile.userId,
         type: "business",
-        startindex: (notiPage - 1) * 10,
-        lastindex: notiPage * 10
+        startindex: 0,
+        lastindex: (notiPage + 1) * 10
       }
     });
     setCsrf(res.csrf);
@@ -200,77 +213,53 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     getNotifications(profileData);
   }
 
-  function realtimeNoti() {
-    const socket = socketIOClient(location.pathname, {
+  function realtimeAccess() {
+    const socket = socketIOClient("https://easyrecycle.ml", {
       transports: ["websocket", "polling"]
     });
-    socket.on(`noti-${sess.userid}`, (messageNew: any) => {
-      if (messageNew) {
-        console.log(messageNew);
+    socket.emit("noti", {
+      action: "noti",
+      linetoken: profileData && profileData.userId,
+      type: "business",
+      startindex: 0,
+      lastindex: (notiPage + 1) * 10
+    });
+  }
+
+  function realtimeEndOfSale(detail: any) {
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"]
+    });
+    const { linetoken } = detail;
+    socket.emit("noti", {
+      action: "noti",
+      linetoken,
+      type: "customer",
+      startindex: 0,
+      lastindex: (notiPage + 1) * 10
+    });
+  }
+
+  function realtimeNoti(thisSess: any) {
+    console.log(`noti-${thisSess.userid}`);
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"]
+    });
+    socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
+      if (messageNew && messageNew.status === "success") {
+        const { list } = messageNew.result;
+        // console.log(messageNew);
+        setNotifications(list);
       }
     });
   }
 
   useEffect(() => {
-    if (profileData && sess && sess.status !== "not member") {
-      _onLocalhostFn(
-        () => {
-          setNotifications([
-            {
-              activity: {
-                method: "create form",
-                data: { business_name: "PDS Co.,Ltd." }
-              },
-              reflink: 6174567,
-              read: 0,
-              createdate: "2020-03-25T18:47:43.000Z"
-            },
-            {
-              activity: {
-                method: "admin delete form",
-                data: { business_name: "TPGSA" }
-              },
-              reflink: 8069118,
-              read: 0,
-              createdate: "2020-03-25T18:46:04.000Z"
-            },
-            {
-              activity: {
-                method: "create form",
-                data: { business_name: "PDS" }
-              },
-              reflink: 2315022,
-              read: 0,
-              createdate: "2020-03-25T09:21:12.000Z"
-            },
-            {
-              activity: {
-                method: "edit form",
-                data: [
-                  { business_name: "TPGSA" },
-                  {
-                    fdocument:
-                      '{"document":["บิลเงินสด","ใบอนุญาตค้าของเก่า"],"etc":"none"}'
-                  },
-                  {
-                    transport:
-                      '{"transport":["แม็คโครปากคีบ/แม็คโครแม่เหล็ก"],"etc":"none"}'
-                  }
-                ]
-              },
-              reflink: 1756407,
-              read: 0,
-              createdate: "2020-03-21T05:27:06.000Z"
-            }
-          ]);
-        },
-        () => {
-          realtimeNoti();
-          getNotifications(profileData);
-        }
-      );
+    if (profileData && sess) {
+      realtimeNoti(sess);
+      getNotifications(profileData);
     }
-  }, [notiPage]);
+  }, [sess, profileData, notiPage]);
 
   useEffect(() => {
     setDense(true);
@@ -323,6 +312,16 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
             <BussinessBackdrop {...{ backDrop, setBackDrop }} />
           </React.Fragment>
         )}
+        <GeneralDialog
+          open={noti}
+          onClose={() => booleanDispatch({ type: "false", key: "noti" })}
+          title="การแจ้งเตือน"
+          fullScreen={true}
+          dividers={false}
+          contentStyle={{ padding: 0 }}
+        >
+          <NotificationsList />
+        </GeneralDialog>
       </div>
     </AppContext.Provider>
   );

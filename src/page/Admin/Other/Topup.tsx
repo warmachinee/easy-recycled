@@ -42,18 +42,11 @@ const useStyles = makeStyles(theme => ({ topupItem: { padding: 12 } }));
 export type TopupProps = RouteComponentProps<{}>;
 
 const TopupItemList: React.FC<any> = props => {
-  const {
-    topupList,
-    topupType,
-    onClickDetail,
-    topupPage,
-    paginationChange
-  } = props;
+  const { topupList, topupType, onClickDetail } = props;
   const arr =
     topupType === 10
       ? topupList.list
       : topupList.list.filter((item: any) => item.status === topupType);
-  const topupCount = Math.ceil(topupList.count / 10);
   return (
     <div style={{ minWidth: 600 }}>
       {arr.length > 0 ? (
@@ -61,22 +54,14 @@ const TopupItemList: React.FC<any> = props => {
           <TopupItem key={d.requestid} data={d} {...{ onClickDetail }} />
         ))
       ) : (
-        <Typography style={{ marginTop: 24 }} align="center">
+        <Typography
+          style={{ margin: "24px 0" }}
+          align="center"
+          variant="h4"
+          color="textSecondary"
+        >
           ไม่มีรายการ
         </Typography>
-      )}
-      {topupCount > 1 && (
-        <div
-          style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
-        >
-          <Pagination
-            count={topupCount}
-            page={topupPage}
-            variant="outlined"
-            shape="rounded"
-            onChange={paginationChange}
-          />
-        </div>
       )}
     </div>
   );
@@ -248,12 +233,30 @@ const Topup: React.FC<TopupProps> = ({ location, history, match }) => {
             }}
           />
         ) : (
-          <Typography style={{ marginTop: 24 }} align="center">
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
             ไม่มีรายการ
           </Typography>
         )
       ) : (
         <Progress />
+      )}
+      {topupList && Math.ceil(topupList.count / 10) > 1 && (
+        <div
+          style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
+        >
+          <Pagination
+            count={Math.ceil(topupList.count / 10)}
+            page={topupPage}
+            variant="outlined"
+            shape="rounded"
+            onChange={paginationChange}
+          />
+        </div>
       )}
       <GeneralDialog
         open={detail}
@@ -267,4 +270,5 @@ const Topup: React.FC<TopupProps> = ({ location, history, match }) => {
     </div>
   );
 };
+
 export default withRouter(props => <Topup {...props} />);

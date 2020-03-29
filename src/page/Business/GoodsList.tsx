@@ -41,14 +41,6 @@ const BusinessProfile = Loadable({
   loading: () => null
 });
 
-const BusinessNotifications = Loadable({
-  loader: () =>
-    import(
-      /* webpackChunkName: 'BusinessNotifications' */ "./BusinessNotifications"
-    ),
-  loading: () => null
-});
-
 const ConfirmDialog = Loadable({
   loader: () =>
     import(
@@ -114,9 +106,14 @@ const GoodsListItem: React.FC<any> = ({ match, data, index, loadForm }) => {
                     marginRight: 8
                   }}
                 >{`${data.accessremain}/${data.accesstotal}`}</Typography>
-                <Typography variant="h6" style={{ flex: 1 }}>
-                  {data.business_name}
-                </Typography>
+                <Link
+                  style={{ flex: 1, color: "inherit", textDecoration: "none" }}
+                  to={`${match.path}/edit/${data.formid}`}
+                >
+                  <Typography variant="h6" style={{ cursor: "pointer" }}>
+                    {data.business_name}
+                  </Typography>
+                </Link>
                 <IconButton onClick={handleClick}>
                   <MoreVert />
                 </IconButton>
@@ -224,8 +221,8 @@ const DefaultComponent: React.FC<any> = props => {
       <div className={classes.paper}>
         <FormControl>
           <Select value={status} onChange={handleChange} variant="outlined">
-            <MenuItem value={0}>กำลังขาย</MenuItem>
-            <MenuItem value={1}>จบการขายแล้ว</MenuItem>
+            <MenuItem value={0}>รายการที่กำลังขาย</MenuItem>
+            <MenuItem value={1}>รายการที่จบการขายแล้ว</MenuItem>
           </Select>
         </FormControl>
         {list &&
@@ -243,7 +240,12 @@ const DefaultComponent: React.FC<any> = props => {
                 />
               ))
           ) : (
-            <Typography variant="h6" align="center" style={{ margin: 48 }}>
+            <Typography
+              style={{ margin: "24px 0" }}
+              align="center"
+              variant="h4"
+              color="textSecondary"
+            >
               ไม่มีรายการ
             </Typography>
           ))}
@@ -266,7 +268,9 @@ const GoodsList: React.FC<GoodsListProps> = props => {
     enQSnackbar,
     closeSnackbar,
     _xhrPost,
-    profileData
+    profileData,
+    booleanReducer,
+    booleanDispatch
   } = useContext(AppContext);
 
   function addSnackbar() {
@@ -288,10 +292,6 @@ const GoodsList: React.FC<GoodsListProps> = props => {
       <Route exact path={match.path} component={DefaultComponent} />
       <Route path={`${match.path}/create`} component={GoodsForm} />
       <Route path={`${match.path}/profile`} component={BusinessProfile} />
-      <Route
-        path={`${match.path}/notifications`}
-        component={BusinessNotifications}
-      />
       <Route path={`${match.path}/edit/:formid`} component={EditGoods} />
     </div>
   );

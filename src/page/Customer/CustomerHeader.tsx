@@ -64,13 +64,22 @@ const CustomerHeader: React.FC<any> = ({
   return (
     <AppBar position="static" color="inherit" elevation={0}>
       <Toolbar style={{ paddingRight: 0 }}>
-        {userInfo && userInfo.info && (
-          <Avatar src={userInfo.info.picture} style={{ marginRight: 16 }} />
-        )}
+        <IconButton
+          style={{ padding: 0, marginRight: 16 }}
+          onClick={() => {
+            handleClose();
+            booleanDispatch({
+              type: "true",
+              key: "userProfile"
+            });
+          }}
+        >
+          {userInfo && userInfo.info && <Avatar src={userInfo.info.picture} />}
+        </IconButton>
         <Typography variant="h6" className={classes.title} color="primary">
-          Customer
+          EasyRecycle
         </Typography>
-        {notifications && (
+        {notifications && !("status" in notifications) && (
           <IconButton
             style={{ marginRight: 16 }}
             onClick={() => {
@@ -91,9 +100,9 @@ const CustomerHeader: React.FC<any> = ({
             </Badge>
           </IconButton>
         )}
-        <IconButton edge="start" color="primary" onClick={handleClick}>
+        {/* <IconButton edge="start" color="primary">
           <MoreVert style={{ color: grey[700] }} />
-        </IconButton>
+        </IconButton> */}
         {/* <ConfirmDialog
           type="delete"
           open={confirmState}

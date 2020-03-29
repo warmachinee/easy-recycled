@@ -18,8 +18,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   buttonGroup: {
     display: "flex",
     padding: 8,
-    position: "absolute",
-    bottom: 0,
     width: "100%",
     boxSizing: "border-box",
     backgroundColor: theme.palette.background.default
@@ -33,61 +31,47 @@ const CustomerNotifications: React.FC<CustomerNotificationsProps | any> = ({
   booleanDispatch
 }) => {
   const classes = useStyles();
-  const { notiPage, paginationChange, notifications } = useContext(AppContext);
+  const { notiPage, setNotiPage, notifications } = useContext(AppContext);
   const [open, setOpen] = useState(noti);
 
   return (
-    <Dialog
-      open={noti}
-      onClose={() => booleanDispatch({ type: "false", key: "noti" })}
-      fullScreen
-    >
-      <Typography variant="h6" style={{ fontWeight: 600 }} align="center">
-        การแจ้งเตือน
-      </Typography>
-      <Divider style={{ margin: "8px 0" }} />
-      <div className={classes.content}>
-        {notifications &&
-          notifications.map((d: any, i: number) => (
-            <React.Fragment key={d.createdate}>
-              <ListItem button>
-                <ListItemText
-                  primary={d.activity.method}
-                  secondary={d.activity.data.business_name}
-                />
-              </ListItem>
-              <Divider />
-            </React.Fragment>
-          ))}
-      </div>
-      <div className={classes.buttonGroup}>
-        {notifications && Math.ceil(notifications.length / 10) > 1 && (
-          <div
-            style={{
-              margin: "16px 0",
-              display: "flex",
-              justifyContent: "center"
-            }}
-          >
-            <Pagination
-              count={Math.ceil(notifications.length / 10)}
-              page={notiPage}
-              variant="outlined"
-              shape="rounded"
-              onChange={paginationChange}
-            />
-          </div>
-        )}
-        <Button
-          style={{ width: "calc(100% - 16px)", margin: 8 }}
-          color="primary"
-          variant="outlined"
-          onClick={() => booleanDispatch({ type: "false", key: "noti" })}
+    <React.Fragment>
+      <Divider />
+      {notifications && notifications.length > 0 ? (
+        notifications.map((d: any, i: number) => (
+          <React.Fragment key={i}>
+            <ListItem button>
+              <ListItemText
+                primary={d.activity.method}
+                secondary={d.activity.data.business_name}
+              />
+            </ListItem>
+            <Divider />
+          </React.Fragment>
+        ))
+      ) : (
+        <Typography
+          style={{ margin: "24px 0" }}
+          align="center"
+          variant="h4"
+          color="textSecondary"
         >
-          ย้อนกลับ
-        </Button>
-      </div>
-    </Dialog>
+          ไม่มีการแจ้งเตือน
+        </Typography>
+      )}
+      {notifications && notifications.length >= 10 && (
+        <div className={classes.buttonGroup}>
+          <Button
+            style={{ width: "calc(100% - 16px)", margin: 8, fontSize: 14 }}
+            color="primary"
+            variant="text"
+            onClick={() => setNotiPage((num: any) => num + 1)}
+          >
+            โหลดเพิ่ม
+          </Button>
+        </div>
+      )}
+    </React.Fragment>
   );
 };
 export default CustomerNotifications;

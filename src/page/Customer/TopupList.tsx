@@ -237,7 +237,12 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
         topupList.length > 0 ? (
           <TopupItemList {...{ topupList, onClickDetail }} />
         ) : (
-          <Typography align="center" style={{ margin: "36px 0" }}>
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
             ไม่มีรายการ
           </Typography>
         )

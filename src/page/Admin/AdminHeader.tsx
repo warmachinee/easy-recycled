@@ -36,8 +36,11 @@ const AppButton = Loadable({
   loading: () => null
 });
 
-const NotiList = Loadable({
-  loader: () => import(/* webpackChunkName: 'NotiList' */ "./NotiList"),
+const NotificationsList = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
+    ),
   loading: () => null
 });
 
@@ -61,10 +64,10 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     useConfirmDeleteItem,
     handleLogout,
     sess,
-    _onLocalhostFn
+    _onLocalhostFn,
+    notifications
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
-  const [notifications, setNotifications] = useState<any>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [anchorElNoti, setAnchorElNoti] = useState<HTMLButtonElement | null>(
     null
@@ -88,119 +91,16 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     setAnchorEl(null);
   };
 
-  async function getNotifications() {
-    const res = await _xhrPost({
-      csrf,
-      url: "aloadusersystem",
-      body: {
-        action: "noti",
-        adminid: sess.userId
-        // startindex: (notiPage - 1) * 10,
-        // lastindex: notiPage * 10
-      }
-    });
-    setCsrf(res.csrf);
-    console.log(res.data);
-    setNotifications(res.data);
-  }
-
   useEffect(() => {
     _onLocalhostFn(
-      () => {
-        setNotifications({
-          list: [
-            {
-              activity: {
-                method: "edit form",
-                data: [{ boarddisplay: 1 }]
-              },
-              reflink: 4314742,
-              read: 0,
-              createdate: "2020-03-26T13:57:45.000Z"
-            },
-            {
-              activity: {
-                method: "delete form",
-                data: { business_name: "AAA1" }
-              },
-              reflink: 2310081,
-              read: 0,
-              createdate: "2020-03-25T21:35:18.000Z"
-            },
-            {
-              activity: {
-                method: "delete form",
-                data: { business_name: "TPGSA" }
-              },
-              reflink: 8069118,
-              read: 0,
-              createdate: "2020-03-25T18:46:04.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ value: "100" }]
-              },
-              reflink: 347147812,
-              read: 0,
-              createdate: "2020-03-24T14:54:12.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ value: "90" }]
-              },
-              reflink: 347147812,
-              read: 0,
-              createdate: "2020-03-24T14:50:17.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ value: "100" }]
-              },
-              reflink: 347147812,
-              read: 0,
-              createdate: "2020-03-24T14:45:57.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ topupstatus: 1 }]
-              },
-              reflink: 632217982,
-              read: 0,
-              createdate: "2020-03-24T05:33:16.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ topupstatus: -1 }]
-              },
-              reflink: 181778193,
-              read: 0,
-              createdate: "2020-03-24T05:33:04.000Z"
-            },
-            {
-              activity: {
-                method: "edit topup",
-                data: [{ topupstatus: -1 }]
-              },
-              reflink: 581613014,
-              read: 0,
-              createdate: "2020-03-24T05:32:47.000Z"
-            }
-          ],
-          count: 13
-        });
-      },
+      () => {},
       () => {
         if (sess && sess.status === "need login before") {
           history.replace(match.path);
         }
-        if (sess) {
-          getNotifications();
-        }
+        // if (sess) {
+        //   getNotifications();
+        // }
       }
     );
   }, []);
@@ -209,7 +109,7 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     <AppBar position="static" color="inherit" className={classes.appBar}>
       <Toolbar style={{ paddingRight: 0 }}>
         <Typography variant="h6" className={classes.title} color="primary">
-          Admin
+          {sess ? `${sess.fullname} ${sess.lastname}` : "Admin"}
         </Typography>
         {notifications && (
           <IconButton onClick={notiClick}>
@@ -223,6 +123,11 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
             </Badge>
           </IconButton>
         )}
+        {/* <IconButton onClick={notiClick}>
+          <Badge badgeContent={4} color="secondary">
+            <Notifications />
+          </Badge>
+        </IconButton> */}
         <IconButton edge="start" color="primary" onClick={handleClick}>
           <MoreVert style={{ color: grey[700] }} />
         </IconButton>
@@ -259,7 +164,7 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
         }}
         PaperProps={{ style: { width: 360, maxHeight: "60%" } }}
       >
-        <NotiList data={notifications} />
+        <NotificationsList />
       </Popover>
     </AppBar>
   );

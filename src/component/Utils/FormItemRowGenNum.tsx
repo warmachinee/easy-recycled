@@ -29,7 +29,7 @@ const FormItemRowGenNum: React.FC<any> = ({ text, onEdit }) => {
   const classes = useStyles();
   const [isHover, setIsHover] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [textValue, setTextValue] = useState<string>(text);
+  const [textValue, setTextValue] = useState<string>(`${text}`);
 
   return (
     <React.Fragment>

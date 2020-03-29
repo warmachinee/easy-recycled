@@ -25,7 +25,7 @@ const BusinessDetail = Loadable({
 
 const useStyles = makeStyles((theme: Theme) => ({
   paper: { padding: 8 },
-  itemGrid: { margin: theme.spacing(1, 0), minWidth: 650, width: "100%" },
+  itemGrid: { margin: theme.spacing(1, 0), minWidth: 800, width: "100%" },
   itemPaper: {
     position: "relative",
     padding: 16,
@@ -124,7 +124,7 @@ const BusinessItem: React.FC<any> = props => {
           style={{
             width: 48,
             marginRight: 16,
-            ...(data.frequencyform >= 3 && { color: red[600], fontWeight: 700 })
+            ...(data.frequencyform > 3 && { color: red[600], fontWeight: 700 })
           }}
           align="right"
         >
@@ -272,7 +272,12 @@ const DefaultComponent: React.FC<any> = props => {
             />
           ))
         ) : (
-          <Typography style={{ marginTop: 24 }} align="center">
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
             ไม่มีรายการ
           </Typography>
         )

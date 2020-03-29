@@ -9,7 +9,12 @@ import {
   Menu,
   MenuItem
 } from "@material-ui/core";
-import { Menu as MenuIcon, MoreVert, ExitToApp } from "@material-ui/icons";
+import {
+  Menu as MenuIcon,
+  MoreVert,
+  ExitToApp,
+  Refresh
+} from "@material-ui/icons";
 import { green, grey } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
 import Loadable from "react-loadable";
@@ -30,16 +35,17 @@ const ConfirmDialog = Loadable({
 });
 
 const useStyles = makeStyles(theme => ({
-  avatar: { position: "absolute", left: 16 }
+  avatar: { position: "absolute", left: 0 }
 }));
 
 const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
   userInfo,
   handleLogout,
-  history
+  history,
+  location
 }) => {
   const classes = useStyles();
-  const { useConfirmDeleteItem } = useContext(AppContext);
+  const { useConfirmDeleteItem, sess, getMarketPlace } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -60,7 +66,7 @@ const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
             <Avatar src={userInfo.info.picture} className={classes.avatar} />
           ) : (
             <Avatar style={{ marginRight: 16 }} className={classes.avatar}>
-              M
+              {sess ? sess.fullname.charAt(0) : "M"}
             </Avatar>
           )}
         </IconButton>
@@ -71,12 +77,12 @@ const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
           align="center"
           style={{ flex: 1, fontWeight: 700, marginRight: 16 }}
         >
-          MARKET
+          บอร์ดสินค้า
         </Typography>
-        {/* <IconButton edge="start" color="primary" onClick={handleClick}>
-          <MoreVert style={{ color: grey[700] }} />
+        <IconButton edge="start" color="primary" onClick={getMarketPlace}>
+          <Refresh style={{ color: grey[700] }} />
         </IconButton>
-        <ConfirmDialog
+        {/* <ConfirmDialog
           type="delete"
           open={confirmState}
           onClose={() => onLogout({ action: "cancel" })}

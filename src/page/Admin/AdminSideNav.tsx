@@ -99,8 +99,24 @@ const PaddingListItem: React.FC<any> = ({ to, primary, location }) => {
   );
 };
 
-const AdminSideNav: React.FC<AdminSideNavProps> = ({ match, location }) => {
+const AdminSideNav: React.FC<any> = ({ match, location, sess }) => {
   const classes = useStyles();
+
+  const per1 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 1);
+  const per2 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 2);
+  const per3 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 3);
+  const per4 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 4);
+  const per5 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 5);
 
   return (
     <ThemeProvider theme={theme}>
@@ -120,49 +136,69 @@ const AdminSideNav: React.FC<AdminSideNavProps> = ({ match, location }) => {
             primary="แดชบอร์ด"
             {...{ location }}
           />
-          <StyledListItem
-            to={`${match.path}/goods_list`}
-            primary="รายการสินค้า"
-            {...{ location }}
-          />
-          <StyledListItem
-            to={`${match.path}/topup`}
-            primary="รายการเติมเงิน"
-            {...{ location }}
-          />
+          {per3 && (
+            <StyledListItem
+              to={`${match.path}/goods_list`}
+              primary="รายการสินค้า"
+              {...{ location }}
+            />
+          )}
+          {per5 && (
+            <StyledListItem
+              to={`${match.path}/topup`}
+              primary="รายการเติมเงิน"
+              {...{ location }}
+            />
+          )}
           <StyledListItem
             to={`${match.path}/setup`}
             primary="ตั้งค่า"
             {...{ location }}
           />
         </List>
-        <Divider />
-        <Label text="ลูกค้า" />
+        {per2 && (
+          <React.Fragment>
+            <Divider />
+            <Label text="ลูกค้า" />
+          </React.Fragment>
+        )}
         <List>
-          <PaddingListItem
-            to={`${match.path}/customer_list`}
-            primary="รายชื่อลูกค้า"
-            {...{ location }}
-          />
-          <PaddingListItem
-            to={`${match.path}/customer_form`}
-            primary="ฟอร์มลูกค้า"
-            {...{ location }}
-          />
+          {per2 && (
+            <PaddingListItem
+              to={`${match.path}/customer_list`}
+              primary="รายชื่อลูกค้า"
+              {...{ location }}
+            />
+          )}
+          {per4 && (
+            <PaddingListItem
+              to={`${match.path}/customer_form`}
+              primary="ฟอร์มลูกค้า"
+              {...{ location }}
+            />
+          )}
         </List>
-        <Divider />
-        <Label text="ผู้ขาย" />
+        {per1 && (
+          <React.Fragment>
+            <Divider />
+            <Label text="ผู้ขาย" />
+          </React.Fragment>
+        )}
         <List>
-          <PaddingListItem
-            to={`${match.path}/business_list`}
-            primary="รายชื่อผู้ขาย"
-            {...{ location }}
-          />
-          <PaddingListItem
-            to={`${match.path}/business_form`}
-            primary="ฟอร์มผู้ขาย"
-            {...{ location }}
-          />
+          {per1 && (
+            <PaddingListItem
+              to={`${match.path}/business_list`}
+              primary="รายชื่อผู้ขาย"
+              {...{ location }}
+            />
+          )}
+          {(per3 || per4) && (
+            <PaddingListItem
+              to={`${match.path}/business_form`}
+              primary="ฟอร์มผู้ขาย"
+              {...{ location }}
+            />
+          )}
         </List>
         <Divider />
       </Drawer>

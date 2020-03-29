@@ -6,7 +6,7 @@ const AddFab: React.FC<any> = () => {
   return (
     <div
       style={{
-        position: "absolute",
+        position: "fixed",
         bottom: 8,
         left: "calc(50% - 28px)"
       }}

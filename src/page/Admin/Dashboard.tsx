@@ -7,6 +7,11 @@ import { RouteComponentProps, withRouter, Route } from "react-router-dom";
 import { AppContext } from "../../AppContext";
 import { red, green, grey } from "@material-ui/core/colors";
 
+const AdminList = Loadable({
+  loader: () => import(/* webpackChunkName: 'AdminList' */ "./Other/AdminList"),
+  loading: () => null
+});
+
 const AdminHeader = Loadable({
   loader: () => import(/* webpackChunkName: 'AdminHeader' */ "./AdminHeader"),
   loading: () => null
@@ -177,7 +182,7 @@ const ChartTooltip: React.FC<any> = ({ label, value }) => {
 const DefaultComponent: React.FC<any> = () => {
   const classes = useStyles();
   const theme = useTheme();
-  const { csrf, setCsrf, _xhrPost, _thousandSeperater } = useContext(
+  const { csrf, setCsrf, _xhrPost, _thousandSeperater, sess } = useContext(
     AppContext
   );
   const [dashboard, setDashboard] = useState<any>(null);
@@ -194,18 +199,18 @@ const DefaultComponent: React.FC<any> = () => {
     setCsrf(res.csrf);
     setDashboard({
       diskspace: {
-        data: res.data,
+        data: res.data.disk,
         chart: [
           {
             id: "พื้นที่เหลือใช้",
             label: "พื้นที่เหลือใช้",
-            value: res.data.free,
+            value: res.data.disk.free,
             status: "free"
           },
           {
             id: "ใช้ไปแล้ว",
             label: "ใช้ไปแล้ว",
-            value: res.data.size - res.data.free,
+            value: res.data.disk.size - res.data.disk.free,
             status: "total"
           }
         ]
@@ -219,7 +224,7 @@ const DefaultComponent: React.FC<any> = () => {
 
   return (
     <div>
-      {dashboard && (
+      {sess && sess.type === "main_admin" && dashboard && (
         <React.Fragment>
           <div className={classes.pieChartGrid}>
             <div className={classes.pieChart}>
@@ -281,6 +286,7 @@ const DefaultComponent: React.FC<any> = () => {
           </div>
         </React.Fragment>
       )}
+      <AdminList />
     </div>
   );
 };
@@ -315,7 +321,7 @@ const Dashboard: React.FC<DashboardProps> = ({ match, history, location }) => {
     <AppContext.Provider value={...passingProps}>
       <div>
         <AdminHeader />
-        <AdminSideNav />
+        {sess && <AdminSideNav {...{ sess }} />}
         <AdminGrid>
           <Route exact path={match.path} component={DefaultComponent} />
           <Route path={`${match.path}/topup`} component={Topup} />

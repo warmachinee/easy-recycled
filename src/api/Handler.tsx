@@ -270,8 +270,8 @@ export function getTopupImg({
   requestid,
   type = "webp"
 }: {
-  customerid: number;
-  requestid: number;
+  customerid: number | string;
+  requestid: number | string;
   type?: string;
 }) {
   if (isSupportsWebp() && type === "webp") {
@@ -279,6 +279,18 @@ export function getTopupImg({
   } else {
     return `https://easyrecycle.ml/customer/${customerid}/topup/${requestid}/${requestid}.jpg`;
   }
+}
+
+export function getFormImg({
+  userid,
+  formid,
+  file
+}: {
+  userid: number | string;
+  formid: number | string;
+  file: string;
+}) {
+  return `https://easyrecycle.ml/business/${userid}/form/${formid}/${file}`;
 }
 
 export const useConfirmDeleteItem = () => {
@@ -302,6 +314,54 @@ export const useConfirmDeleteItem = () => {
 
   return [state, onDeleteItem, setState];
 };
+
+export function _isDesktopBrowser() {
+  if (
+    navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+export function _openFullScreen(e: any) {
+  const elem = e.target;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) {
+    /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) {
+    /* Chrome, Safari and Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
+
+export function _closeFullscreen(e: any) {
+  const doc = e.target;
+  if (doc.exitFullscreen) {
+    doc.exitFullscreen();
+  } else if ("mozCancelFullScreen" in doc) {
+    /* Firefox */
+    doc.mozCancelFullScreen();
+  } else if ("webkitExitFullscreen" in doc) {
+    /* Chrome, Safari and Opera */
+    doc.webkitExitFullscreen();
+  } else if ("msExitFullscreen" in doc) {
+    /* IE/Edge */
+    doc.msExitFullscreen();
+  }
+}
 
 export interface BooleanReducerState {
   [key: string]: boolean;
@@ -330,5 +390,57 @@ export function booleanReducer(
       return { ...newObj };
     default:
       return { ...state };
+  }
+}
+
+export function getDataFromKeys(keys: any, data: any) {
+  switch (keys) {
+    case "endofsale":
+      switch (data.endofsale) {
+        case 0:
+          return "สินค้ากำลังขาย";
+        case 1:
+          return "สินค้าจบการขายแล้ว";
+        default:
+          return "สินค้ากำลังขาย";
+      }
+    case "business_name":
+      return data.business_name;
+    case "balance":
+      return data.balance;
+    default:
+      return "";
+  }
+}
+
+export function _getNotiText(obj: any) {
+  const { method, data } = obj.activity;
+
+  switch (true) {
+    case method === "edit form":
+      return {
+        primary: "แก้ไขรายละเอียดสินค้า",
+        secondary: getDataFromKeys(
+          data[0] ? Object.keys(data[0])[0] : "",
+          data[0]
+        )
+      };
+    case method === "approve topup":
+      return {
+        primary: "การเติมเงินเสร็จสมบูรณ์",
+        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
+      };
+    case method === "endofsale form":
+      return {
+        primary: "จบการขายสินค้า",
+        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
+      };
+    case method === "balancewarning":
+      return {
+        primary: "จบการขายสินค้า",
+        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
+      };
+    default:
+      return { primary: "", secondary: "" };
   }
 }

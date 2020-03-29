@@ -20,10 +20,32 @@ export interface CustomerFormProps {}
 
 const FormComponent: React.FC<any> = ({ form }) => {
   const { customer_condition, business_type } = form;
+  const { sess } = useContext(AppContext);
+
+  const per1 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 1);
+  const per2 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 2);
+  const per3 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 3);
+  const per4 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 4);
+  const per5 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 5);
+
   return (
     <React.Fragment>
-      <Condition data={customer_condition} />
-      <BusinessType data={business_type} />
+      {per4 && (
+        <React.Fragment>
+          <Condition data={customer_condition} />
+          <BusinessType data={business_type} />
+        </React.Fragment>
+      )}
     </React.Fragment>
   );
 };

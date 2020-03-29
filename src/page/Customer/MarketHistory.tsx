@@ -11,8 +11,9 @@ import {
   Select,
   MenuItem
 } from "@material-ui/core";
-import { red, green } from "@material-ui/core/colors";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { red, green, grey } from "@material-ui/core/colors";
+import { RouteComponentProps, withRouter, Link } from "react-router-dom";
+import AppButton from "../../AppComponent/AppButton";
 
 const useStyles = makeStyles(theme => ({}));
 
@@ -134,8 +135,8 @@ const MarketHistory: React.FC<MarketHistoryProps> = props => {
     <React.Fragment>
       <FormControl style={{ padding: 16 }}>
         <Select value={endOfSale} onChange={handleChange} variant="outlined">
-          <MenuItem value={0}>กำลังขาย</MenuItem>
-          <MenuItem value={1}>จบการขายแล้ว</MenuItem>
+          <MenuItem value={0}>รายการที่กำลังขาย</MenuItem>
+          <MenuItem value={1}>รายการที่จบการขายแล้ว</MenuItem>
         </Select>
       </FormControl>
       <List>
@@ -149,9 +150,26 @@ const MarketHistory: React.FC<MarketHistoryProps> = props => {
               ))}
           </React.Fragment>
         ) : (
-          <Typography variant="h6" style={{ margin: "24px 0" }} align="center">
-            ไม่มีรายการ
-          </Typography>
+          <React.Fragment>
+            <Typography
+              style={{ margin: "24px 0" }}
+              align="center"
+              variant="h4"
+              color="textSecondary"
+            >
+              ไม่มีรายการ
+            </Typography>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Link
+                to="/market"
+                style={{ color: "inherit", textDecoration: "none" }}
+              >
+                <AppButton buttonColor={grey} variant="outlined">
+                  ไปที่ Market
+                </AppButton>
+              </Link>
+            </div>
+          </React.Fragment>
         )}
       </List>
     </React.Fragment>

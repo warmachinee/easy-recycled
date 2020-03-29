@@ -64,9 +64,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 export type GoodsListProps = RouteComponentProps<{}>;
 
 const GoodsItemList: React.FC<any> = props => {
-  const { goods, goodsType, goodsPage, paginationChange } = props;
+  const { goods, goodsType } = props;
   const arr = getArr();
-  const goodsCount = Math.ceil(goods.count / 10);
 
   function getArr() {
     switch (goodsType) {
@@ -95,19 +94,6 @@ const GoodsItemList: React.FC<any> = props => {
         <Typography style={{ marginTop: 24 }} align="center">
           ไม่มีรายการ
         </Typography>
-      )}
-      {goodsCount > 1 && (
-        <div
-          style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
-        >
-          <Pagination
-            count={goodsCount}
-            page={goodsPage}
-            variant="outlined"
-            shape="rounded"
-            onChange={paginationChange}
-          />
-        </div>
       )}
     </div>
   );
@@ -457,12 +443,30 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
             }}
           />
         ) : (
-          <Typography style={{ marginTop: 24 }} align="center">
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
             ไม่มีรายการ
           </Typography>
         )
       ) : (
         <Progress />
+      )}
+      {goods && Math.ceil(goods.count / 10) > 1 && (
+        <div
+          style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
+        >
+          <Pagination
+            count={Math.ceil(goods.count / 10)}
+            page={goodsPage}
+            variant="outlined"
+            shape="rounded"
+            onChange={paginationChange}
+          />
+        </div>
       )}
       <GeneralDialog
         open={goodsDetailState}

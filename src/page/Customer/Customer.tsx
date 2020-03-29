@@ -96,11 +96,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   const [sess, setSess] = useState<any | null>(null);
   const [backDrop, setBackDrop] = useState<any | null>(null);
   const [notifications, setNotifications] = useState<any | null>(null);
-  const [notiPage, setNotiPage] = React.useState(getHash());
-  const paginationChange = (event: any, value: any) => {
-    history.replace(`${match.path}/notifications#${value}`);
-    setNotiPage(value);
-  };
+  const [notiPage, setNotiPage] = React.useState(0);
   const passingProps: any = {
     ...useContext(AppContext),
     sess,
@@ -112,18 +108,10 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     notifications,
     setNotifications,
     notiPage,
-    paginationChange,
-    readNotifications
+    setNotiPage,
+    readNotifications,
+    realtimeAccess
   };
-
-  function getHash() {
-    const hash = location.hash;
-    if (hash === "") {
-      return 1;
-    } else {
-      return parseInt(hash.split("#")[1]);
-    }
-  }
 
   function addSnackbar({ message, variant }: any) {
     enQSnackbar({
@@ -200,8 +188,8 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
         action: "noti",
         linetoken: profile.userId,
         type: "customer",
-        startindex: (notiPage - 1) * 10,
-        lastindex: notiPage * 10
+        startindex: 0,
+        lastindex: (notiPage + 1) * 10
       }
     });
     setCsrf(res.csrf);
@@ -233,75 +221,37 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     getNotifications(profileData);
   }
 
+  function realtimeAccess() {
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"]
+    });
+    socket.emit("noti", {
+      action: "noti",
+      linetoken: profileData && profileData.userId,
+      type: "customer",
+      startindex: 0,
+      lastindex: (notiPage + 1) * 10
+    });
+  }
+
   function realtimeNoti(thisSess: any) {
-    const socket = socketIOClient(location.pathname, {
+    console.log(`noti-${thisSess.userid}`);
+    const socket = socketIOClient("https://easyrecycle.ml", {
       transports: ["websocket", "polling"]
     });
     socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
-      if (messageNew) {
-        console.log(messageNew);
+      if (messageNew && messageNew.status === "success") {
+        const { list } = messageNew.result;
+        // console.log(messageNew);
+        setNotifications(list);
       }
     });
   }
 
   useEffect(() => {
     if (profileData && sess) {
-      _onLocalhostFn(
-        () => {
-          setNotifications([
-            {
-              activity: {
-                method: "create form",
-                data: { business_name: "PDS Co.,Ltd." }
-              },
-              reflink: 6174567,
-              read: 0,
-              createdate: "2020-03-25T18:47:43.000Z"
-            },
-            {
-              activity: {
-                method: "admin delete form",
-                data: { business_name: "TPGSA" }
-              },
-              reflink: 8069118,
-              read: 0,
-              createdate: "2020-03-25T18:46:04.000Z"
-            },
-            {
-              activity: {
-                method: "create form",
-                data: { business_name: "PDS" }
-              },
-              reflink: 2315022,
-              read: 0,
-              createdate: "2020-03-25T09:21:12.000Z"
-            },
-            {
-              activity: {
-                method: "edit form",
-                data: [
-                  { business_name: "TPGSA" },
-                  {
-                    fdocument:
-                      '{"document":["บิลเงินสด","ใบอนุญาตค้าของเก่า"],"etc":"none"}'
-                  },
-                  {
-                    transport:
-                      '{"transport":["แม็คโครปากคีบ/แม็คโครแม่เหล็ก"],"etc":"none"}'
-                  }
-                ]
-              },
-              reflink: 1756407,
-              read: 0,
-              createdate: "2020-03-21T05:27:06.000Z"
-            }
-          ]);
-        },
-        () => {
-          realtimeNoti(sess);
-          getNotifications(profileData);
-        }
-      );
+      realtimeNoti(sess);
+      getNotifications(profileData);
     }
   }, [sess, profileData, notiPage]);
 

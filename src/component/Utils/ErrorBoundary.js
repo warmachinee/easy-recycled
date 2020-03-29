@@ -52,7 +52,7 @@ class ErrorBoundary extends Component {
               variant="outlined"
               onClick={() => window.location.reload()}
             >
-              โหลดใหม่
+              ลองใหม่
             </AppButton>
           </div>
         </Paper>

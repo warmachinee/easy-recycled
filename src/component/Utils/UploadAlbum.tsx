@@ -23,20 +23,18 @@ const UploadAlbum: React.FC<any> = props => {
       const files = event.target.files;
       setAlbum(files);
       if (setAlbumDisplay) {
-        const tempFile: any = [];
-        for (var i = 0; i < files.length; i++) {
-          var file = files[i];
-          if (!file.type.match("image")) continue;
-          var picReader = new FileReader();
-          picReader.addEventListener("load", function(event) {
-            var picFile: any = event.target;
-            tempFile.push(<img src={picFile.result} alt={picFile.result} />);
-          });
-          //Read the image
-          picReader.readAsDataURL(file);
-        }
-        console.log(tempFile);
-        setAlbumDisplay(tempFile);
+        const tempImgArr: any = [];
+        const imageArr = Array.from(files);
+        imageArr.forEach((image: any, i: number) => {
+          // var reader = new FileReader();
+          // reader.readAsDataURL(image);
+          // reader.onloadend = function() {
+          //   tempImgArr.push(reader.result);
+          // };
+          tempImgArr.push(URL.createObjectURL(image));
+        });
+
+        setAlbumDisplay(tempImgArr);
       }
     } else {
       setAlbum(null);
@@ -45,6 +43,8 @@ const UploadAlbum: React.FC<any> = props => {
       }
     }
   }
+
+  const isDis: any = !album || (album && album.length > 10);
 
   return (
     <div style={{ ...(fullWidth && { width: "100%" }) }}>
@@ -61,14 +61,16 @@ const UploadAlbum: React.FC<any> = props => {
           startIcon={
             <PhotoCamera
               fontSize="large"
-              style={{ ...(!album && { color: "white" }) }}
+              style={{
+                ...(isDis && { color: "white" })
+              }}
             />
           }
           variant="contained"
-          color={!album ? "primary" : "default"}
+          color={isDis ? "primary" : "default"}
           style={{
             ...(fullWidth && { width: "100%" }),
-            ...(!album && { color: "white" })
+            ...(isDis && { color: "white" })
           }}
           size="large"
           component="span"

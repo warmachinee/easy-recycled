@@ -12,12 +12,29 @@ export interface GeneralSetupProps {}
 
 const GeneralSetup: React.FC<GeneralSetupProps> = () => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const { csrf, setCsrf, _xhrPost, _onLocalhostFn, sess } = useContext(
+    AppContext
+  );
   const [formPrice, setFormPrice] = useState<any>({
     price: [],
     balancewarning: 0,
     topup: ""
   });
+  const per1 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 1);
+  const per2 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 2);
+  const per3 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 3);
+  const per4 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 4);
+  const per5 =
+    sess.permission &&
+    sess.permission.permission.some((item: any) => item === 5);
 
   async function getFormPrice() {
     const res = await _xhrPost({
@@ -88,10 +105,12 @@ const GeneralSetup: React.FC<GeneralSetupProps> = () => {
               onEdit={(obj: any) => onEditWarning(obj)}
             />
           </div>
-          <FormItemRowGen
-            text={formPrice.topup}
-            onEdit={(obj: any) => onEditBank(obj)}
-          />
+          {per3 && (
+            <FormItemRowGen
+              text={formPrice.topup}
+              onEdit={(obj: any) => onEditBank(obj)}
+            />
+          )}
         </React.Fragment>
       )}
     </FormSetupPaper>

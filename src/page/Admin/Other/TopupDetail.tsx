@@ -28,7 +28,8 @@ const TopupDetail: React.FC<any> = props => {
     _dateToString,
     getTopupImg,
     _onEnter,
-    _thousandSeperater
+    _thousandSeperater,
+    realtimeTopupAccept
   } = useContext(AppContext);
   const [actionState, setActionState] = useState<any>(false);
   const [actionType, setActionType] = useState<any>("");
@@ -83,6 +84,7 @@ const TopupDetail: React.FC<any> = props => {
     onActionClose();
     booleanDispatch({ type: "false", key: "detail" });
     getTopupList();
+    realtimeTopupAccept(topupDetail);
   }
 
   async function onEditTopup() {

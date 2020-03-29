@@ -15,9 +15,9 @@ const UploadButton: React.FC<any> = props => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       const fileSize = file.size;
-      var reader = new FileReader();
       setSlip(file);
       if (setSlipDisplay) {
+        var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = function() {
           setSlipDisplay(reader.result);
