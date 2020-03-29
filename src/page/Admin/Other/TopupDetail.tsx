@@ -62,7 +62,7 @@ const TopupDetail: React.FC<any> = props => {
   //       status: 0
   //     }
   //   });
-  //   console.log(res.data);
+  //
   //   setCsrf(res.csrf);
   //   booleanDispatch({ type: "false", key: "detail" });
   //   getTopupList();
@@ -79,7 +79,7 @@ const TopupDetail: React.FC<any> = props => {
         status: actionType === "accept" ? 1 : -1
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     onActionClose();
     booleanDispatch({ type: "false", key: "detail" });
@@ -98,7 +98,7 @@ const TopupDetail: React.FC<any> = props => {
         value: topupValue
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setIsEditing(false);
     getTopupList();

@@ -18,7 +18,6 @@ const UploadAlbum: React.FC<any> = props => {
   const classes = useStyles();
 
   function handlePicture(event: React.ChangeEvent<HTMLInputElement>) {
-    // console.log(event.target.files);
     if (event.target.files && event.target.files.length > 0) {
       const files = event.target.files;
       setAlbum(files);

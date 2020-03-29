@@ -26,7 +26,7 @@ const Condition: React.FC<ConditionProps> = ({ data }) => {
         condition: state
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setIsEditing(false);
     handleFetch();

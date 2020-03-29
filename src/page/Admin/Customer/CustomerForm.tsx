@@ -71,7 +71,7 @@ const CustomerForm: React.FC<CustomerFormProps> = () => {
         action: "customer_register"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setForm(res.data);
   }
@@ -87,7 +87,7 @@ const CustomerForm: React.FC<CustomerFormProps> = () => {
         newtext: state
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setState("");
     handleFetch();
@@ -104,7 +104,7 @@ const CustomerForm: React.FC<CustomerFormProps> = () => {
         oldtext: text
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     handleFetch();
   }
@@ -121,46 +121,14 @@ const CustomerForm: React.FC<CustomerFormProps> = () => {
         newtext
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     afterEdit();
     handleFetch();
   }
 
   useEffect(() => {
-    _onLocalhostFn(() => {
-      setForm({
-        customer_condition: ["<แก้ไข เงื่อนไขและข้อตกลง>"],
-        business_type: [
-          "บุคคลธรรมดา",
-          "รถรับซื้อของเก่า/ซาเล้ง",
-          "ร้านรับซื้อของเก่า",
-          "นิติบุคคล(บริษัท/หจก)"
-        ],
-        org_size: [
-          "พนักงาน 1-5 คน",
-          "พนักงาน 6-20 คน",
-          "พนักงาน 21-40 คน",
-          "พนักงาน 41-100 คน",
-          "มากกว่า 100 คน"
-        ],
-        document: [
-          "บิลเงินสด",
-          "ใบอนุญาตค้าของเก่า",
-          "ภพ.20",
-          "หนังสือรับรองบริษัท",
-          "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
-          "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
-        ],
-        transport: [
-          "รถกะบะ Pickup",
-          "รถบรรทุก 6 ล้อ",
-          "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
-          "รถสไลด์(วางกะบะเหล็ก)",
-          "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
-        ]
-      });
-    }, handleFetch);
+    handleFetch();
   }, []);
 
   return (

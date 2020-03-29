@@ -74,12 +74,23 @@ const MarketList: React.FC<MarketListProps | any> = props => {
   const { history, location } = props;
 
   return (
-    <List style={{ marginTop: 16 }}>
+    <List>
       <Divider />
       {marketList &&
         !("status" in marketList) &&
-        marketList.map((d: any) => (
-          <MarketItem key={d.formid} data={d} {...props} />
+        (marketList.length > 0 ? (
+          marketList.map((d: any) => (
+            <MarketItem key={d.formid} data={d} {...props} />
+          ))
+        ) : (
+          <Typography
+            style={{ margin: "24px 0" }}
+            align="center"
+            variant="h4"
+            color="textSecondary"
+          >
+            ไม่มีรายการ
+          </Typography>
         ))}
     </List>
   );

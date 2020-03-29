@@ -241,7 +241,7 @@ const EditDetail: React.FC<any> = props => {
       url: "abusinesssystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getBaseDetail();
     setEditing(false);
@@ -259,7 +259,7 @@ const EditDetail: React.FC<any> = props => {
       url: "abusinesssystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getBaseDetail();
     setEditing(false);
@@ -390,33 +390,13 @@ const BusinessDetail: React.FC<BusinessDetailProps | any> = props => {
         businessid: parseInt(params.businessid)
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setDetail(res.data);
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        setDetail({
-          linetoken: "U34854b16de48d84b63c751717c9d2771",
-          email: "sippakorn.prem@gmail.com",
-          displayname: "P.R.E.M.I.O.R",
-          fullname: "Sippakorn",
-          lastname: "Suphapinyo",
-          tel: 806760057,
-          statusmassage: "UI/UX Developer at PDS Co.,Ltd.",
-          picture:
-            "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-          frequencyform: 3,
-          registerdate: "2020-03-09T21:35:27.000Z",
-          status: 1
-        });
-      },
-      () => {
-        getBaseDetail();
-      }
-    );
+    getBaseDetail();
   }, []);
 
   return (

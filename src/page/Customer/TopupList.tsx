@@ -8,6 +8,7 @@ import { BooleanReducerState, BooleanReducerActions } from "apptype";
 import GeneralDialog from "../../component/Dialog/GeneralDialog";
 import UploadButton from "../../component/Utils/UploadButton";
 import AppButton from "../../AppComponent/AppButton";
+import { AttachMoney } from "@material-ui/icons";
 
 const CustomerBackdrop = Loadable({
   loader: () =>
@@ -72,9 +73,14 @@ const TopupItem: React.FC<any> = ({ data, onClickDetail }) => {
           {_dateToString(data.createdate)}
         </Typography>
         {getStatus(data.status)}
-        <Typography variant="h6" style={{ flex: 1 }} align="right">
-          {_thousandSeperater(data.value)} ฿
+        <Typography
+          variant="h6"
+          style={{ flex: 1, marginRight: 8 }}
+          align="right"
+        >
+          {_thousandSeperater(data.value)}
         </Typography>
+        <AttachMoney />
       </ListItem>
       <Divider />
     </React.Fragment>
@@ -167,7 +173,7 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
         type: "customer"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setTopupList(res.data);
     setBackDrop(res.data);

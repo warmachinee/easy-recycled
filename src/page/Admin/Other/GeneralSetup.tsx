@@ -44,7 +44,7 @@ const GeneralSetup: React.FC<GeneralSetupProps> = () => {
         action: "formprice"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setFormPrice(res.data);
   }
@@ -61,7 +61,7 @@ const GeneralSetup: React.FC<GeneralSetupProps> = () => {
       url: "ausersystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     afterEdit();
     getFormPrice();
@@ -78,7 +78,7 @@ const GeneralSetup: React.FC<GeneralSetupProps> = () => {
       url: "ausersystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     afterEdit();
     getFormPrice();

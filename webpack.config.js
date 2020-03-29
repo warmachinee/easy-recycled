@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = function() {
-  var mode = "development"; /*development*/ /*production*/
+  var mode = "production"; /*production*/ /*development*/
 
   var entry = {
     app: "./src/index.tsx"

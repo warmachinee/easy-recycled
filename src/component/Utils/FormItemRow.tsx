@@ -91,7 +91,9 @@ const FormItemRow: React.FC<any> = ({ text, onDelete, onEdit }) => {
             </AppButton>
           </div>
         ) : (
-          <Typography style={{ flex: 1, whiteSpace: "pre" }}>{text}</Typography>
+          <Typography style={{ flex: 1, whiteSpace: "pre-line" }}>
+            {text}
+          </Typography>
         )}
         {!isEditing && isHover ? (
           <React.Fragment>

@@ -69,7 +69,7 @@ const FormItemInsertCon: React.FC<any> = ({ rawData, onClick }) => {
           </AppButton>
         </React.Fragment>
       ) : (
-        <Typography style={{ flex: 1, maxWidth: 600, whiteSpace: "pre" }}>
+        <Typography style={{ flex: 1, maxWidth: 600, whiteSpace: "pre-line" }}>
           {state}
         </Typography>
       )}

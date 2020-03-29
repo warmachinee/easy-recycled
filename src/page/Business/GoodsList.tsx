@@ -87,7 +87,7 @@ const GoodsListItem: React.FC<any> = ({ match, data, index, loadForm }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     loadForm();
   }
 
@@ -206,7 +206,7 @@ const DefaultComponent: React.FC<any> = props => {
       body: { action: "list", linetoken: profileData.userId }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     setList(res.data);
   }
 

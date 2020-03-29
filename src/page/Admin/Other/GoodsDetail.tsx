@@ -70,7 +70,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
         [keys]: thisValue
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getGoodsDetail();
     if (keys === "endofsale") {
@@ -448,7 +448,7 @@ const BusinessName: React.FC<any> = ({ value }) => {
         business_name: thisValue
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setEditing(false);
     getGoodsDetail();
@@ -526,7 +526,7 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
         accessremain: parseInt(thisValue)
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -621,7 +621,7 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
         price: thisValue
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -704,7 +704,7 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
         location: thisValue
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -785,7 +785,7 @@ const BusinessDate: React.FC<any> = ({ appointment, auctiondate }) => {
         [keys]: _dateToAPI(date)
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getGoodsDetail();
     setEditing({ ...editing, [keys]: false });
@@ -902,7 +902,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
         position: thisValue
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -1030,7 +1030,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
         })
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -1200,7 +1200,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
         })
       }
     });
-    console.log(res.data);
+
     setEditing(false);
     setCsrf(res.csrf);
     getGoodsDetail();
@@ -1340,7 +1340,7 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
         sale_condition: thisValue
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setEditing(false);
     getGoodsDetail();
@@ -1392,7 +1392,7 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
           </AppButton>
         </div>
       ) : (
-        <Typography style={{ whiteSpace: "pre" }}>{value}</Typography>
+        <Typography style={{ whiteSpace: "pre-line" }}>{value}</Typography>
       )}
     </div>
   );
@@ -1432,91 +1432,9 @@ const GoodsDetail: React.FC<any> = ({ detail }) => {
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        setData({
-          accessremain: 10,
-          accesstotal: 10,
-          business_name: "Test",
-          sale_condition: "1. ขายด่วน\n2. อื่นๆ",
-          price: "",
-          position: "ผู้จัดการ",
-          product: [{ product: "ทองแดง", value: "มากกว่า 5000 kg" }],
-          appointment: "2020-03-25T17:00:00.000Z",
-          auctiondate: "2020-03-25T17:00:00.000Z",
-          location: "นนทบุรี",
-          document: {
-            document: ["ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"],
-            etc: "none"
-          },
-          transport: {
-            transport: ["รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)"],
-            etc: "none"
-          },
-          picture: 0,
-          endofsale: 0,
-          createdate: null,
-          status: 1,
-          boarddisplay: 0,
-          formcode: { sector: "10", province: "11", number: "12" }
-        });
-        setBusinessForm({
-          form_condition: ["<แก้ไข เงื่อนไขและข้อตกลง>"],
-          position: [
-            "ผู้จัดการ",
-            "จัดซื้อ-จัดจ้าง",
-            "บุคคล",
-            "หัวหน้าแผนก",
-            "เจ้าหน้าที่ SAFETY"
-          ],
-          product: [
-            "ทองแดง",
-            "ทองเหลือง",
-            "อลูมิเนียม",
-            "สแตนเลส",
-            "เหล็ก",
-            "พลาสติก",
-            "กระดาษ",
-            "พาเลทไม้"
-          ],
-          productvalue: [
-            "มากกว่า 5000 kg",
-            "น้ำหนัก 2001-5000 kg",
-            "น้ำหนัก 501-2000 kg",
-            "น้ำหนัก 201-500 kg",
-            "น้ำหนัก 51-200 kg",
-            "น้ำหนัก 1-50 kg"
-          ],
-          org_size: [
-            "พนักงาน 1-5 คน",
-            "พนักงาน 6-20 คน",
-            "พนักงาน 21-40 คน",
-            "พนักงาน 41-100 คน",
-            "มากกว่า 100 คน"
-          ],
-          document: [
-            "บิลเงินสด",
-            "ใบอนุญาตค้าของเก่า",
-            "ภพ.20",
-            "หนังสือรับรองบริษัท",
-            "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
-            "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
-          ],
-          transport: [
-            "รถกะบะ Pickup",
-            "รถบรรทุก 6 ล้อ",
-            "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
-            "รถสไลด์(วางกะบะเหล็ก)",
-            "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
-          ]
-        });
-      },
-      () => {
-        if (detail) {
-          getGoodsDetail();
-        }
-      }
-    );
+    if (detail) {
+      getGoodsDetail();
+    }
   }, [detail]);
 
   return data && businessForm ? (

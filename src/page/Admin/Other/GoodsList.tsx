@@ -244,7 +244,6 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
   }
 
   async function onDeleteGoodsItem() {
-    console.log(itemOnDelete);
     const res = await _xhrPost({
       csrf,
       url: "abusinesssystem",
@@ -254,7 +253,7 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     onDeleteGoods({ action: "cancel" });
     getGoodsList();
   }
@@ -269,149 +268,13 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
         lastindex: goodsPage * 10
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setGoods(res.data);
   }
 
   useEffect(() => {
-    _onLocalhostFn(() => {
-      setGoods({
-        list: [
-          {
-            formid: 4314742,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "Steel Provider Co.,Ltd.",
-            appointment: "2020-08-18T17:00:00.000Z",
-            auctiondate: "2020-03-30T17:00:00.000Z",
-            location: "ลาดพร้าว",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 2315022,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PDS",
-            appointment: "2020-03-30T17:00:00.000Z",
-            auctiondate: "2020-04-22T17:00:00.000Z",
-            location: "นนทบุรี",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 6174567,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PDS Co.,Ltd.",
-            appointment: "2020-03-30T17:00:00.000Z",
-            auctiondate: "2020-03-30T17:00:00.000Z",
-            location: "ลาดพร้าว",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 2624816,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PPP",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "นนทบุรี",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 3014238,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "KLxHunter",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "บ้าน",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 1682616,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PPP3",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "ลาดพร้าว",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 4144826,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "AAA",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "นนทบุรี",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 3196925,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PPP2",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "ลาดพร้าว",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 8714655,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "PPP4",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "นนทบุรี",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          },
-          {
-            formid: 7826943,
-            accessremain: 0,
-            accesstotal: 0,
-            business_name: "AAA1",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            location: "นนทบุรี",
-            endofsale: 0,
-            boarddisplay: 0,
-            createdate: null,
-            status: 1
-          }
-        ],
-        count: 11
-      });
-    }, getGoodsList);
+    getGoodsList();
   }, [goodsPage]);
 
   return (

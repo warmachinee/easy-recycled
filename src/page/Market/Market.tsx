@@ -7,9 +7,14 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Theme
+  Theme,
+  Link as MaterialLink
 } from "@material-ui/core";
-import { Menu as MenuIcon, Close as CloseIcon } from "@material-ui/icons";
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  AttachMoney
+} from "@material-ui/icons";
 import { LineProfileData } from "apptype";
 import { green } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
@@ -70,7 +75,8 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     closeSnackbar,
     _xhrPost,
     _xhrGet,
-    _onLocalhost
+    _onLocalhost,
+    _thousandSeperater
   } = useContext(AppContext);
   const [profileData, setProfileData] = useState<LineProfileData | null>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -142,7 +148,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
       url: "loadusersystem",
       body: { action: "info", linetoken: profile.userId, type: "customer" }
     });
-    // console.log(res.data);
+
     setCsrf(res.csrf);
     if ("status" in res.data) {
       checkSession();
@@ -161,6 +167,10 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     setCsrf(res.csrf);
     setSess(res.data);
     setBackDrop(res.data);
+    if (res.data.status === "not member") {
+      history.replace("/");
+      window.location.reload();
+    }
     if (res.data && res.data.userid) {
       getInfo(profile);
     }
@@ -247,15 +257,31 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
         <MarketHeader {...{ userInfo, handleLogout }} />
         <div className={classes.offset} />
         {userInfo && !("status" in userInfo) && (
-          <div style={{ display: "flex", padding: "12px 16px 0 16px" }}>
-            <Typography style={{ marginRight: 16 }}>ยอดเงินคงเหลือ</Typography>
+          <div
+            style={{
+              display: "flex",
+              padding: "12px 16px 0 16px",
+              alignItems: "center"
+            }}
+          >
+            <MaterialLink href="/">
+              <Typography style={{ marginRight: 16 }} variant="h6">
+                บัญชีของฉัน
+              </Typography>
+            </MaterialLink>
             <Typography
-              style={{ width: 64, marginRight: 8, fontWeight: 700 }}
+              variant="h6"
+              style={{
+                marginLeft: 24,
+                marginRight: 8,
+                fontWeight: 700,
+                flex: 1
+              }}
               align="right"
             >
-              {userInfo.info.balance}
+              {_thousandSeperater(userInfo.info.balance)}
             </Typography>
-            <Typography>บาท</Typography>
+            <AttachMoney />
           </div>
         )}
         <RouteMarketList exact path={match.path} />

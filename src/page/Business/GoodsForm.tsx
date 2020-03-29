@@ -52,6 +52,14 @@ const UploadAlbum = Loadable({
   loading: () => null
 });
 
+const GeneralDialog = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
+    ),
+  loading: () => null
+});
+
 const ConfirmDialog = Loadable({
   loader: () =>
     import(
@@ -317,6 +325,19 @@ const ComponentStep1: React.FC<any> = ({
     setProductAmount(event.target.value as string);
   };
 
+  function checkEqual() {
+    return (
+      form.product.some(
+        (item: any) =>
+          item === getProduct({ type: "product", value: productVal })
+      ) &&
+      form.productvalue.some(
+        (item: any) =>
+          item === getProduct({ type: "amount", value: productAmount })
+      )
+    );
+  }
+
   function addProduct() {
     const thisArr = [...productArr];
     thisArr.push({
@@ -406,6 +427,7 @@ const ComponentStep1: React.FC<any> = ({
           variant="contained"
           buttonColor={green}
           onClick={addProduct}
+          disabled={checkEqual()}
         >
           เพิ่ม
         </AppButton>
@@ -706,14 +728,33 @@ const ComponentStep3: React.FC<any> = ({
   form,
   setForm,
   setActiveStep,
-  albumDisplay
+  albumDisplay,
+  checked,
+  setChecked
 }) => {
   const { _dateToString } = useContext(AppContext);
+  const [conState, setConState] = useState<any>(false);
   const MarginDivider = () => {
     return <div style={{ marginBottom: 12 }} />;
   };
   return (
     <div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Checkbox
+          color="primary"
+          checked={checked}
+          onChange={(e: any) => setChecked(e.target.checked)}
+          style={{ marginRight: 16 }}
+        />
+        <AppButton
+          style={{ padding: 0 }}
+          buttonColor={green}
+          variant="text"
+          onClick={() => setConState(true)}
+        >
+          ยอมรับเงื่อนไขและข้อตกลง
+        </AppButton>
+      </div>
       {albumDisplay && <PreviewImage files={albumDisplay} />}
       <Typography variant="h6" style={{ flex: 1 }}>
         ชื่อบริษัท
@@ -847,11 +888,22 @@ const ComponentStep3: React.FC<any> = ({
           </MaterialLink>
         </Typography>
       ) : (
-        <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre" }}>
+        <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre-line" }}>
           {form.sale_condition}
         </Typography>
       )}
       <MarginDivider />
+      <GeneralDialog
+        open={conState}
+        onClose={() => setConState(false)}
+        title="เงื่อนไขและข้อตกลง"
+      >
+        {businessForm && (
+          <Typography style={{ marginBottom: 16, whiteSpace: "pre-line" }}>
+            {businessForm.form_condition[0]}
+          </Typography>
+        )}
+      </GeneralDialog>
     </div>
   );
 };
@@ -896,6 +948,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   });
   const [goodsDetail, setGoodsDetail] = useState<any | null>(null);
   const [businessForm, setBusinessForm] = useState<any | null>(null);
+  const [checked, setChecked] = useState<any>(false);
   const [
     { confirmState, item: itemOnEndSale },
     onEndSale
@@ -910,7 +963,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: { action: "business_form", type: "business" }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     setBusinessForm(res.data);
     if (editting && match) {
       const { formid } = match.params;
@@ -928,7 +981,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: { action: "detail", formid, linetoken: profileData.userId }
     });
     setCsrf(res.csrf);
-    // console.log(res.data);
+
     const d = res.data;
     setInitialGoodsDetail(d, thisForm);
     setGoodsDetail(res.data);
@@ -944,7 +997,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: { action: "album", formid, linetoken: profileData.userId }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     if (res.data && res.data.filelist.length > 0) {
       setAlbumDisplay(
         res.data.filelist.map((file: any) =>
@@ -1019,7 +1072,6 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
         transetc: transport.etc
       });
     }
-    console.log(obj);
     setForm(obj);
   }
 
@@ -1055,7 +1107,6 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       ...(docsetc !== "" && { docsetc }),
       ...(transetc !== "" && { transetc })
     };
-    console.log(sendObj);
     const res = await _xhrPost({
       csrf,
       url: "formsystem",
@@ -1081,16 +1132,14 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       },
       body: { albumimage: album }
     });
-    console.log(imgRes);
     setAlbum(null);
     if (imgRes.data.status === "success") {
       addSnackbar({ message: "สร้างสำเร็จ", variant: "success" });
-      history.push("/business");
     }
+    history.push("/business");
   }
 
   async function editForm() {
-    console.log({ albumDisplay, length: albumDisplay.length });
     const {
       business_name,
       sale_condition,
@@ -1150,7 +1199,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: sendObj
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     realtimeAccess();
     if (album && album.length <= 5) {
       uploadAlbum(parseInt(formid), res.csrf);
@@ -1171,7 +1220,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     realtimeEndOfSale(profileData);
     if (res.data.status === "success") {
       addSnackbar({ message: "จบการขายสำเร็จ", variant: "success" });
@@ -1251,7 +1300,6 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
           })
         );
       }
-      console.log(thisAl);
       setAlbumDisplay(thisAl);
     } else {
       loadBusinessForm();
@@ -1277,7 +1325,9 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
           album,
           setAlbum,
           albumDisplay,
-          setAlbumDisplay
+          setAlbumDisplay,
+          checked,
+          setChecked
         }}
       />
       <div className={classes.buttonGroup}>
@@ -1311,7 +1361,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
                 form.product.length === 0 ||
                 form.location === "" ||
                 form.transport.length === 0 ||
-                form.document.length === 0
+                form.document.length === 0 ||
+                !checked
               }
             >
               สร้าง

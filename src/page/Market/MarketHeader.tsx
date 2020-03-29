@@ -79,7 +79,12 @@ const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
         >
           บอร์ดสินค้า
         </Typography>
-        <IconButton edge="start" color="primary" onClick={getMarketPlace}>
+        <IconButton
+          edge="start"
+          color="primary"
+          onClick={getMarketPlace}
+          style={{ position: "absolute", right: 0 }}
+        >
           <Refresh style={{ color: grey[700] }} />
         </IconButton>
         {/* <ConfirmDialog

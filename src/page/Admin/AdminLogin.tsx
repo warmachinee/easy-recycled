@@ -71,7 +71,7 @@ const AdminLogin: React.FC<AdminLoginProps> = React.memo(() => {
       body: sendObj
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     switch (res.data.status) {
       case "wrong username":
         setErr({ username: true, password: false });

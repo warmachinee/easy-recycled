@@ -2,13 +2,14 @@ import React, { useEffect, useContext, useState } from "react";
 import socketIOClient from "socket.io-client";
 import { makeStyles } from "@material-ui/styles";
 import { RouteComponentProps } from "react-router-dom";
-import { IconButton, Typography } from "@material-ui/core";
+import { IconButton, Typography, useTheme } from "@material-ui/core";
 import { ArrowBackIos, ShoppingBasket } from "@material-ui/icons";
 import { AppContext } from "../../AppContext";
 import AppButton from "../../AppComponent/AppButton";
-import { green } from "@material-ui/core/colors";
+import { green, grey, red } from "@material-ui/core/colors";
 import ConfirmDialog from "../../component/Dialog/ConfirmDialog";
 import PreviewImage from "../../component/Utils/PreviewImage";
+import { ResponsivePie } from "@nivo/pie";
 
 const useStyles = makeStyles(theme => ({}));
 
@@ -17,6 +18,95 @@ export interface MarketGoodsProps
 
 const MarginDivider = () => {
   return <div style={{ marginBottom: 12 }} />;
+};
+
+const chartTheme = {
+  labels: {
+    text: {
+      fontSize: 16,
+      fontFamily: [
+        "-apple-system",
+        "BlinkMacSystemFont",
+        '"Segoe UI"',
+        "Roboto",
+        '"Helvetica Neue"',
+        "Arial",
+        "sans-serif",
+        '"Apple Color Emoji"',
+        '"Segoe UI Emoji"',
+        '"Segoe UI Symbol"'
+      ].join(",")
+    }
+  }
+};
+
+const defs = [
+  {
+    id: "total",
+    type: "patternDots",
+    background: "inherit",
+    color: red[400],
+    size: 4,
+    padding: 1,
+    stagger: true
+  },
+  {
+    id: "free",
+    type: "patternLines",
+    background: "inherit",
+    color: green[400],
+    rotation: -45,
+    lineWidth: 6,
+    spacing: 7
+  }
+];
+
+function getFill(data: any) {
+  let variant = "";
+  switch (data.status) {
+    case "total":
+      variant = "total";
+      break;
+    case "free":
+      variant = "free";
+      break;
+    default:
+      variant = "free";
+  }
+  return {
+    match: {
+      id: data.id
+    },
+    id: variant
+  };
+}
+
+const ChartTooltip: React.FC<any> = ({ label, value }) => {
+  const theme = useTheme();
+  return (
+    <div style={{ display: "flex" }}>
+      <Typography
+        variant="body1"
+        style={{
+          color: theme.palette.grey[900],
+          fontWeight: 400,
+          marginRight: 16
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="body1"
+        style={{
+          color: theme.palette.grey[900],
+          fontWeight: 700,
+          marginRight: 8
+        }}
+      >
+        {value}
+      </Typography>
+    </div>
+  );
 };
 
 const MarketGoods: React.FC<MarketGoodsProps> = props => {
@@ -49,7 +139,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
         formid
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     if (
       "status" in res.data &&
@@ -75,7 +165,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
         formid
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getGoodsDetail();
     setConfirmState(false);
@@ -91,7 +181,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
         formid
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
   }
 
@@ -106,27 +196,9 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        setData({
-          business_name: "PDS",
-          sale_condition: "ขายด่วน",
-          position: "บุคคล",
-          price: "25",
-          formcode: { sector: "135", province: "45", number: "" },
-          product: [
-            { product: "ทองแดง", value: "มากกว่า 5000 kg" },
-            { product: "สแตนเลส", value: "น้ำหนัก 501-2000 kg" },
-            { product: "กระดาษ", value: "น้ำหนัก 201-500 kg" }
-          ]
-        });
-      },
-      () => {
-        if (profileData) {
-          getGoodsDetail();
-        }
-      }
-    );
+    if (profileData) {
+      getGoodsDetail();
+    }
   }, [profileData]);
 
   return (
@@ -134,7 +206,130 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
       <IconButton onClick={() => history.replace("/market")}>
         <ArrowBackIos fontSize="small" />
       </IconButton>
-
+      {data && (
+        <div style={{ height: 400, width: "auto" }}>
+          <ResponsivePie
+            data={data.product.map((item: any) => {
+              return {
+                id: item.product,
+                label: item.value,
+                value: 1
+              };
+            })}
+            sliceLabel={(d: any) => `${d.label}`}
+            margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+            innerRadius={0.5}
+            padAngle={0.7}
+            cornerRadius={3}
+            colors={{ scheme: "nivo" }}
+            borderWidth={1}
+            borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
+            radialLabelsSkipAngle={10}
+            radialLabelsTextXOffset={6}
+            radialLabelsTextColor="#333333"
+            radialLabelsLinkOffset={0}
+            radialLabelsLinkDiagonalLength={16}
+            radialLabelsLinkHorizontalLength={24}
+            radialLabelsLinkStrokeWidth={1}
+            radialLabelsLinkColor={{ from: "color" }}
+            slicesLabelsSkipAngle={10}
+            slicesLabelsTextColor="#333333"
+            animate={true}
+            motionStiffness={90}
+            motionDamping={15}
+            defs={[
+              {
+                id: "dots",
+                type: "patternDots",
+                background: "inherit",
+                color: "rgba(255, 255, 255, 0.3)",
+                size: 4,
+                padding: 1,
+                stagger: true
+              },
+              {
+                id: "lines",
+                type: "patternLines",
+                background: "inherit",
+                color: "rgba(255, 255, 255, 0.3)",
+                rotation: -45,
+                lineWidth: 6,
+                spacing: 10
+              }
+            ]}
+            fill={[
+              {
+                match: {
+                  id: "ruby"
+                },
+                id: "dots"
+              },
+              {
+                match: {
+                  id: "c"
+                },
+                id: "dots"
+              },
+              {
+                match: {
+                  id: "go"
+                },
+                id: "dots"
+              },
+              {
+                match: {
+                  id: "python"
+                },
+                id: "dots"
+              },
+              {
+                match: {
+                  id: "scala"
+                },
+                id: "lines"
+              },
+              {
+                match: {
+                  id: "lisp"
+                },
+                id: "lines"
+              },
+              {
+                match: {
+                  id: "elixir"
+                },
+                id: "lines"
+              },
+              {
+                match: {
+                  id: "javascript"
+                },
+                id: "lines"
+              }
+            ]}
+            legends={[
+              {
+                anchor: "bottom",
+                direction: "row",
+                translateY: 56,
+                itemWidth: 100,
+                itemHeight: 18,
+                itemTextColor: "#999",
+                symbolSize: 18,
+                symbolShape: "circle",
+                effects: [
+                  {
+                    on: "hover",
+                    style: {
+                      itemTextColor: "#000"
+                    }
+                  }
+                ]
+              }
+            ]}
+          />
+        </div>
+      )}
       {data &&
         ("status" in data && data.status === "wrong formid" ? (
           <Typography
@@ -207,6 +402,39 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
                   )}
                 />
               )}
+            {data.formcode && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  รหัส
+                </Typography>
+                <div style={{ display: "flex" }}>
+                  <Typography gutterBottom style={{ width: 100 }}>
+                    รหัสสินค้า
+                  </Typography>
+                  <Typography gutterBottom style={{ flex: 1 }}>
+                    {data.formcode.sector ? data.formcode.sector : "-"}
+                  </Typography>
+                </div>
+                <div style={{ display: "flex" }}>
+                  <Typography gutterBottom style={{ width: 100 }}>
+                    รหัสจังหวัด
+                  </Typography>
+                  <Typography gutterBottom style={{ flex: 1 }}>
+                    {data.formcode.province ? data.formcode.province : "-"}
+                  </Typography>
+                </div>
+                <div style={{ display: "flex" }}>
+                  <Typography gutterBottom style={{ width: 100 }}>
+                    หมายเลข
+                  </Typography>
+                  <Typography gutterBottom style={{ flex: 1 }}>
+                    {data.formcode.number ? data.formcode.number : "-"}
+                  </Typography>
+                </div>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+
             <Typography variant="h6" style={{ flex: 1 }}>
               ชื่อบริษัท
             </Typography>
@@ -315,7 +543,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
             <Typography variant="h6" style={{ flex: 1 }}>
               เงื่อนไขการขาย
             </Typography>
-            <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre" }}>
+            <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre-line" }}>
               {data.sale_condition}
             </Typography>
           </div>

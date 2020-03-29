@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from "react";
 import Loadable from "react-loadable";
 import { ResponsivePie } from "@nivo/pie";
 import { makeStyles } from "@material-ui/styles";
-import { Theme, Typography, useTheme } from "@material-ui/core";
+import { Theme, Typography, useTheme, Paper } from "@material-ui/core";
 import { RouteComponentProps, withRouter, Route } from "react-router-dom";
 import { AppContext } from "../../AppContext";
 import { red, green, grey } from "@material-ui/core/colors";
@@ -71,8 +71,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   contentChild: {
     height: `calc(100vh - ${64 + 24 * 2}px)`,
     maxWidth: 1200,
-    margin: "auto",
-    overflowX: "auto"
+    margin: "auto"
   },
   pieChartGrid: { minWidth: 600, position: "relative" },
   pieChart: { height: 400, width: "auto" },
@@ -192,12 +191,13 @@ const DefaultComponent: React.FC<any> = () => {
       csrf,
       url: "aloadusersystem",
       body: {
-        action: "diskspace"
+        action: "dashboard"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setDashboard({
+      ...res.data,
       diskspace: {
         data: res.data.disk,
         chart: [
@@ -210,7 +210,7 @@ const DefaultComponent: React.FC<any> = () => {
           {
             id: "ใช้ไปแล้ว",
             label: "ใช้ไปแล้ว",
-            value: res.data.disk.size - res.data.disk.free,
+            value: res.data.disk.use,
             status: "total"
           }
         ]
@@ -225,68 +225,378 @@ const DefaultComponent: React.FC<any> = () => {
   return (
     <div>
       {sess && sess.type === "main_admin" && dashboard && (
-        <React.Fragment>
-          <div className={classes.pieChartGrid}>
-            <div className={classes.pieChart}>
-              <ResponsivePie
-                data={dashboard.diskspace.chart}
-                radialLabel={(d: any) =>
-                  `${d.label} (${(d.value / 100).toFixed(2)} GB)`
-                }
-                sliceLabel={d =>
-                  `${((d.value / dashboard.diskspace.data.size) * 100).toFixed(
-                    1
-                  )}%`
-                }
-                margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-                innerRadius={0}
-                padAngle={0.7}
-                cornerRadius={3}
-                borderWidth={1}
-                borderColor={{ theme: "grid.line.stroke" }}
-                radialLabelsSkipAngle={9}
-                radialLabelsTextXOffset={6}
-                radialLabelsTextColor={theme.palette.text.primary}
-                radialLabelsLinkOffset={0}
-                radialLabelsLinkDiagonalLength={16}
-                radialLabelsLinkHorizontalLength={24}
-                radialLabelsLinkStrokeWidth={1}
-                radialLabelsLinkColor={theme.palette.text.primary}
-                slicesLabelsTextColor={grey[900]}
-                slicesLabelsSkipAngle={12}
-                animate={true}
-                motionStiffness={90}
-                motionDamping={15}
-                defs={defs}
-                fill={dashboard.diskspace.chart.map((d: any) => {
-                  return getFill(d);
-                })}
-                tooltip={d => {
-                  const val = d.value
-                    .toFixed(2)
-                    .toString()
-                    .split(".");
-                  return (
-                    <ChartTooltip
-                      label={d.label}
-                      value={`${_thousandSeperater(val[0])}.${val[1]}`}
-                    />
-                  );
-                }}
-                theme={chartTheme}
-              />
+        <div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className={classes.pieChartGrid}>
+              <div className={classes.pieChart}>
+                <ResponsivePie
+                  data={dashboard.diskspace.chart}
+                  radialLabel={(d: any) =>
+                    `${d.label} (${(d.value / 1000).toFixed(2)} GB)`
+                  }
+                  sliceLabel={d =>
+                    `${(
+                      (d.value / dashboard.diskspace.data.size) *
+                      100
+                    ).toFixed(1)}%`
+                  }
+                  margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                  innerRadius={0}
+                  padAngle={0.7}
+                  cornerRadius={3}
+                  borderWidth={1}
+                  borderColor={{ theme: "grid.line.stroke" }}
+                  radialLabelsSkipAngle={9}
+                  radialLabelsTextXOffset={6}
+                  radialLabelsTextColor={theme.palette.text.primary}
+                  radialLabelsLinkOffset={0}
+                  radialLabelsLinkDiagonalLength={16}
+                  radialLabelsLinkHorizontalLength={24}
+                  radialLabelsLinkStrokeWidth={1}
+                  radialLabelsLinkColor={theme.palette.text.primary}
+                  slicesLabelsTextColor={grey[900]}
+                  slicesLabelsSkipAngle={12}
+                  animate={true}
+                  motionStiffness={90}
+                  motionDamping={15}
+                  defs={defs}
+                  fill={dashboard.diskspace.chart.map((d: any) => {
+                    return getFill(d);
+                  })}
+                  tooltip={d => {
+                    const val = d.value
+                      .toFixed(2)
+                      .toString()
+                      .split(".");
+                    return (
+                      <ChartTooltip
+                        label={d.label}
+                        value={`${_thousandSeperater(val[0])}.${val[1]}`}
+                      />
+                    );
+                  }}
+                  theme={chartTheme}
+                />
+              </div>
+              <Typography
+                variant="h6"
+                align="center"
+                className={classes.chartLabel}
+              >
+                พื้นที่จัดเก็บข้อมูล
+              </Typography>
             </div>
-            <Typography
-              variant="h6"
-              align="center"
-              className={classes.chartLabel}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxWidth: 240
+              }}
             >
-              พื้นที่จัดเก็บข้อมูล
-            </Typography>
+              <Paper
+                elevation={3}
+                style={{
+                  padding: 16,
+                  margin: 16,
+                  width: "100%",
+                  boxSizing: "border-box"
+                }}
+              >
+                <Typography style={{ marginBottom: 24 }}>
+                  ลูกค้าในระบบ
+                </Typography>
+                <div style={{ display: "flex" }}>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      color: green[600],
+                      fontWeight: 600,
+                      flex: 1,
+                      marginRight: 16
+                    }}
+                    align="right"
+                  >
+                    {_thousandSeperater(dashboard.total.customer)}
+                  </Typography>
+                  <Typography variant="h6">คน</Typography>
+                </div>
+              </Paper>
+              <Paper
+                elevation={3}
+                style={{
+                  padding: 16,
+                  margin: 16,
+                  width: "100%",
+                  boxSizing: "border-box"
+                }}
+              >
+                <Typography style={{ marginBottom: 24 }}>
+                  เจ้าของกิจการในระบบ
+                </Typography>
+                <div style={{ display: "flex" }}>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      color: green[600],
+                      fontWeight: 600,
+                      flex: 1,
+                      marginRight: 16
+                    }}
+                    align="right"
+                  >
+                    {_thousandSeperater(dashboard.total.business)}
+                  </Typography>
+                  <Typography variant="h6">คน</Typography>
+                </div>
+              </Paper>
+            </div>
           </div>
-        </React.Fragment>
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <div style={{ width: "100%", maxWidth: 500 }}>
+              <Typography variant="h6" style={{ margin: "0 16px" }}>
+                รายวัน
+              </Typography>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>
+                    ผู้ใช้งานใหม่
+                  </Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.day.newuser)}
+                    </Typography>
+                    <Typography variant="h6">คน</Typography>
+                  </div>
+                </Paper>
+                <div style={{ padding: 16, margin: 16, flex: 1 }} />
+              </div>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>ลงสินค้า</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.day.createform)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>
+                    เข้าดูสินค้า
+                  </Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.day.accessform)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+              </div>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>จบการขาย</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.day.endofsale)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>เติมเงิน</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.day.topup)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+              </div>
+            </div>
+            <div style={{ width: "100%", maxWidth: 500 }}>
+              <Typography variant="h6" style={{ margin: "0 16px" }}>
+                รายเดือน
+              </Typography>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>
+                    ผู้ใช้งานใหม่
+                  </Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.month.newuser)}
+                    </Typography>
+                    <Typography variant="h6">คน</Typography>
+                  </div>
+                </Paper>
+                <div style={{ padding: 16, margin: 16, flex: 1 }} />
+              </div>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>ลงสินค้า</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.month.createform)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>
+                    เข้าดูสินค้า
+                  </Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.month.accessform)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+              </div>
+              <div style={{ display: "flex" }}>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>จบการขาย</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.month.endofsale)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+                <Paper
+                  elevation={3}
+                  style={{ padding: 16, margin: 16, flex: 1 }}
+                >
+                  <Typography style={{ marginBottom: 16 }}>เติมเงิน</Typography>
+                  <div style={{ display: "flex" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        color: green[600],
+                        fontWeight: 600,
+                        flex: 1,
+                        marginRight: 16
+                      }}
+                      align="right"
+                    >
+                      {_thousandSeperater(dashboard.month.topup)}
+                    </Typography>
+                    <Typography variant="h6">ครั้ง</Typography>
+                  </div>
+                </Paper>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-      <AdminList />
     </div>
   );
 };
@@ -306,7 +616,7 @@ const Dashboard: React.FC<DashboardProps> = ({ match, history, location }) => {
         action: "info"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
   }
 
@@ -326,6 +636,7 @@ const Dashboard: React.FC<DashboardProps> = ({ match, history, location }) => {
           <Route exact path={match.path} component={DefaultComponent} />
           <Route path={`${match.path}/topup`} component={Topup} />
           <Route path={`${match.path}/goods_list`} component={GoodsList} />
+          <Route path={`${match.path}/admin_list`} component={AdminList} />
           <Route path={`${match.path}/setup`} component={SetupForm} />
 
           <Route

@@ -9,6 +9,7 @@ import {
   Theme
 } from "@material-ui/core";
 import { AppContext } from "../../AppContext";
+import { red } from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme: Theme) => ({
   content: { flexGrow: 1, padding: "16px 16px 68px 16px", overflow: "auto" },
@@ -40,7 +41,16 @@ const NotificationsList: React.FC<any> = () => {
           <React.Fragment key={i}>
             <ListItem button>
               <ListItemText
-                primary={_getNotiText(d).primary}
+                primary={
+                  <Typography
+                    component="span"
+                    style={{
+                      ...(_getNotiText(d).warning && { color: red[600] })
+                    }}
+                  >
+                    {_getNotiText(d).primary}
+                  </Typography>
+                }
                 secondary={
                   <span style={{ display: "flex", flexDirection: "column" }}>
                     <Typography component="span" color="textSecondary">

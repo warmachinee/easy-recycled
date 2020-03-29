@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { KeyboardArrowRight, KeyboardArrowLeft } from "@material-ui/icons";
 import AppButton from "../../AppComponent/AppButton";
 import { green, red } from "@material-ui/core/colors";
+import GeneralDialog from "../../component/Dialog/GeneralDialog";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {},
@@ -42,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   buttonGroup: {
     display: "flex",
     padding: 8,
-    position: "absolute",
+    position: "fixed",
     bottom: 0,
     width: "100%",
     boxSizing: "border-box",
@@ -458,16 +459,37 @@ const Component3: React.FC<any> = ({
   inputForm,
   form,
   setForm,
-  setActiveStep
+  setActiveStep,
+  checked,
+  setChecked
 }) => {
+  const classes = useStyles();
   const { _dateToString } = useContext(AppContext);
+  const [conState, setConState] = useState<any>(false);
+
   const MarginDivider = () => {
     return <div style={{ marginBottom: 12 }} />;
   };
   return (
     <div>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+        <Checkbox
+          color="primary"
+          checked={checked}
+          onChange={(e: any) => setChecked(e.target.checked)}
+          style={{ marginRight: 16 }}
+        />
+        <AppButton
+          style={{ padding: 0 }}
+          buttonColor={green}
+          variant="text"
+          onClick={() => setConState(true)}
+        >
+          ยอมรับเงื่อนไขและข้อตกลง
+        </AppButton>
+      </div>
       <Typography variant="h6" style={{ flex: 1 }}>
-        ชิ่อ-นามสกุล
+        ชื่อ-นามสกุล
       </Typography>
       {form.fullname === "" || form.lastname === "" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
@@ -483,7 +505,7 @@ const Component3: React.FC<any> = ({
           {`${form.fullname} ${form.lastname}`}
         </Typography>
       )}
-      <Typography variant="h6" style={{ flex: 1 }}>
+      {/* <Typography variant="h6" style={{ flex: 1 }}>
         อีเมล
       </Typography>
       {form.email === "" ? (
@@ -499,7 +521,7 @@ const Component3: React.FC<any> = ({
         <Typography gutterBottom style={{ flex: 1 }}>
           {form.email}
         </Typography>
-      )}
+      )} */}
       <Typography variant="h6" style={{ flex: 1 }}>
         เบอร์โทรศัพท์
       </Typography>
@@ -603,6 +625,19 @@ const Component3: React.FC<any> = ({
         </MaterialLink>
       )}
       <MarginDivider />
+
+      <GeneralDialog
+        open={conState}
+        onClose={() => setConState(false)}
+        title="เงื่อนไขและข้อตกลง"
+      >
+        <Typography
+          className={classes.textField}
+          style={{ whiteSpace: "pre-line" }}
+        >
+          {inputForm && inputForm.customer_condition[0]}
+        </Typography>
+      </GeneralDialog>
     </div>
   );
 };
@@ -645,20 +680,15 @@ const RegisterForm: React.FC<any> = ({
       <Typography variant="h6" style={{ marginTop: 16 }}>
         สมัครสมาชิก
       </Typography>
-      <Typography variant="h6" style={{ marginTop: 16 }}>
-        เงื่อนไขและข้อตกลง
-      </Typography>
-      <Typography className={classes.textField}>
-        {inputForm && inputForm.customer_condition[0]}
-      </Typography>
-      <TextField
+
+      {/* <TextField
         className={classes.textField}
         fullWidth
         name="email"
         label="อีเมล"
         value={form.email}
         onChange={onFormChange}
-      />
+      /> */}
       <TextField
         className={classes.textField}
         fullWidth
@@ -698,6 +728,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
   const [form, setForm] = useState<any>(null);
   const [activeStep, setActiveStep] = React.useState<any>(0);
   const [inputForm, setInputForm] = useState<any | null>(null);
+  const [checked, setChecked] = useState<any>(false);
 
   async function loadForm() {
     const res = await _xhrPost({
@@ -706,7 +737,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
       body: { action: "customer_register", type: "customer" }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     setInputForm(res.data);
   }
 
@@ -722,50 +753,18 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
       ...(docsetc !== "" && { docsetc }),
       ...(transetc !== "" && { transetc })
     };
-    console.log(sendObj);
     const res = await _xhrPost({
       csrf,
       url: "register",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     getSess(profileData);
   }
 
   useEffect(() => {
     loadForm();
-    setInputForm({
-      customer_condition: [],
-      business_type: [
-        "บุคคลธรรมดา",
-        "รถรับซื้อของเก่า/ซาเล้ง",
-        "ร้านรับซื้อของเก่า",
-        "นิติบุคคล(บริษัท/หจก)"
-      ],
-      org_size: [
-        "พนักงาน 1-5 คน",
-        "พนักงาน 6-20 คน",
-        "พนักงาน 21-40 คน",
-        "พนักงาน 41-100 คน",
-        "มากกว่า 100 คน"
-      ],
-      document: [
-        "บิลเงินสด",
-        "ใบอนุญาตค้าของเก่า",
-        "ภพ.20",
-        "หนังสือรับรองบริษัท",
-        "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
-        "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
-      ],
-      transport: [
-        "รถกะบะ Pickup",
-        "รถบรรทุก 6 ล้อ",
-        "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
-        "รถสไลด์(วางกะบะเหล็ก)",
-        "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
-      ]
-    });
     if (profileData) {
       setForm({
         email: "",
@@ -798,20 +797,15 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
             activeStep,
             setActiveStep,
             form,
-            setForm
+            setForm,
+            checked,
+            setChecked
           }}
         />
       )}
-      <div className={classes.buttonGroup}>
-        <Link
-          to="/business"
-          style={{ textDecoration: "none", flexGrow: 1, margin: 8 }}
-        >
-          <Button style={{ width: "100%" }} color="primary" variant="outlined">
-            ยกเลิก
-          </Button>
-        </Link>
-        {activeStep === formStep - 1 && (
+
+      {activeStep === formStep - 1 && (
+        <div className={classes.buttonGroup}>
           <AppButton
             variant="contained"
             buttonColor={green}
@@ -820,18 +814,18 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
             disabled={
               form.fullname === "" ||
               form.lastname === "" ||
-              form.email === "" ||
               form.tel === "" ||
               form.business_name === "" ||
               form.location === "" ||
               form.transport.length === 0 ||
-              form.document.length === 0
+              form.document.length === 0 ||
+              !checked
             }
           >
             สร้าง
           </AppButton>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

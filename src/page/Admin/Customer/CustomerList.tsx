@@ -119,58 +119,13 @@ const DefaultComponent: React.FC<any> = props => {
       url: "aloadcustomer",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setCustomers(res.data);
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        const thisList = [
-          {
-            customerid: 1728881,
-            linetoken: "U1e84a64d2648d5dfa1c3c113e6c1d37c",
-            displayname: "Imagery.bag",
-            fullname: "Sippakorn",
-            lastname: "Suphapinyo",
-            picture:
-              "https://profile.line-scdn.net/0hcuLOUwB5PFpxNhey7D5DDU1zMjcGGDoSCVN1aFMxMmNdBHNcGAN0blc_az8JUX0JH1EmaAczYGxU",
-            balance: 0,
-            status: 1
-          },
-          {
-            customerid: 8671952,
-            linetoken: "Uab6817bd574cfb5a241e374019021333",
-            displayname: "Meaw",
-            fullname: "Thanapat",
-            lastname: "Taweerat",
-            picture:
-              "https://profile.line-scdn.net/0hXDUWGpBHB2toLizFyMx4PFRrCQYfAAEjEBtNCBorDAkQTUY5VhxLWk4nDV0RHhU4VUkYDBgoWAgV",
-            balance: 0,
-            status: 1
-          },
-          {
-            customerid: 9154507,
-            linetoken: "U34854b16de48d84b63c751717c9d2771",
-            displayname: "P.R.E.M.I.O.R",
-            fullname: "Sippakorn",
-            lastname: "Suphapinyo",
-            picture:
-              "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-            balance: 335,
-            status: 1
-          }
-        ];
-        setCustomers({
-          list: thisList,
-          count: thisList.length
-        });
-      },
-      () => {
-        getBaseList(customerType);
-      }
-    );
+    getBaseList(customerType);
   }, [customerPage]);
 
   return (

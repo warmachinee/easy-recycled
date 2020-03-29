@@ -162,7 +162,7 @@ const Topup: React.FC<TopupProps> = ({ location, history, match }) => {
         lastindex: topupPage * 10
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setTopupList(res.data);
   }
@@ -181,29 +181,7 @@ const Topup: React.FC<TopupProps> = ({ location, history, match }) => {
   }
 
   useEffect(() => {
-    _onLocalhostFn(() => {
-      const json = [];
-      for (var i = 0; i < 100; i++) {
-        json.push({
-          requestid: 58161301 + i,
-          userid: 915450 + i,
-          linetoken: "U34854b16de48d84b63c751717c9d2771",
-          displayname: "P.R.E.M.I.O.R",
-          fullname: "Sippakorn" + i,
-          lastname: "Suphapinyo" + i,
-          picture:
-            "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-          value: 100,
-          bill: 1,
-          createdate: "2020-03-22T14:47:21.000Z",
-          status: getPercentStatus(i)
-        });
-      }
-      setTopupList({
-        list: json,
-        count: json.length
-      });
-    }, getTopupList);
+    getTopupList();
   }, [topupPage]);
 
   return (

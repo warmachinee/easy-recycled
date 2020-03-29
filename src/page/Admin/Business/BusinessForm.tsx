@@ -90,7 +90,7 @@ const BusinessForm: React.FC<BusinessFormProps> = () => {
         newtext: state
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setState("");
     handleFetch();
@@ -107,7 +107,7 @@ const BusinessForm: React.FC<BusinessFormProps> = () => {
         oldtext: text
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     handleFetch();
   }
@@ -124,7 +124,7 @@ const BusinessForm: React.FC<BusinessFormProps> = () => {
         newtext
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     afterEdit();
     handleFetch();
@@ -152,70 +152,10 @@ const BusinessForm: React.FC<BusinessFormProps> = () => {
       ...thisRegis,
       ...thisForm
     });
-    console.log({
-      ...thisRegis,
-      ...thisForm
-    });
   }
 
   useEffect(() => {
-    _onLocalhostFn(() => {
-      const thisRegis = { dcondition: "<แก้ไข เงื่อนไขและข้อตกลง>" };
-      const thisForm = {
-        form_condition: ["<แก้ไข เงื่อนไขและข้อตกลง>"],
-        position: [
-          "ผู้จัดการ",
-          "จัดซื้อ-จัดจ้าง",
-          "บุคคล",
-          "หัวหน้าแผนก",
-          "เจ้าหน้าที่ SAFETY"
-        ],
-        product: [
-          "ทองแดง",
-          "ทองเหลือง",
-          "อลูมิเนียม",
-          "สแตนเลส",
-          "เหล็ก",
-          "พลาสติก",
-          "กระดาษ",
-          "พาเลทไม้"
-        ],
-        productvalue: [
-          "มากกว่า 5000 kg",
-          "น้ำหนัก 2001-5000 kg",
-          "น้ำหนัก 501-2000 kg",
-          "น้ำหนัก 201-500 kg",
-          "น้ำหนัก 51-200 kg",
-          "น้ำหนัก 1-50 kg"
-        ],
-        org_size: [
-          "พนักงาน 1-5 คน",
-          "พนักงาน 6-20 คน",
-          "พนักงาน 21-40 คน",
-          "พนักงาน 41-100 คน",
-          "มากกว่า 100 คน"
-        ],
-        document: [
-          "บิลเงินสด",
-          "ใบอนุญาตค้าของเก่า",
-          "ภพ.20",
-          "หนังสือรับรองบริษัท",
-          "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
-          "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
-        ],
-        transport: [
-          "รถกะบะ Pickup",
-          "รถบรรทุก 6 ล้อ",
-          "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
-          "รถสไลด์(วางกะบะเหล็ก)",
-          "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
-        ]
-      };
-      setForm({
-        ...thisRegis,
-        ...thisForm
-      });
-    }, handleFetch);
+    handleFetch();
   }, []);
 
   return (

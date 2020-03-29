@@ -187,7 +187,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     if (
       "status" in res.data &&
       res.data.status === "this is not user account or have been delete account"
@@ -209,7 +209,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     getNotifications(profileData);
   }
 
@@ -241,14 +241,12 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
   }
 
   function realtimeNoti(thisSess: any) {
-    console.log(`noti-${thisSess.userid}`);
     const socket = socketIOClient("https://easyrecycle.ml", {
       transports: ["websocket", "polling"]
     });
     socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
       if (messageNew && messageNew.status === "success") {
         const { list } = messageNew.result;
-        // console.log(messageNew);
         setNotifications(list);
       }
     });
@@ -263,31 +261,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
 
   useEffect(() => {
     setDense(true);
-    _onLocalhostFn(() => {
-      setProfileData({
-        userId: "U34854b16de48d84b63c751717c9d2771",
-        displayName: "P.R.E.M.I.O.R",
-        pictureUrl:
-          "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-        statusMessage: "UI/UX Developer at PDS Co.,Ltd."
-      });
-      setSess({
-        userid: 12346,
-        type: "main_admin",
-        fullname: "admin",
-        lastname: "admin"
-      });
-      setUserInfo({
-        displayname: "P.R.E.M.I.O.R",
-        fullname: "Sippakorn",
-        lastname: "Suphapinyo",
-        tel: 80670057,
-        statusmassage: "UI/UX Developer at PDS Co.,Ltd.",
-        picture:
-          "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-        email: "sippakorn.prem@gmail.com"
-      });
-    }, handleFetch);
+    handleFetch();
   }, []);
 
   const action = (key: any) => (
@@ -299,19 +273,16 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
   return (
     <AppContext.Provider value={...passingProps}>
       <div>
-        <Header {...{ profileData, handleLogout }} />
-        {_onLocalhost(
-          <GoodsList />,
-          <React.Fragment>
-            {sess &&
-              (sess.status !== "not member" ? (
-                <GoodsList />
-              ) : (
-                <BusinessRegister {...{ profileData }} />
-              ))}
-            <BussinessBackdrop {...{ backDrop, setBackDrop }} />
-          </React.Fragment>
-        )}
+        {sess &&
+          (sess.status !== "not member" ? (
+            <React.Fragment>
+              <Header {...{ profileData, handleLogout }} />
+              <GoodsList />
+            </React.Fragment>
+          ) : (
+            <BusinessRegister {...{ profileData }} />
+          ))}
+        <BussinessBackdrop {...{ backDrop, setBackDrop }} />
         <GeneralDialog
           open={noti}
           onClose={() => booleanDispatch({ type: "false", key: "noti" })}

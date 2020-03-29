@@ -7,9 +7,13 @@ import {
   Paper,
   Avatar,
   Typography,
-  Button
+  Button,
+  Checkbox
 } from "@material-ui/core";
 import { AppContext } from "../../AppContext";
+import GeneralDialog from "../../component/Dialog/GeneralDialog";
+import AppButton from "../../AppComponent/AppButton";
+import { green } from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: { padding: theme.spacing(1, 2) },
@@ -89,6 +93,8 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
     profileData,
     getSess
   } = useContext(AppContext);
+  const [conState, setConState] = useState<any>(false);
+  const [checked, setChecked] = useState<any>(false);
 
   function onFormChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -111,7 +117,6 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
         tel: phoneFormatToNumber(form.tel)
       }
     });
-    console.log(res);
     setCsrf(res.csrf);
     getSess(profileData);
   }
@@ -160,18 +165,29 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
         onChange={onFormChange}
         onKeyPress={handleKeyPress}
       />
-      <Typography variant="h6">เงื่อนไขและข้อตกลง</Typography>
-      {businessForm && (
-        <Typography style={{ marginBottom: 16 }}>
-          {businessForm.form_condition[0]}
-        </Typography>
-      )}
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Checkbox
+          color="primary"
+          checked={checked}
+          onChange={(e: any) => setChecked(e.target.checked)}
+          style={{ marginRight: 16 }}
+        />
+        <AppButton
+          style={{ padding: 0 }}
+          buttonColor={green}
+          variant="text"
+          onClick={() => setConState(true)}
+        >
+          ยอมรับเงื่อนไขและข้อตกลง
+        </AppButton>
+      </div>
       <Button
         disabled={
           form.email === "" ||
           form.fullname === "" ||
           form.lastname === "" ||
-          form.tel === ""
+          form.tel === "" ||
+          !checked
         }
         color="primary"
         variant="contained"
@@ -180,6 +196,17 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
       >
         สมัคร
       </Button>
+      <GeneralDialog
+        open={conState}
+        onClose={() => setConState(false)}
+        title="เงื่อนไขและข้อตกลง"
+      >
+        {businessForm && (
+          <Typography style={{ marginBottom: 16, whiteSpace: "pre-line" }}>
+            {businessForm.form_condition[0]}
+          </Typography>
+        )}
+      </GeneralDialog>
     </div>
   );
 };
@@ -197,7 +224,7 @@ const BusinessRegister: React.FC<any> = ({ profileData }) => {
       body: { action: "business_form", type: "business" }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     setBusinessForm(res.data);
   }
 

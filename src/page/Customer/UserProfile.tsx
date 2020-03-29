@@ -1,17 +1,38 @@
 import React, { useEffect, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
+import Loadable from "react-loadable";
 import {
   Typography,
   Avatar,
   Divider,
   IconButton,
-  TextField
+  TextField,
+  FormControl,
+  Select,
+  MenuItem,
+  Link as MaterialLink
 } from "@material-ui/core";
 import { Settings, ArrowBackIos } from "@material-ui/icons";
 import MaskedInput from "react-text-mask";
 import AppButton from "../../AppComponent/AppButton";
 import { green } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
+
+const GeneralDialog = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
+    ),
+  loading: () => null
+});
+
+const UploadDocs = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'UploadDocs' */ "../../component/Utils/UploadDocs"
+    ),
+  loading: () => null
+});
 
 const useStyles = makeStyles(theme => ({
   avatar: { height: 128, width: 128, margin: "auto" },
@@ -56,10 +77,142 @@ function TextMaskCustom(props: TextMaskCustomProps) {
   );
 }
 
+const docsArr = [
+  "id_card",
+  "house_regist",
+  "access",
+  "cert_book",
+  "doc_20",
+  "doc_105",
+  "doc_106"
+];
+
+const docsArrString = [
+  "บัตรประชาชน",
+  "สำเนาทะเบียนบ้าน",
+  "ใบอนุญาติค้าของเก่า",
+  "หนังสือรับรองบริษัท",
+  "ภพ. 20",
+  "ใบรง. 4 ลำดับที่ 105",
+  "ใบรง. 4 ลำดับที่ 106"
+];
+
+const docsLabel: any = {
+  id_card: "บัตรประชาชน",
+  house_regist: "สำเนาทะเบียนบ้าน",
+  access: "ใบอนุญาติค้าของเก่า",
+  cert_book: "หนังสือรับรองบริษัท",
+  doc_20: "ภพ. 20",
+  doc_105: "ใบรง. 4 ลำดับที่ 105",
+  doc_106: "ใบรง. 4 ลำดับที่ 106"
+};
+
+const DocsForm: React.FC<any> = props => {
+  const classes = useStyles();
+  const { csrf, setCsrf, profileData, _xhrPost, _fetchFile } = useContext(
+    AppContext
+  );
+  const {
+    docsType,
+    setDocsType,
+    handleChange,
+    docsDisplay,
+    setDocsDisplay,
+    docs,
+    setDocs,
+    setIsUpload,
+    getInfo
+  } = props;
+
+  async function uploadDocs() {
+    const imgRes = await _fetchFile({
+      url: "usersystem",
+      csrf,
+      headers: {
+        action: "docs",
+        type: "customer",
+        docstype: docsType
+      },
+      body: { [`${docsType}image`]: docs }
+    });
+    setDocs(null);
+    setDocsDisplay(null);
+    setIsUpload(false);
+    setDocsType("id_card");
+    setCsrf(imgRes.csrf);
+    getInfo();
+  }
+
+  return (
+    <div>
+      <div>
+        <FormControl>
+          <Select value={docsType} onChange={handleChange} variant="outlined">
+            {docsArr.map((d: any, i: number) => (
+              <MenuItem value={d}>{docsArrString[i]}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <div style={{ display: "flex", marginTop: 16 }}>
+          <UploadDocs fullWidth label="อัพโหลด" {...props} />
+          {docs && (
+            <AppButton
+              buttonColor={green}
+              onClick={() => {
+                setDocs(null);
+                setDocsDisplay(null);
+              }}
+            >
+              รีเซ็ต
+            </AppButton>
+          )}
+        </div>
+
+        {docsDisplay && (
+          <img
+            src={docsDisplay}
+            alt="docsimg"
+            style={{ width: "100%", marginTop: 16 }}
+          />
+        )}
+        <AppButton
+          buttonColor={green}
+          variant="contained"
+          style={{ margin: "16px 0", width: "100%" }}
+          disabled={!docs}
+          onClick={uploadDocs}
+        >
+          บันทึก
+        </AppButton>
+      </div>
+    </div>
+  );
+};
+
+const UserDocs: React.FC<any> = ({ data }) => {
+  const keys: any = data.split(".")[0];
+  const { sess } = useContext(AppContext);
+
+  const str =
+    "https://easyrecycle.ml/customer/<customerid>/(id_card , house_regist , access , cert_book , doc_20 , doc_105 , doc_106).(webp/jpg)";
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <MaterialLink
+        href={`https://easyrecycle.ml/customer/${sess.userid}/${data}`}
+        target="_blank"
+      >
+        {docsLabel[keys]}
+      </MaterialLink>
+    </div>
+  );
+};
+
 const ProfileComponent: React.FC<any> = ({
   data,
   booleanDispatch,
-  getInfo
+  getInfo,
+  userDocs
 }) => {
   const classes = useStyles();
   const {
@@ -77,6 +230,14 @@ const ProfileComponent: React.FC<any> = ({
     ...data,
     tel: stringToPhone(`0${data.tel}`)
   });
+  const [docs, setDocs] = useState<any>(null);
+  const [docsDisplay, setDocsDisplay] = useState<any>(null);
+  const [isUpload, setIsUpload] = useState<any>(false);
+  const [docsType, setDocsType] = useState<any>("id_card");
+
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setDocsType(event.target.value);
+  };
 
   function checkDisabled() {
     const keyArr = ["displayname", "fullname", "lastname", "business_name"];
@@ -92,11 +253,18 @@ const ProfileComponent: React.FC<any> = ({
     return thisArr.length === 0;
   }
 
+  function onCloseUpload() {
+    setIsUpload(false);
+    setDocs(null);
+    setDocsDisplay(null);
+  }
+
   async function onSave() {
     const sendObj = {
       action: "editprofile",
       linetoken: profileData.userId,
-      type: "customer"
+      type: "customer",
+      picture: profileData.pictureUrl
     };
     const keyArr = ["displayname", "fullname", "lastname", "business_name"];
     for (var i = 0; i < keyArr.length; i++) {
@@ -112,7 +280,7 @@ const ProfileComponent: React.FC<any> = ({
       url: "usersystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     if (
       "status" in res.data &&
@@ -132,7 +300,7 @@ const ProfileComponent: React.FC<any> = ({
       {
         <IconButton
           style={{ position: "absolute", top: -12, right: 0 }}
-          onClick={() => setIsEditing(true)}
+          onClick={() => setIsEditing((prev: any) => !prev)}
         >
           <Settings />
         </IconButton>
@@ -140,6 +308,7 @@ const ProfileComponent: React.FC<any> = ({
       {isEditing ? (
         <React.Fragment>
           <TextField
+            style={{ marginTop: 24 }}
             className={classes.textField}
             fullWidth
             label="ชื่อที่แสดง"
@@ -248,8 +417,55 @@ const ProfileComponent: React.FC<any> = ({
             <Typography className={classes.label}>สถานที่</Typography>
             <Typography className={classes.text}>{data.location}</Typography>
           </div>
+          <Divider style={{ margin: "12px 0" }} />
+          <div style={{ margin: "8px 0" }}>
+            <AppButton
+              buttonColor={green}
+              variant="outlined"
+              size="large"
+              onClick={() => setIsUpload(true)}
+              style={{ width: "100%" }}
+            >
+              อัพโหลดรูปเอกสาร
+            </AppButton>
+          </div>
+          {userDocs && (
+            <div style={{ marginTop: 16 }}>
+              {userDocs
+                .filter(
+                  (d: any) =>
+                    d.split(".")[1] !== "webp" &&
+                    d !== "topup" &&
+                    d !== "log.txt"
+                )
+                .map((d: any, i: number) => (
+                  <UserDocs key={d} data={d} />
+                ))}
+            </div>
+          )}
         </React.Fragment>
       )}
+
+      <GeneralDialog
+        open={isUpload}
+        onClose={onCloseUpload}
+        title="อัพโหลดรูปเอกสาร"
+      >
+        <DocsForm
+          {...{
+            docs,
+            setDocs,
+            docsDisplay,
+            setDocsDisplay,
+            onCloseUpload,
+            docsType,
+            setDocsType,
+            handleChange,
+            getInfo,
+            setIsUpload
+          }}
+        />
+      </GeneralDialog>
     </div>
   );
 };
@@ -257,8 +473,12 @@ const ProfileComponent: React.FC<any> = ({
 const UserProfile: React.FC<UserProfileProps | any> = props => {
   const classes = useStyles();
   const { userInfo } = props;
-  const { info } = userInfo;
+  const { info, docs } = userInfo;
 
-  return <div>{info && <ProfileComponent data={info} {...props} />}</div>;
+  return (
+    <div>
+      {info && <ProfileComponent data={info} userDocs={docs} {...props} />}
+    </div>
+  );
 };
 export default UserProfile;

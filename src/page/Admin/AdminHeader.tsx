@@ -65,7 +65,8 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     handleLogout,
     sess,
     _onLocalhostFn,
-    notifications
+    notifications,
+    readNotifications
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -92,17 +93,9 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
   };
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {},
-      () => {
-        if (sess && sess.status === "need login before") {
-          history.replace(match.path);
-        }
-        // if (sess) {
-        //   getNotifications();
-        // }
-      }
-    );
+    if (sess && sess.status === "need login before") {
+      history.replace(match.path);
+    }
   }, []);
 
   return (
@@ -112,7 +105,12 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
           {sess ? `${sess.fullname} ${sess.lastname}` : "Admin"}
         </Typography>
         {notifications && (
-          <IconButton onClick={notiClick}>
+          <IconButton
+            onClick={(e: any) => {
+              readNotifications();
+              notiClick(e);
+            }}
+          >
             <Badge
               badgeContent={
                 notifications.list.filter((item: any) => item.read === 0).length

@@ -100,7 +100,8 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
     const sendObj = {
       action: "editprofile",
       linetoken: profileData.userId,
-      type: "business"
+      type: "business",
+      picture: profileData.pictureUrl
     };
     const keyArr = ["displayname", "fullname", "lastname", "email"];
     for (var i = 0; i < keyArr.length; i++) {
@@ -116,7 +117,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
       url: "usersystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     if (
       "status" in res.data &&

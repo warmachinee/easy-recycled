@@ -147,12 +147,15 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   }
 
   function handleFetch() {
-    const myLiffId = "1653861118-DAld6Lv2";
+    // const myLiffId = "1653861118-Pa7l4bay"; // /market
+    const myLiffId = "1653861118-DAld6Lv2"; // customer
     liff.init({ liffId: myLiffId }, async () => {
       if (liff.isLoggedIn()) {
         getProfile();
       } else {
-        liff.login();
+        liff.login({
+          redirectUri: "https://easyrecycle.ml/"
+        });
       }
     });
   }
@@ -164,7 +167,6 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
       body: { action: "info", type: "customer" }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
   }
 
   async function getSess(profile: any) {
@@ -193,7 +195,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     if (
       ("status" in res.data &&
         res.data.status ===
@@ -217,7 +219,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     getNotifications(profileData);
   }
 
@@ -235,21 +237,19 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   }
 
   function realtimeNoti(thisSess: any) {
-    console.log(`noti-${thisSess.userid}`);
     const socket = socketIOClient("https://easyrecycle.ml", {
       transports: ["websocket", "polling"]
     });
     socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
       if (messageNew && messageNew.status === "success") {
         const { list } = messageNew.result;
-        // console.log(messageNew);
         setNotifications(list);
       }
     });
   }
 
   useEffect(() => {
-    if (profileData && sess) {
+    if (profileData && sess && sess.status !== "not member") {
       realtimeNoti(sess);
       getNotifications(profileData);
     }
@@ -279,18 +279,13 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   return (
     <AppContext.Provider value={...passingProps}>
       <div>
-        {_onLocalhost(
-          <CustomerDashboard />,
-          <React.Fragment>
-            {sess &&
-              (sess.status !== "not member" ? (
-                <CustomerDashboard />
-              ) : (
-                <CustomerRegister {...{ profileData }} />
-              ))}
-            <CustomerBackdrop {...{ backDrop, setBackDrop }} />
-          </React.Fragment>
-        )}
+        {sess &&
+          (sess.status !== "not member" ? (
+            <CustomerDashboard />
+          ) : (
+            <CustomerRegister {...{ profileData }} />
+          ))}
+        <CustomerBackdrop {...{ backDrop, setBackDrop }} />
       </div>
     </AppContext.Provider>
   );

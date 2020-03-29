@@ -274,7 +274,6 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
   }
 
   async function onDeleteGoodsItem() {
-    console.log(itemOnDelete);
     const res = await _xhrPost({
       csrf,
       url: "abusinesssystem",
@@ -284,7 +283,7 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     onDeleteGoods({ action: "cancel" });
     getGoodsList();
   }
@@ -301,7 +300,7 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
         businessid: parseInt(match.params.businessid)
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setGoods(res.data);
   }

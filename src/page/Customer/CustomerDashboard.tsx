@@ -101,16 +101,25 @@ const BalanceCard: React.FC<any> = props => {
   const { userInfo, booleanDispatch } = props;
   return (
     <Paper elevation={3} className={classes.paper}>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Typography variant="h6">เงินคงเหลือ</Typography>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <Typography variant="h6" style={{ marginRight: 16 }}>
+          เงินคงเหลือ
+        </Typography>
         <div style={{ width: 16 }} />
-        <Typography variant="h6">
+        <Typography variant="h6" style={{ marginRight: 8, fontWeight: 700 }}>
           {userInfo &&
           userInfo.info &&
           typeof userInfo.info.balance === "number"
-            ? `${_thousandSeperater(userInfo.info.balance)} ฿`
+            ? `${_thousandSeperater(userInfo.info.balance)}`
             : "-"}
         </Typography>
+        <AttachMoney />
       </div>
       <Divider style={{ marginTop: 12 }} />
       <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -168,7 +177,7 @@ const AddTopup: React.FC<any> = props => {
       {bankDetail && (
         <React.Fragment>
           <Typography variant="h6">รายละเอียด</Typography>
-          <Typography style={{ whiteSpace: "pre" }}>
+          <Typography style={{ whiteSpace: "pre-line" }}>
             {bankDetail.topup}
           </Typography>
         </React.Fragment>
@@ -271,7 +280,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       url: "loadusersystem",
       body: { action: "info", linetoken: profileData.userId, type: "customer" }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     if (
       "status" in res.data &&
@@ -294,7 +303,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         type: "customer"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setBankDetail(res.data);
   }
@@ -311,7 +320,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       url: "usersystem",
       body: sendObj
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     realtimeAccess();
     if (res.data.status === "success") {
@@ -325,7 +334,6 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         },
         body: { receiptimage: slip }
       });
-      console.log(imgRes);
       setSlip(null);
       setTopup(50);
       setTopupEtc(0);

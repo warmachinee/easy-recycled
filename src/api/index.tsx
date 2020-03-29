@@ -96,7 +96,6 @@ function _fetchFile(props: _fetchFileProps) {
       headers,
       body: formData
     };
-    // console.log(options);
     const res = await fetch(`${apiUrl(url)}?_csrf=${csrf}`, options);
     const json = await res.json();
     const thisCsrf: any = await getCSRF();
@@ -132,7 +131,6 @@ function _fetchFileMultiple(props: _fetchFileMultipleProps) {
       headers,
       body: formData
     };
-    // console.log(options);
     const res = await fetch(`${apiUrl(url)}?_csrf=${csrf}`, options);
     const json = await res.json();
     const thisCsrf: any = await getCSRF();

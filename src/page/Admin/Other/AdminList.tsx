@@ -181,7 +181,7 @@ const AddAdminForm: React.FC<any> = ({
         permission
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     handleClose();
     getAdminList();
@@ -204,7 +204,7 @@ const AddAdminForm: React.FC<any> = ({
         )
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setEditing(false);
     getAdminList();
@@ -220,7 +220,7 @@ const AddAdminForm: React.FC<any> = ({
         status
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setEditing(false);
     getAdminList();
@@ -453,7 +453,7 @@ const AdminList: React.FC<AdminListProps> = () => {
         action: "adminlist"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setAdminList(res.data);
   }
@@ -463,7 +463,7 @@ const AdminList: React.FC<AdminListProps> = () => {
   }, []);
 
   return (
-    <div style={{ padding: 8 }}>
+    <div style={{ padding: 8, overflowX: "auto" }}>
       {sess &&
         (sess.type === "main_admin" ? (
           <React.Fragment>

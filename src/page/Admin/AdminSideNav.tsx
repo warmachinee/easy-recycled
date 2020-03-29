@@ -150,6 +150,12 @@ const AdminSideNav: React.FC<any> = ({ match, location, sess }) => {
               {...{ location }}
             />
           )}
+
+          <StyledListItem
+            to={`${match.path}/admin_list`}
+            primary="แอดมิน"
+            {...{ location }}
+          />
           <StyledListItem
             to={`${match.path}/setup`}
             primary="ตั้งค่า"

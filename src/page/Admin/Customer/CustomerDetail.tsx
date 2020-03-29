@@ -1,16 +1,29 @@
 import React, { useState, useEffect, useContext } from "react";
+import Loadable from "react-loadable";
 import { makeStyles } from "@material-ui/styles";
 import { AppContext } from "../../../AppContext";
 import {
-  IconButton,
-  Theme,
   Paper,
-  Typography,
+  Theme,
   Avatar,
-  Divider
+  Typography,
+  IconButton,
+  TextField,
+  Divider,
+  Chip
 } from "@material-ui/core";
 import { ArrowBackIos, Settings } from "@material-ui/icons";
-import { red } from "@material-ui/core/colors";
+import { red, green } from "@material-ui/core/colors";
+import MaskedInput from "react-text-mask";
+import AppButton from "../../../AppComponent/AppButton";
+
+const GeneralDialog = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'GeneralDialog' */ "../../../component/Dialog/GeneralDialog"
+    ),
+  loading: () => null
+});
 
 const useStyles = makeStyles((theme: Theme) => ({
   paper: { padding: 8 },
@@ -31,6 +44,40 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export interface CustomerDetailProps {}
+
+interface TextMaskCustomProps {
+  inputRef: (ref: HTMLInputElement | null) => void;
+}
+
+function TextMaskCustom(props: TextMaskCustomProps) {
+  const { inputRef, ...other } = props;
+
+  return (
+    <MaskedInput
+      {...other}
+      ref={(ref: any) => {
+        inputRef(ref ? ref.inputElement : null);
+      }}
+      mask={[
+        "(",
+        /[0-9]/,
+        /\d/,
+        /\d/,
+        ")",
+        " ",
+        /\d/,
+        /\d/,
+        /\d/,
+        "-",
+        /\d/,
+        /\d/,
+        /\d/,
+        /\d/
+      ]}
+      placeholderChar={"\u2000"}
+    />
+  );
+}
 
 const DetailCard: React.FC<any> = props => {
   const classes = useStyles();
@@ -281,6 +328,173 @@ const DetailCard: React.FC<any> = props => {
   );
 };
 
+const EditDetail: React.FC<any> = props => {
+  const classes = useStyles();
+  const {
+    csrf,
+    setCsrf,
+    _xhrPost,
+    _dateToString,
+    stringToPhone,
+    phoneFormatToNumber
+  } = useContext(AppContext);
+  const { data, setEditing, getBaseDetail, match } = props;
+  const { info } = data;
+  const { customerid } = match.params;
+  const [thisData, setThisData] = useState<any>({
+    ...info,
+    tel: stringToPhone(`0${info.tel}`)
+  });
+
+  function checkDisabled() {
+    const keyArr = ["displayname", "fullname", "lastname", "business_name"];
+    const thisArr = [];
+    for (var i = 0; i < keyArr.length; i++) {
+      if (thisData[keyArr[i]] !== data[keyArr[i]]) {
+        thisArr.push(thisData[keyArr[i]]);
+      }
+    }
+    if (phoneFormatToNumber(thisData.tel) !== `0${info.tel}`) {
+      thisArr.push(thisData[keyArr[i]]);
+    }
+    return thisArr.length === 0;
+  }
+
+  async function onSave() {
+    const { params } = match;
+    const sendObj = {
+      action: "base_edit",
+      customerid
+    };
+    const keyArr = ["displayname", "fullname", "lastname", "business_name"];
+    for (var i = 0; i < keyArr.length; i++) {
+      if (thisData[keyArr[i]] !== data[keyArr[i]]) {
+        Object.assign(sendObj, { [keyArr[i]]: thisData[keyArr[i]] });
+      }
+    }
+    if (thisData.tel !== `0${info.tel}`) {
+      Object.assign(sendObj, { tel: phoneFormatToNumber(thisData.tel) });
+    }
+    const res = await _xhrPost({
+      csrf,
+      url: "acustomersystem",
+      body: sendObj
+    });
+
+    setCsrf(res.csrf);
+    getBaseDetail();
+    setEditing(false);
+  }
+
+  async function onSaveStatus(status: any) {
+    const { params } = match;
+    const sendObj = {
+      action: "base_edit",
+      customerid,
+      status
+    };
+    const res = await _xhrPost({
+      csrf,
+      url: "acustomersystem",
+      body: sendObj
+    });
+
+    setCsrf(res.csrf);
+    getBaseDetail();
+    setEditing(false);
+  }
+
+  return (
+    <div>
+      <div
+        style={{ display: "flex", marginBottom: 12, alignItems: "baseline" }}
+      >
+        <Typography style={{ width: 100 }}>สถานะบัญชี</Typography>
+        <div style={{ display: "flex" }}>
+          <Chip
+            label="เปิดการใช้งาน"
+            style={{
+              marginRight: 4,
+              ...(info.status === 1 && { color: "white" })
+            }}
+            {...(info.status === 0 && { variant: "outlined" })}
+            {...(info.status === 1 && { color: "primary" })}
+            onClick={() => onSaveStatus(1)}
+          />
+          <Chip
+            label="ปิดการใช้งาน"
+            style={{ ...(info.status === 0 && { color: "white" }) }}
+            {...(info.status === 1 && { variant: "outlined" })}
+            {...(info.status === 0 && { color: "primary" })}
+            onClick={() => onSaveStatus(0)}
+          />
+        </div>
+      </div>
+      <Divider style={{ margin: "16px 0" }} />
+      <TextField
+        className={classes.textField}
+        fullWidth
+        label="ชื่อที่แสดง"
+        value={thisData.displayname}
+        onChange={e =>
+          setThisData({ ...thisData, displayname: e.target.value })
+        }
+      />
+      <TextField
+        className={classes.textField}
+        fullWidth
+        label="ชื่อ"
+        value={thisData.fullname}
+        onChange={e => setThisData({ ...thisData, fullname: e.target.value })}
+      />
+      <TextField
+        className={classes.textField}
+        fullWidth
+        label="นามสกุล"
+        value={thisData.lastname}
+        onChange={e => setThisData({ ...thisData, lastname: e.target.value })}
+      />
+      <Divider style={{ margin: "16px 0" }} />
+      <TextField
+        className={classes.textField}
+        fullWidth
+        label="เบอร์โทรศัพท์"
+        InputProps={{
+          inputComponent: TextMaskCustom as any
+        }}
+        value={thisData.tel}
+        onChange={e => setThisData({ ...thisData, tel: e.target.value })}
+      />
+      <Divider style={{ margin: "12px 0" }} />
+      <div style={{ display: "flex" }}>
+        <AppButton
+          buttonColor={green}
+          variant="outlined"
+          style={{ flex: 1, margin: 8 }}
+          onClick={() => {
+            setThisData({
+              ...data,
+              tel: `0${info.tel}`
+            });
+            setEditing(false);
+          }}
+        >
+          ยกเลิก
+        </AppButton>
+        <AppButton
+          buttonColor={green}
+          variant="contained"
+          style={{ flex: 1, margin: 8 }}
+          onClick={onSave}
+          disabled={checkDisabled()}
+        >
+          บันทึก
+        </AppButton>
+      </div>
+    </div>
+  );
+};
+
 const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
   const classes = useStyles();
   const { match, history } = props;
@@ -298,7 +512,7 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
         customerid: parseInt(params.customerid)
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
   }
 
@@ -312,48 +526,12 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
         customerid: parseInt(params.customerid)
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setDetail(res.data);
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        setDetail({
-          info: {
-            linetoken: "U34854b16de48d84b63c751717c9d2771",
-            displayname: "P.R.E.M.I.O.R",
-            fullname: "Sippakorn",
-            lastname: "Suphapinyo",
-            tel: 806760057,
-            statusmassage: "UI/UX Developer at PDS Co.,Ltd.",
-            picture:
-              "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-            business_name: "PDS Co.,Ltd.",
-            business_type: "รถรับซื้อของเก่า/ซาเล้ง",
-            location: "นนทบุรี",
-            org_size: "พนักงาน 6-20 คน",
-            document: {
-              document: [
-                "บิลเงินสด",
-                "etc",
-                "ภพ.20",
-                "ใบอนุญาตค้าของเก่า",
-                "หนังสือรับรองบริษัท"
-              ],
-              etc: "Transcript"
-            },
-            transport: { transport: ["etc"], etc: "Taxi" },
-            balance: 335,
-            registerdate: "2020-03-21T12:19:16.000Z",
-            status: 1
-          },
-          docs: ["log.txt", "topup"]
-        });
-      },
-      () => {}
-    );
     getBaseDetail();
     getFormList();
   }, []);
@@ -366,6 +544,15 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
       <div className={classes.itemGrid}>
         {detail && <DetailCard {...{ detail, setEditing }} />}
       </div>
+      <GeneralDialog
+        open={editing}
+        onClose={() => setEditing(false)}
+        title="แก้ไขข้อมูล"
+      >
+        {detail && (
+          <EditDetail data={detail} {...{ setEditing, getBaseDetail, match }} />
+        )}
+      </GeneralDialog>
     </div>
   );
 };

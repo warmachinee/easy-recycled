@@ -98,37 +98,15 @@ const MarketHistory: React.FC<MarketHistoryProps> = props => {
         type: "customer"
       }
     });
-    console.log(res.data);
+
     setCsrf(res.csrf);
     setMarketList(res.data);
   }
 
   useEffect(() => {
-    _onLocalhostFn(
-      () => {
-        setMarketList([
-          {
-            formid: 2315022,
-            business_name: "PDS",
-            appointment: "2020-03-30T17:00:00.000Z",
-            auctiondate: "2020-04-22T17:00:00.000Z",
-            endofsale: 0
-          },
-          {
-            formid: 3014238,
-            business_name: "KLxHunter",
-            appointment: "2020-03-25T17:00:00.000Z",
-            auctiondate: "2020-03-25T17:00:00.000Z",
-            endofsale: 0
-          }
-        ]);
-      },
-      () => {
-        if (profileData) {
-          getAccess();
-        }
-      }
-    );
+    if (profileData) {
+      getAccess();
+    }
   }, [profileData]);
 
   return (
@@ -165,7 +143,7 @@ const MarketHistory: React.FC<MarketHistoryProps> = props => {
                 style={{ color: "inherit", textDecoration: "none" }}
               >
                 <AppButton buttonColor={grey} variant="outlined">
-                  ไปที่ Market
+                  ไปที่บอร์ดสินค้า
                 </AppButton>
               </Link>
             </div>

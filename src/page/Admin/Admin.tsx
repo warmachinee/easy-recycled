@@ -51,20 +51,21 @@ const Admin: React.FC<AdminProps> = () => {
     setNotiPage,
     realtimeAccess,
     realtimeTopupAccept,
-    realtimeEndOfSale
+    realtimeEndOfSale,
+    readNotifications
   };
 
   async function handleLogout() {
     const res = await _xhrGet("logout");
     setCsrf(res.csrf);
-    console.log(res.data);
+
     getSess();
   }
 
   async function getSess() {
     const res = await _xhrGet("asession");
     setCsrf(res.csrf);
-    console.log(res.data);
+
     if (res.data.status === "not member") {
       handleLogout();
     } else {
@@ -85,8 +86,21 @@ const Admin: React.FC<AdminProps> = () => {
       }
     });
     setCsrf(res.csrf);
-    console.log(res.data);
+
     setNotifications(res.data);
+  }
+
+  async function readNotifications() {
+    const res = await _xhrPost({
+      csrf,
+      url: "ausersystem",
+      body: {
+        action: "readnoti"
+      }
+    });
+    setCsrf(res.csrf);
+
+    getNotifications(sess);
   }
 
   function realtimeAccess() {
@@ -121,13 +135,6 @@ const Admin: React.FC<AdminProps> = () => {
       transports: ["websocket", "polling"]
     });
     const { linetoken } = detail;
-    console.log({
-      action: "noti",
-      linetoken,
-      type: "business",
-      startindex: 0,
-      lastindex: (notiPage + 1) * 10
-    });
     socket.emit("noti", {
       action: "noti",
       linetoken,
@@ -162,17 +169,14 @@ const Admin: React.FC<AdminProps> = () => {
   return (
     <AppContext.Provider value={...passingProps}>
       <div>
-        {_onLocalhost(
-          <Dashboard />,
-          sess ? (
-            sess.status === "need login before" ? (
-              <AdminLogin />
-            ) : (
-              <Dashboard />
-            )
+        {sess ? (
+          sess.status === "need login before" ? (
+            <AdminLogin />
           ) : (
-            <AdminBackdrop />
+            <Dashboard />
           )
+        ) : (
+          <AdminBackdrop />
         )}
       </div>
     </AppContext.Provider>
