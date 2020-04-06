@@ -89,7 +89,7 @@ const ThisRoute: React.FC<any> = props => {
   function enQSnackbar({ message, variant, action }: enQSnackbarProps) {
     enqueueSnackbar(message, {
       variant,
-      autoHideDuration: 10000,
+      autoHideDuration: 5000,
       action
     });
   }

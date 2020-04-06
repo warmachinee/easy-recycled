@@ -59,7 +59,7 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
         </Link>
 
         <Typography variant="h6" className={classes.title} color="primary">
-          EasyRecycle
+          EasyRecycled
         </Typography>
         {notifications && !("status" in notifications) && (
           <IconButton

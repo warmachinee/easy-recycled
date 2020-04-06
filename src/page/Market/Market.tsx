@@ -8,12 +8,12 @@ import {
   Toolbar,
   IconButton,
   Theme,
-  Link as MaterialLink
+  Link as MaterialLink,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
   Close as CloseIcon,
-  AttachMoney
+  AttachMoney,
 } from "@material-ui/icons";
 import { LineProfileData } from "apptype";
 import { green } from "@material-ui/core/colors";
@@ -23,29 +23,29 @@ import { RouteComponentProps, withRouter, Route } from "react-router-dom";
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
 const MarketHeader = Loadable({
   loader: () => import(/* webpackChunkName: 'MarketHeader' */ "./MarketHeader"),
-  loading: () => null
+  loading: () => null,
 });
 
 const RouteMarketList = Loadable.Map({
   loader: {
     MarketList: () =>
-      import(/* webpackChunkName: 'RouteMarketList' */ "./MarketList")
+      import(/* webpackChunkName: 'RouteMarketList' */ "./MarketList"),
   },
   render(loaded: any, props: any) {
     let Component = loaded.MarketList.default;
     return <Route {...props} render={() => <Component {...props} />} />;
   },
-  loading: () => null
+  loading: () => null,
 });
 
 const MarketGoods = Loadable({
   loader: () => import(/* webpackChunkName: 'MarketGoods' */ "./MarketGoods"),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -56,9 +56,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "center",
     margin: 36,
     padding: 16,
-    width: 200
+    width: 200,
   },
-  title: { flexGrow: 1 }
+  title: { flexGrow: 1 },
 }));
 
 const liff = window.liff;
@@ -75,8 +75,8 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     closeSnackbar,
     _xhrPost,
     _xhrGet,
-    _onLocalhost,
-    _thousandSeperater
+    _isDesktopBrowser,
+    _thousandSeperater,
   } = useContext(AppContext);
   const [profileData, setProfileData] = useState<LineProfileData | null>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -95,14 +95,15 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     checkSession,
     passedFormid,
     marketList,
-    getMarketPlace
+    getMarketPlace,
+    refreshInfo,
   };
 
   function addSnackbar({ message, variant }: any) {
     enQSnackbar({
       message,
       variant,
-      action
+      action,
     });
   }
 
@@ -113,7 +114,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
         setProfileData(profile);
         getSess(profile);
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }
 
   async function handleLogout() {
@@ -128,7 +129,8 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
   async function checkSession() {
     const res = await _xhrGet("logout");
     setCsrf(res.csrf);
-    handleFetch();
+    // handleFetch();
+    window.location.reload();
   }
 
   function handleFetch() {
@@ -146,7 +148,25 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadusersystem",
-      body: { action: "info", linetoken: profile.userId, type: "customer" }
+      body: { action: "info", linetoken: profile.userId, type: "customer" },
+    });
+
+    setCsrf(res.csrf);
+    if ("status" in res.data) {
+      checkSession();
+    }
+    setUserInfo(res.data);
+  }
+
+  async function refreshInfo() {
+    const res = await _xhrPost({
+      csrf,
+      url: "loadusersystem",
+      body: {
+        action: "info",
+        linetoken: profileData && profileData.userId,
+        type: "customer",
+      },
     });
 
     setCsrf(res.csrf);
@@ -162,7 +182,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     const res = await _xhrPost({
       csrf,
       url: "session",
-      body: { linetoken: profile.userId, type: "customer" }
+      body: { linetoken: profile.userId, type: "customer" },
     });
     setCsrf(res.csrf);
     setSess(res.data);
@@ -183,8 +203,8 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
       body: {
         action: "boardlist",
         linetoken: profileData && profileData.userId,
-        type: "customer"
-      }
+        type: "customer",
+      },
     });
     setCsrf(res.csrf);
     if (
@@ -199,7 +219,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
 
   function realtimeBoard(list: any) {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.on(`boardlist`, (messageNew: any) => {
       if (messageNew) {
@@ -235,14 +255,18 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
   }, [marketList]);
 
   useEffect(() => {
-    handleFetch();
-    const formidFromSearchParams = new URLSearchParams(location.search).get(
-      "formid"
-    );
-    if (formidFromSearchParams) {
-      setPassedFormid(formidFromSearchParams);
+    if (_isDesktopBrowser()) {
+      history.replace("/admin");
+    } else {
+      handleFetch();
+      const formidFromSearchParams = new URLSearchParams(location.search).get(
+        "formid"
+      );
+      if (formidFromSearchParams) {
+        setPassedFormid(formidFromSearchParams);
+      }
+      setDense(true);
     }
-    setDense(true);
   }, []);
 
   const action = (key: any) => (
@@ -261,7 +285,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
             style={{
               display: "flex",
               padding: "12px 16px 0 16px",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <MaterialLink href="/">
@@ -275,7 +299,7 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
                 marginLeft: 24,
                 marginRight: 8,
                 fontWeight: 700,
-                flex: 1
+                flex: 1,
               }}
               align="right"
             >
@@ -292,4 +316,4 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
   );
 };
 
-export default withRouter(props => <Market {...props} />);
+export default withRouter((props) => <Market {...props} />);

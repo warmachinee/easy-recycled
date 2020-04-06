@@ -29,7 +29,11 @@ const FormItemRowGenNum: React.FC<any> = ({ text, onEdit }) => {
   const classes = useStyles();
   const [isHover, setIsHover] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [textValue, setTextValue] = useState<string>(`${text}`);
+  const [textValue, setTextValue] = useState<string>("");
+
+  React.useEffect(() => {
+    setTextValue(`${text}`);
+  }, [text]);
 
   return (
     <React.Fragment>
@@ -77,7 +81,10 @@ const FormItemRowGenNum: React.FC<any> = ({ text, onEdit }) => {
             <AppButton
               variant="text"
               buttonColor={green}
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                setTextValue(`${text}`);
+              }}
             >
               ยกเลิก
             </AppButton>
@@ -87,7 +94,12 @@ const FormItemRowGenNum: React.FC<any> = ({ text, onEdit }) => {
         )}
         {!isEditing && isHover ? (
           <React.Fragment>
-            <IconButton onClick={() => setIsEditing(true)}>
+            <IconButton
+              onClick={() => {
+                setIsEditing(true);
+                setTextValue(`${text}`);
+              }}
+            >
               <Create />
             </IconButton>
           </React.Fragment>

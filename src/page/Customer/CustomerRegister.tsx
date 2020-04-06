@@ -24,6 +24,9 @@ import { KeyboardArrowRight, KeyboardArrowLeft } from "@material-ui/icons";
 import AppButton from "../../AppComponent/AppButton";
 import { green, red } from "@material-ui/core/colors";
 import GeneralDialog from "../../component/Dialog/GeneralDialog";
+import Province from "../../component/Dropdown/Province";
+import District from "../../component/Dropdown/District";
+import Subdistrict from "../../component/Dropdown/Subdistrict";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {},
@@ -178,8 +181,29 @@ const Component0: React.FC<any> = ({ form, ...other }) => {
   );
 };
 
-const Component1: React.FC<any> = ({ form, setForm, inputForm }) => {
+const Component1: React.FC<any> = props => {
   const classes = useStyles();
+
+  const {
+    form,
+    setForm,
+    inputForm,
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict
+  } = props;
+
+  const locationProps: any = {
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict
+  };
 
   function onFormChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -206,7 +230,7 @@ const Component1: React.FC<any> = ({ form, setForm, inputForm }) => {
         className={classes.textField}
         fullWidth
         name="business_name"
-        label="ชื่อบริษัท"
+        label="ชื่อกิจการ"
         value={form.business_name}
         onChange={onFormChange}
       />
@@ -215,7 +239,7 @@ const Component1: React.FC<any> = ({ form, setForm, inputForm }) => {
         className={classes.textField}
         fullWidth
         name="location"
-        label="สถานที่รับวัสดุเหลือใช้"
+        label="เขตพิ้นที่รับเศษวัสดุเหลือใช้"
         value={form.location}
         onChange={e =>
           setForm({
@@ -224,7 +248,26 @@ const Component1: React.FC<any> = ({ form, setForm, inputForm }) => {
           })
         }
       />
-      <FormControl component="fieldset" style={{ marginBottom: 16 }} fullWidth>
+      {/* <Typography variant="h6">เขตพิ้นที่รับเศษวัสดุเหลือใช้</Typography>
+      {(province || district || subdistrict) && (
+        <Typography>
+          {province.name}
+          {district ? ` > ${district.name}` : ""}
+          {subdistrict
+            ? ` > ${subdistrict.name} (${subdistrict.zip_code})`
+            : ""}
+        </Typography>
+      )}
+      <div style={{ height: 12 }} />
+      <Province {...locationProps} />
+      {province && <District {...locationProps} />}
+      {province && district && <Subdistrict {...locationProps} />} */}
+
+      <FormControl
+        component="fieldset"
+        style={{ marginBottom: 16, marginTop: 12 }}
+        fullWidth
+      >
         <FormLabel component="legend">ประเภทองค์กร</FormLabel>
         <RadioGroup
           name="business_type"
@@ -464,7 +507,7 @@ const Component3: React.FC<any> = ({
   setChecked
 }) => {
   const classes = useStyles();
-  const { _dateToString } = useContext(AppContext);
+  const { _dateToString, _parseLocation } = useContext(AppContext);
   const [conState, setConState] = useState<any>(false);
 
   const MarginDivider = () => {
@@ -585,6 +628,7 @@ const Component3: React.FC<any> = ({
         </Typography>
       ) : (
         <Typography gutterBottom style={{ flex: 1 }}>
+          {/* {_parseLocation(form.location).label} */}
           {form.location}
         </Typography>
       )}
@@ -722,13 +766,29 @@ const RegisterForm: React.FC<any> = ({
 
 const CustomerRegister: React.FC<any> = ({ profileData }) => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, phoneFormatToNumber, getSess } = useContext(
-    AppContext
-  );
+  const {
+    csrf,
+    setCsrf,
+    _xhrPost,
+    phoneFormatToNumber,
+    getSess,
+    _parseLocation
+  } = useContext(AppContext);
   const [form, setForm] = useState<any>(null);
   const [activeStep, setActiveStep] = React.useState<any>(0);
   const [inputForm, setInputForm] = useState<any | null>(null);
   const [checked, setChecked] = useState<any>(false);
+  // const [province, setProvince] = useState<any>(null);
+  // const [district, setDistrict] = useState<any>(null);
+  // const [subdistrict, setSubdistrict] = useState<any>(null);
+  // const locationProps: any = {
+  //   province,
+  //   setProvince,
+  //   district,
+  //   setDistrict,
+  //   subdistrict,
+  //   setSubdistrict
+  // };
 
   async function loadForm() {
     const res = await _xhrPost({
@@ -786,6 +846,16 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     }
   }, [profileData]);
 
+  // useEffect(() => {
+  //   if (province || district || subdistrict) {
+  //     setForm({
+  //       ...form,
+  //       location: JSON.stringify({ province, district, subdistrict })
+  //       // location: `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
+  //     });
+  //   }
+  // }, [province, district, subdistrict]);
+
   return (
     <div className={classes.root}>
       <FormTitle />
@@ -801,6 +871,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
             checked,
             setChecked
           }}
+          // {...locationProps}
         />
       )}
 
@@ -817,6 +888,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
               form.tel === "" ||
               form.business_name === "" ||
               form.location === "" ||
+              // _parseLocation(form.location).label === "" ||
               form.transport.length === 0 ||
               form.document.length === 0 ||
               !checked

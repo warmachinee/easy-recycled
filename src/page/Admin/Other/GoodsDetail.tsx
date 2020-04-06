@@ -20,6 +20,9 @@ import { Create } from "@material-ui/icons";
 import AppButton from "../../../AppComponent/AppButton";
 import { green, red } from "@material-ui/core/colors";
 import { DatePicker } from "@material-ui/pickers";
+import District from "../../../component/Dropdown/District";
+import Subdistrict from "../../../component/Dropdown/Subdistrict";
+import Province from "../../../component/Dropdown/Province";
 
 const useStyles = makeStyles(theme => ({
   editButton: { padding: 6, marginBottom: 6, marginLeft: 8 },
@@ -103,7 +106,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
           </IconButton>
         )}
       </Typography>
-      <div
+      {/* <div
         style={{ display: "flex", marginBottom: 12, alignItems: "baseline" }}
       >
         <Typography style={{ width: 100 }}>รหัสสินค้า</Typography>
@@ -270,7 +273,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               : "-"}
           </Typography>
         )}
-      </div>
+      </div> */}
 
       <div
         style={{ display: "flex", marginBottom: 12, alignItems: "baseline" }}
@@ -689,10 +692,32 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
+    _parseLocation
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
+  const [province, setProvince] = useState<any>(_parseLocation(value).province);
+  const [district, setDistrict] = useState<any>(_parseLocation(value).district);
+  const [subdistrict, setSubdistrict] = useState<any>(
+    _parseLocation(value).subdistrict
+  );
+  const locationProps: any = {
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict
+  };
+
+  function onCancel() {
+    setEditing(false);
+    setThisValue(value);
+    setProvince(_parseLocation(value).province);
+    setDistrict(_parseLocation(value).district);
+    setSubdistrict(_parseLocation(value).subdistrict);
+  }
 
   async function handleSave() {
     const res = await _xhrPost({
@@ -711,48 +736,71 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     realtimeAccess();
   }
 
+  React.useEffect(() => {
+    if (province || district || subdistrict) {
+      // setThisValue(
+      //   `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
+      // );
+      setThisValue(JSON.stringify({ province, district, subdistrict }));
+    }
+  }, [province, district, subdistrict]);
+
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        สถานที่
-        {/* <IconButton
+        เขตพิ้นที่รับเศษวัสดุเหลือใช้
+        <IconButton
           className={classes.editButton}
           onClick={() => setEditing(prev => !prev)}
         >
           <Create fontSize="small" />
-        </IconButton> */}
+        </IconButton>
       </Typography>
-      {editing ? (
-        <div style={{ display: "flex" }}>
-          <TextField
+      {/* {province && district && subdistrict ? (
+        <Typography>
+          {`${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`}
+        </Typography>
+      ) : (
+        <Typography>{value}</Typography>
+      )} */}
+      {(province || district || subdistrict) && (
+        <Typography>
+          {province.name}
+          {district ? ` > ${district.name}` : ""}
+          {subdistrict
+            ? ` > ${subdistrict.name} (${subdistrict.zip_code})`
+            : ""}
+        </Typography>
+      )}
+      {editing && (
+        <div style={{ display: "flex", marginTop: 12 }}>
+          {/* <TextField
             style={{ marginRight: 16 }}
             fullWidth
             autoFocus={editing}
             value={thisValue}
             onChange={e => setThisValue(e.target.value)}
             onKeyPress={_onEnter(handleSave)}
-          />
-          <AppButton
-            disabled={thisValue === value}
-            variant="contained"
-            buttonColor={green}
-            onClick={handleSave}
-          >
-            บันทึก
-          </AppButton>
-          <AppButton
-            variant="text"
-            buttonColor={green}
-            onClick={() => {
-              setEditing(false);
-              setThisValue(value);
-            }}
-          >
-            ยกเลิก
-          </AppButton>
+          /> */}
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <Province {...locationProps} />
+            {province && <District {...locationProps} />}
+            {province && district && <Subdistrict {...locationProps} />}
+          </div>
+          <div style={{ marginLeft: 16, marginBottom: "auto" }}>
+            <AppButton
+              disabled={thisValue === value}
+              variant="contained"
+              buttonColor={green}
+              onClick={handleSave}
+            >
+              บันทึก
+            </AppButton>
+            <AppButton variant="text" buttonColor={green} onClick={onCancel}>
+              ยกเลิก
+            </AppButton>
+          </div>
         </div>
-      ) : (
-        <Typography>{value}</Typography>
       )}
     </div>
   );
@@ -912,7 +960,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        ตำแหน่ง
+        ผู้ให้ข้อมูล
         <IconButton
           className={classes.editButton}
           onClick={() => setEditing(prev => !prev)}
@@ -927,14 +975,14 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
           setEditing(false);
           setThisValue(value);
         }}
-        title="แก้ไขตำแหน่ง"
+        title="แก้ไขผู้ให้ข้อมูล"
       >
         <FormControl
           component="fieldset"
           style={{ marginBottom: 16 }}
           fullWidth
         >
-          <FormLabel component="legend">ตำแหน่ง</FormLabel>
+          <FormLabel component="legend">ผู้ให้ข้อมูล</FormLabel>
           <RadioGroup
             value={thisValue}
             onChange={e => setThisValue(e.target.value)}
@@ -1439,22 +1487,33 @@ const GoodsDetail: React.FC<any> = ({ detail }) => {
 
   return data && businessForm ? (
     <AppContext.Provider value={...passingProps}>
-      <div>
-        <StatusSetup value={data} />
-        <Divider style={{ margin: "16px 0" }} />
-        <BusinessName value={data.business_name} />
-        <BusinessAccess remain={data.accessremain} total={data.accesstotal} />
-        <BusinessAccessPrice value={data.price} />
-        <BusinessLocation value={data.location} />
-        <BusinessDate
-          appointment={data.appointment}
-          auctiondate={data.auctiondate}
-        />
-        <BusinessPosition value={data.position} />
-        <BusinessTransport value={data.transport} />
-        <BusinessDocument value={data.document} />
-        <BusinessSaleCondition value={data.sale_condition} />
-      </div>
+      {"status" in data && data.status !== "wrong formid" ? (
+        <div>
+          <StatusSetup value={data} />
+          <Divider style={{ margin: "16px 0" }} />
+          <BusinessName value={data.business_name} />
+          <BusinessAccess remain={data.accessremain} total={data.accesstotal} />
+          <BusinessAccessPrice value={data.price} />
+          <BusinessLocation value={data.location} />
+          <BusinessDate
+            appointment={data.appointment}
+            auctiondate={data.auctiondate}
+          />
+          <BusinessPosition value={data.position} />
+          <BusinessTransport value={data.transport} />
+          <BusinessDocument value={data.document} />
+          <BusinessSaleCondition value={data.sale_condition} />
+        </div>
+      ) : (
+        <Typography
+          style={{ margin: "24px 0" }}
+          align="center"
+          variant="h4"
+          color="textSecondary"
+        >
+          ไม่มีสินค้า
+        </Typography>
+      )}
     </AppContext.Provider>
   ) : (
     <div />

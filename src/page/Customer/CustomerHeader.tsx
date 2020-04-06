@@ -77,7 +77,7 @@ const CustomerHeader: React.FC<any> = ({
           {userInfo && userInfo.info && <Avatar src={userInfo.info.picture} />}
         </IconButton>
         <Typography variant="h6" className={classes.title} color="primary">
-          EasyRecycle
+          EasyRecycled
         </Typography>
         {notifications && !("status" in notifications) && (
           <IconButton

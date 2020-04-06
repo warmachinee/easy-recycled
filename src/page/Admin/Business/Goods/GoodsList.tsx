@@ -65,6 +65,7 @@ export type GoodsListProps = RouteComponentProps<{ businessid: string }>;
 
 const GoodsItemList: React.FC<any> = props => {
   const { goods, goodsType } = props;
+  const { _parseLocation } = useContext(AppContext);
   const arr = getArr();
 
   function getArr() {
@@ -107,7 +108,7 @@ const GoodsItemList: React.FC<any> = props => {
 const GoodsItem: React.FC<any> = props => {
   const classes = useStyles();
   const { data, onDeleteGoods, onClickGoods } = props;
-  const { _dateToString, sess } = useContext(AppContext);
+  const { _dateToString, sess, _parseLocation } = useContext(AppContext);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -201,8 +202,10 @@ const GoodsItem: React.FC<any> = props => {
         </Typography>
       </div>
       <div style={{ display: "flex" }}>
-        <Typography style={{ width: 100 }}>สถานที่รับ</Typography>
-        <Typography style={{ fontWeight: 600 }}>{data.location}</Typography>
+        <Typography style={{ width: 100 }}>เขตพิ้นที่รับ</Typography>
+        <Typography style={{ fontWeight: 600 }}>
+          {_parseLocation(data.location).label}
+        </Typography>
       </div>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem

@@ -10,13 +10,22 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Link as MaterialLink
+  Link as MaterialLink,
+  Button
 } from "@material-ui/core";
 import { Settings, ArrowBackIos } from "@material-ui/icons";
 import MaskedInput from "react-text-mask";
 import AppButton from "../../AppComponent/AppButton";
 import { green } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
+
+const FullscreenImage = Loadable({
+  loader: () =>
+    import(
+      /* webpackChunkName: 'FullscreenImage' */ "../../component/Dialog/FullscreenImage"
+    ),
+  loading: () => null
+});
 
 const GeneralDialog = Loadable({
   loader: () =>
@@ -109,9 +118,14 @@ const docsLabel: any = {
 
 const DocsForm: React.FC<any> = props => {
   const classes = useStyles();
-  const { csrf, setCsrf, profileData, _xhrPost, _fetchFile } = useContext(
-    AppContext
-  );
+  const {
+    csrf,
+    setCsrf,
+    profileData,
+    _xhrPost,
+    _fetchFile,
+    addSnackbar
+  } = useContext(AppContext);
   const {
     docsType,
     setDocsType,
@@ -135,12 +149,17 @@ const DocsForm: React.FC<any> = props => {
       },
       body: { [`${docsType}image`]: docs }
     });
-    setDocs(null);
-    setDocsDisplay(null);
-    setIsUpload(false);
-    setDocsType("id_card");
-    setCsrf(imgRes.csrf);
-    getInfo();
+    if (imgRes.data.status === "success") {
+      addSnackbar({ message: "อัพโหลดเอกสารสำเร็จ", variant: "success" });
+      setDocs(null);
+      setDocsDisplay(null);
+      setIsUpload(false);
+      setDocsType("id_card");
+      setCsrf(imgRes.csrf);
+      getInfo();
+    } else {
+      addSnackbar({ message: "อัพโหลดเอกสารไม่สำเร็จ", variant: "error" });
+    }
   }
 
   return (
@@ -192,19 +211,28 @@ const DocsForm: React.FC<any> = props => {
 const UserDocs: React.FC<any> = ({ data }) => {
   const keys: any = data.split(".")[0];
   const { sess } = useContext(AppContext);
-
-  const str =
-    "https://easyrecycle.ml/customer/<customerid>/(id_card , house_regist , access , cert_book , doc_20 , doc_105 , doc_106).(webp/jpg)";
+  const [open, setOpen] = useState<any>(false);
 
   return (
-    <div style={{ marginBottom: 8 }}>
-      <MaterialLink
-        href={`https://easyrecycle.ml/customer/${sess.userid}/${data}`}
-        target="_blank"
+    <React.Fragment>
+      <div style={{ marginBottom: 8 }} onClick={() => setOpen(true)}>
+        <Button variant="text" color="primary">
+          {docsLabel[keys]}
+        </Button>
+      </div>
+      <FullscreenImage
+        open={open}
+        onClose={() => setOpen(false)}
+        title={docsLabel[keys]}
+        fullScreen
       >
-        {docsLabel[keys]}
-      </MaterialLink>
-    </div>
+        <img
+          style={{ width: "100%", maxHeight: "calc(100% - 64px)" }}
+          src={`https://easyrecycle.ml/customer/${sess.userid}/${data}`}
+          alt={docsLabel[keys]}
+        />
+      </FullscreenImage>
+    </React.Fragment>
   );
 };
 

@@ -19,7 +19,7 @@ const liff = window.liff;
 
 const Header = Loadable({
   loader: () => import(/* webpackChunkName: 'Header' */ "./Header"),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -27,7 +27,7 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const NotificationsList = Loadable({
@@ -35,24 +35,24 @@ const NotificationsList = Loadable({
     import(
       /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const BussinessBackdrop = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'BussinessBackdrop' */ "./BussinessBackdrop"),
-  loading: () => null
+  loading: () => null,
 });
 
 const BusinessRegister = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'BusinessRegister' */ "./BusinessRegister"),
-  loading: () => null
+  loading: () => null,
 });
 
 const GoodsList = Loadable({
   loader: () => import(/* webpackChunkName: 'GoodsList' */ "./GoodsList"),
-  loading: () => null
+  loading: () => null,
 });
 
 const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
@@ -67,7 +67,8 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     _xhrGet,
     _onLocalhost,
     _onLocalhostFn,
-    booleanReducer
+    booleanReducer,
+    _isDesktopBrowser,
   } = useContext(AppContext);
   const [profileData, setProfileData] = useState<LineProfileData | null>(null);
   const [sess, setSess] = useState<any | null>(null);
@@ -96,7 +97,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     getInfo,
     booleanDispatch,
     realtimeAccess,
-    realtimeEndOfSale
+    realtimeEndOfSale,
   };
 
   function getProfile() {
@@ -106,14 +107,14 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
         setProfileData(profile);
         getSess(profile);
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }
 
   function addSnackbar({ message, variant }: any) {
     enQSnackbar({
       message,
       variant,
-      action
+      action,
     });
   }
 
@@ -132,7 +133,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadusersystem",
-      body: { action: "info", type: "business" }
+      body: { action: "info", type: "business" },
     });
     setCsrf(res.csrf);
     if ("status" in res.data) {
@@ -148,7 +149,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     const res = await _xhrPost({
       csrf,
       url: "session",
-      body: { linetoken: profile.userId, type: "business" }
+      body: { linetoken: profile.userId, type: "business" },
     });
     setCsrf(res.csrf);
     setSess(res.data);
@@ -171,7 +172,8 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
   async function checkSession() {
     const res = await _xhrGet("logout");
     setCsrf(res.csrf);
-    handleFetch();
+    // handleFetch();
+    window.location.reload();
   }
 
   async function getNotifications(profile: any) {
@@ -183,8 +185,8 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
         linetoken: profile.userId,
         type: "business",
         startindex: 0,
-        lastindex: (notiPage + 1) * 10
-      }
+        lastindex: (notiPage + 1) * 10,
+      },
     });
     setCsrf(res.csrf);
 
@@ -205,8 +207,8 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
       body: {
         action: "readnoti",
         linetoken: profileData && profileData.userId,
-        type: "business"
-      }
+        type: "business",
+      },
     });
     setCsrf(res.csrf);
 
@@ -215,20 +217,20 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
 
   function realtimeAccess() {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.emit("noti", {
       action: "noti",
       linetoken: profileData && profileData.userId,
       type: "business",
       startindex: 0,
-      lastindex: (notiPage + 1) * 10
+      lastindex: (notiPage + 1) * 10,
     });
   }
 
   function realtimeEndOfSale(detail: any) {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     const { linetoken } = detail;
     socket.emit("noti", {
@@ -236,13 +238,13 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
       linetoken,
       type: "customer",
       startindex: 0,
-      lastindex: (notiPage + 1) * 10
+      lastindex: (notiPage + 1) * 10,
     });
   }
 
   function realtimeNoti(thisSess: any) {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
       if (messageNew && messageNew.status === "success") {
@@ -260,8 +262,13 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
   }, [sess, profileData, notiPage]);
 
   useEffect(() => {
-    setDense(true);
+    // if (_isDesktopBrowser()) {
+    //   history.replace("/admin");
+    // } else {
+
+    // }
     handleFetch();
+    setDense(true);
   }, []);
 
   const action = (key: any) => (
@@ -291,10 +298,10 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
           dividers={false}
           contentStyle={{ padding: 0 }}
         >
-          <NotificationsList />
+          <NotificationsList type="business" />
         </GeneralDialog>
       </div>
     </AppContext.Provider>
   );
 };
-export default withRouter(props => <Business {...props} />);
+export default withRouter((props) => <Business {...props} />);

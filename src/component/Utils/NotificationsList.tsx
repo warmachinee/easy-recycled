@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import {
   Divider,
@@ -10,6 +10,8 @@ import {
 } from "@material-ui/core";
 import { AppContext } from "../../AppContext";
 import { red } from "@material-ui/core/colors";
+import GeneralDialog from "../Dialog/GeneralDialog";
+import GoodsDetail from "../../page/Admin/Other/GoodsDetail";
 
 const useStyles = makeStyles((theme: Theme) => ({
   content: { flexGrow: 1, padding: "16px 16px 68px 16px", overflow: "auto" },
@@ -21,55 +23,82 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const NotificationsList: React.FC<any> = () => {
+const NotificationsList: React.FC<any> = ({ type }) => {
   const classes = useStyles();
-  const {
-    setNotiPage,
-    notifications,
-    _dateToString,
-    _getNotiText
-  } = useContext(AppContext);
-  const ctx = useContext(AppContext);
+  const { setNotiPage, notifications, _dateToString, _notiText } = useContext(
+    AppContext
+  );
+  const [goodsDetail, setGoodsDetail] = useState<any>(null);
+  const [goodsDetailState, setGoodsDetailState] = useState<boolean>(false);
 
   const arr = "list" in notifications ? notifications.list : notifications;
+
+  function onClickGoodsDetail(formid: any) {
+    setGoodsDetail({ formid });
+    setGoodsDetailState(true);
+  }
+
+  function onCloseGoodsDetail() {
+    setGoodsDetail(null);
+    setGoodsDetailState(false);
+  }
 
   return (
     <React.Fragment>
       <Divider />
       {notifications && arr.length > 0 ? (
-        arr.map((d: any, i: number) => (
-          <React.Fragment key={i}>
-            <ListItem button>
-              <ListItemText
-                primary={
-                  <Typography
-                    component="span"
-                    style={{
-                      ...(_getNotiText(d).warning && { color: red[600] })
-                    }}
-                  >
-                    {_getNotiText(d).primary}
-                  </Typography>
+        arr.map((d: any, i: number) => {
+          const isButton: any =
+            type !== "customer" &&
+            type !== "business" &&
+            d.activity &&
+            d.activity.method === "edit form";
+
+          return (
+            <React.Fragment key={i}>
+              <ListItem
+                button={isButton}
+                onClick={() =>
+                  isButton ? onClickGoodsDetail(d.reflink) : console.log()
                 }
-                secondary={
-                  <span style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography component="span" color="textSecondary">
-                      {_getNotiText(d).secondary}
-                    </Typography>
+              >
+                <ListItemText
+                  primary={
                     <Typography
                       component="span"
-                      variant="body2"
-                      color="textSecondary"
+                      style={{
+                        ...(_notiText({ obj: d, type }).warning && {
+                          color: red[600]
+                        })
+                      }}
                     >
-                      {_dateToString(d.createdate)}
+                      {_notiText({ obj: d, type }).primary}
                     </Typography>
-                  </span>
-                }
-              />
-            </ListItem>
-            <Divider />
-          </React.Fragment>
-        ))
+                  }
+                  secondary={
+                    <span style={{ display: "flex", flexDirection: "column" }}>
+                      <Typography
+                        component="span"
+                        color="textSecondary"
+                        style={{ whiteSpace: "pre-line" }}
+                      >
+                        {_notiText({ obj: d, type }).secondary}
+                      </Typography>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="textSecondary"
+                      >
+                        {_dateToString(d.createdate)}
+                      </Typography>
+                    </span>
+                  }
+                />
+              </ListItem>
+              <Divider />
+            </React.Fragment>
+          );
+        })
       ) : (
         <Typography
           style={{ margin: "24px 0" }}
@@ -91,6 +120,16 @@ const NotificationsList: React.FC<any> = () => {
             โหลดเพิ่ม
           </Button>
         </div>
+      )}
+      {goodsDetail && (
+        <GeneralDialog
+          open={goodsDetailState}
+          onClose={onCloseGoodsDetail}
+          title="รายละเอียดสินค้า"
+          maxWidth="sm"
+        >
+          <GoodsDetail detail={goodsDetail} />
+        </GeneralDialog>
       )}
     </React.Fragment>
   );

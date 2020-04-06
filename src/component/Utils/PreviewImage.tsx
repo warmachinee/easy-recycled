@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import SwipeableViews from "react-swipeable-views";
 import { makeStyles } from "@material-ui/styles";
 import { Theme, GridList, IconButton } from "@material-ui/core";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@material-ui/icons";
 import { AppContext } from "../../AppContext";
 import FullscreenImage from "../Dialog/FullscreenImage";
+import { grey } from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -19,10 +21,24 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     margin: "16px 0"
   },
-  gridList: {
+  slider: {
+    position: "relative",
+    width: "100%"
+  },
+  itemGrid: {
     height: 240,
-    flexWrap: "nowrap",
-    transform: "translateZ(0)"
+    backgroundColor: grey[900],
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center"
+  },
+  item: {
+    maxHeight: 240,
+    width: "100%",
+    display: "block"
   }
 }));
 
@@ -35,7 +51,8 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
   const classes = useStyles();
   const { _openFullScreen, _closeFullscreen } = useContext(AppContext);
   const [open, setOpen] = useState<any>(false);
-  const [fullscreenItem, setFullscreenItem] = useState<any>(null);
+  const [fullscreenItem, setFullscreenItem] = useState<any>(0);
+  const imgArr = [...(editting ? files : Array.from(files))];
 
   function handleOpen(image: any) {
     setOpen(true);
@@ -44,26 +61,77 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
 
   function handleClose() {
     setOpen(false);
-    setFullscreenItem(null);
+  }
+
+  function onBack() {
+    setFullscreenItem((item: any) => {
+      if (item - 1 >= 0) {
+        return (item - 1) % imgArr.length;
+      } else {
+        return (item - 1 + imgArr.length) % imgArr.length;
+      }
+    });
+  }
+
+  function onNext() {
+    setFullscreenItem((item: any) => (item + 1) % imgArr.length);
   }
 
   return (
     <div className={classes.root}>
-      <GridList className={classes.gridList} cols={1.25}>
-        {[...(editting ? files : Array.from(files))].map(
-          (image: any, i: number) => (
-            <img
-              key={i}
-              style={{ height: "100%", width: "auto", boxSizing: "border-box" }}
-              src={image}
-              alt={`${i}`}
-              onClick={() => handleOpen(i)}
-            />
-          )
-        )}
-      </GridList>
+      <div className={classes.slider}>
+        <SwipeableViews index={fullscreenItem} className={classes.item}>
+          {imgArr.map((image: any, i: number) => (
+            <div key={i} className={classes.itemGrid}>
+              <img
+                className={classes.item}
+                src={image}
+                alt={`${i}`}
+                onClick={() => handleOpen(i)}
+              />
+            </div>
+          ))}
+        </SwipeableViews>
+        <IconButton
+          style={{
+            position: "absolute",
+            left: 0,
+            top: "calc(50% - 12px)",
+            backgroundColor: "white",
+            opacity: 0.8
+          }}
+          onClick={onBack}
+        >
+          <ArrowBackIos />
+        </IconButton>
+        <IconButton
+          style={{
+            position: "absolute",
+            right: 0,
+            top: "calc(50% - 12px)",
+            backgroundColor: "white",
+            opacity: 0.8
+          }}
+          onClick={onNext}
+        >
+          <ArrowForwardIos />
+        </IconButton>
+      </div>
       <FullscreenImage open={open} onClose={handleClose} fullScreen>
-        <div style={{ position: "relative" }}>
+        <div
+          className={classes.slider}
+          style={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center"
+          }}
+        >
+          <SwipeableViews index={fullscreenItem}>
+            {imgArr.map((image: any, i: number) => (
+              <img key={i} style={{ width: "100%" }} src={image} alt={`${i}`} />
+            ))}
+          </SwipeableViews>
           <IconButton
             style={{
               position: "absolute",
@@ -72,8 +140,7 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
               backgroundColor: "white",
               opacity: 0.8
             }}
-            disabled={fullscreenItem === 0}
-            onClick={() => setFullscreenItem((item: any) => item - 1)}
+            onClick={onBack}
           >
             <ArrowBackIos />
           </IconButton>
@@ -85,16 +152,10 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
               backgroundColor: "white",
               opacity: 0.8
             }}
-            disabled={fullscreenItem === files.length - 1}
-            onClick={() => setFullscreenItem((item: any) => item + 1)}
+            onClick={onNext}
           >
             <ArrowForwardIos />
           </IconButton>
-          <img
-            style={{ width: "100%" }}
-            src={files[fullscreenItem]}
-            alt={`full`}
-          />
         </div>
       </FullscreenImage>
     </div>

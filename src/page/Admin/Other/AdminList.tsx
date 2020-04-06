@@ -242,7 +242,7 @@ const AddAdminForm: React.FC<any> = ({
 
   return (
     <div>
-      {edit && (
+      {edit && sess.type === "main_admin" && (
         <React.Fragment>
           <Typography style={{ width: 100 }}>สถานะบัญชี</Typography>
           <div style={{ display: "flex", marginBottom: 16 }}>
@@ -280,6 +280,10 @@ const AddAdminForm: React.FC<any> = ({
         type="password"
         value={form.password}
         onChange={e => setForm({ ...form, password: e.target.value })}
+        disabled={sess.type === "sub_admin"}
+        inputProps={{
+          autoComplete: "new-password" // disable autocomplete and autofill
+        }}
       />
       <TextField
         className={classes.textField}
@@ -296,7 +300,12 @@ const AddAdminForm: React.FC<any> = ({
         onChange={e => setForm({ ...form, lastname: e.target.value })}
       />
       <Divider style={{ margin: "16px 0" }} />
-      <FormControl component="fieldset" style={{ marginBottom: 16 }} fullWidth>
+      <FormControl
+        component="fieldset"
+        style={{ marginBottom: 16 }}
+        fullWidth
+        disabled={sess.type === "sub_admin"}
+      >
         <FormLabel component="legend">ความสามารถ</FormLabel>
         {Array.from(new Array(5)).map((d: any, i: number) => (
           <FormControlLabel
@@ -339,14 +348,19 @@ const AddAdminForm: React.FC<any> = ({
 
 const AdminItem: React.FC<any> = ({ data, onClickEdit, onCancleEdit }) => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, _dateToString } = useContext(AppContext);
+  const { csrf, setCsrf, _xhrPost, _dateToString, sess } = useContext(
+    AppContext
+  );
 
   return (
     <ButtonBase
       className={classes.itemGrid}
       onClick={() =>
-        data.type === "main_admin" ? console.log() : onClickEdit(data)
+        sess.type === "sub_admin" && data.type === "main_admin"
+          ? console.log()
+          : onClickEdit(data)
       }
+      disableRipple={sess.type === "sub_admin" && data.type === "main_admin"}
     >
       <Paper
         className={classes.itemPaper}

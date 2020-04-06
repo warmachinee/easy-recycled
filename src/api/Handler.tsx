@@ -197,6 +197,33 @@ export function _isObjectEmpty(obj: {} | { [keys: string]: any }) {
  * Other handler function
  */
 
+export function _parseLocation(location: string) {
+  let returned;
+  try {
+    const parsed = JSON.parse(location);
+    const { province, district, subdistrict } = parsed;
+    returned = {
+      label: `${province ? province.name : ""}${
+        district ? ` > ${district.name}` : ""
+      }${
+        subdistrict ? ` > ${subdistrict.name} (${subdistrict.zip_code})` : ""
+      }`,
+      province,
+      district,
+      subdistrict
+    };
+  } catch (error) {
+    // console.log({ error, location });
+    returned = {
+      label: "จังหวัด > เขต/อำเภอ > ตำบล (รหัสไปรษณีย์)",
+      province: { id: 1, name: "จังหวัด" },
+      district: { id: 1, name: "เขต/อำเภอ" },
+      subdistrict: { id: 1, name: "ตำบล", zip_code: 1 }
+    };
+  }
+  return returned;
+}
+
 export const _onEnter = (func: () => any) => (
   event: React.KeyboardEvent<HTMLInputElement>
 ) => {
@@ -390,119 +417,5 @@ export function booleanReducer(
       return { ...newObj };
     default:
       return { ...state };
-  }
-}
-
-export function getDataFromKeys(keys: any, data: any) {
-  switch (keys) {
-    case "endofsale":
-      switch (data.endofsale) {
-        case 0:
-          return "สินค้ากำลังขาย";
-        case 1:
-          return "สินค้าจบการขายแล้ว";
-        default:
-          return "สินค้ากำลังขาย";
-      }
-    case "boarddisplay":
-      switch (data.boarddisplay) {
-        case 0:
-          return "สินค้าไม่ได้ขายบนร้านค้า";
-        case 1:
-          return "สินค้าขายบนร้านค้า";
-        default:
-          return "สินค้าไม่ได้ขายบนร้านค้า";
-      }
-    case "topup":
-      return `${data.topup} บาท`;
-    case "price":
-      if (data.price) {
-        return `จ่ายค่าเข้าชมสินค้า ${data.price} บาท`;
-      } else {
-        return `สินค้าเข้าชมฟรี`;
-      }
-    default:
-      return data[keys] ? data[keys] : "";
-  }
-}
-
-export function _getNotiText(obj: any) {
-  const { method, data } = obj.activity;
-
-  switch (true) {
-    case method === "edit form":
-      return {
-        primary: "แก้ไขรายละเอียดสินค้า",
-        secondary: getDataFromKeys(
-          data[0] ? Object.keys(data[0])[0] : "",
-          data[0]
-        )
-      };
-    case method === "approve topup":
-      return {
-        primary: "การเติมเงินเสร็จสมบูรณ์",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "endofsale form":
-      return {
-        primary: "จบการขายสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "balancewarning":
-      return {
-        primary: "จบการขายสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "access form":
-      return {
-        primary: "เข้าดูสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "create form":
-      return {
-        primary: "ลงสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "create topup":
-      return {
-        primary: "เติมเงิน",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "zero_access":
-      return {
-        primary: "ไม่เหลือสิทธิการเข้าชม",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "edit profile":
-      return {
-        primary: "แก้ไขโปรไฟล์",
-        secondary: getDataFromKeys(
-          data[0] ? Object.keys(data[0])[0] : "",
-          data[0]
-        )
-      };
-    case method === "delete form":
-      return {
-        primary: "ลบสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "host delete form":
-      return {
-        primary: "ผู้ขายลบสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "admin delete form":
-      return {
-        primary: "แอดมินลบสินค้า",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data)
-      };
-    case method === "frequency warning":
-      return {
-        primary: "คุณลงสินค้าได้ไม่เกิน 3 ครั้งต่อเดือน",
-        secondary: getDataFromKeys(data ? Object.keys(data)[0] : "", data),
-        warning: true
-      };
-    default:
-      return { primary: "", secondary: "" };
   }
 }

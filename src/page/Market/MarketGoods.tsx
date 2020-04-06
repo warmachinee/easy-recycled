@@ -11,7 +11,7 @@ import ConfirmDialog from "../../component/Dialog/ConfirmDialog";
 import PreviewImage from "../../component/Utils/PreviewImage";
 import { ResponsivePie } from "@nivo/pie";
 
-const useStyles = makeStyles(theme => ({}));
+const useStyles = makeStyles((theme) => ({}));
 
 export interface MarketGoodsProps
   extends RouteComponentProps<{ formid: string }> {}
@@ -34,10 +34,10 @@ const chartTheme = {
         "sans-serif",
         '"Apple Color Emoji"',
         '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"'
-      ].join(",")
-    }
-  }
+        '"Segoe UI Symbol"',
+      ].join(","),
+    },
+  },
 };
 
 const defs = [
@@ -48,7 +48,7 @@ const defs = [
     color: red[400],
     size: 4,
     padding: 1,
-    stagger: true
+    stagger: true,
   },
   {
     id: "free",
@@ -57,8 +57,8 @@ const defs = [
     color: green[400],
     rotation: -45,
     lineWidth: 6,
-    spacing: 7
-  }
+    spacing: 7,
+  },
 ];
 
 function getFill(data: any) {
@@ -75,9 +75,9 @@ function getFill(data: any) {
   }
   return {
     match: {
-      id: data.id
+      id: data.id,
     },
-    id: variant
+    id: variant,
   };
 }
 
@@ -90,7 +90,7 @@ const ChartTooltip: React.FC<any> = ({ label, value }) => {
         style={{
           color: theme.palette.grey[900],
           fontWeight: 400,
-          marginRight: 16
+          marginRight: 16,
         }}
       >
         {label}
@@ -100,7 +100,7 @@ const ChartTooltip: React.FC<any> = ({ label, value }) => {
         style={{
           color: theme.palette.grey[900],
           fontWeight: 700,
-          marginRight: 8
+          marginRight: 8,
         }}
       >
         {value}
@@ -109,7 +109,7 @@ const ChartTooltip: React.FC<any> = ({ label, value }) => {
   );
 };
 
-const MarketGoods: React.FC<MarketGoodsProps> = props => {
+const MarketGoods: React.FC<MarketGoodsProps> = (props) => {
   const classes = useStyles();
   const {
     csrf,
@@ -117,11 +117,13 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
     _xhrPost,
     profileData,
     checkSession,
-    _onLocalhostFn,
     _dateToString,
     stringToPhone,
     getFormImg,
-    sess
+    sess,
+    addSnackbar,
+    refreshInfo,
+    _parseLocation,
   } = useContext(AppContext);
   const { match, history, location } = props;
   const formid = parseInt(match.params.formid);
@@ -136,8 +138,8 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
         action: "formdetail",
         linetoken: profileData.userId,
         type: "customer",
-        formid
-      }
+        formid,
+      },
     });
 
     setCsrf(res.csrf);
@@ -149,8 +151,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
     } else {
       setData(res.data);
       if (!Boolean(res.data.price)) {
-        realtimeAccess();
-        accessFormFree();
+        accessFormInitial();
       }
     }
   }
@@ -162,37 +163,63 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
       body: {
         action: "accessform",
         type: "customer",
-        formid
-      }
+        formid,
+      },
     });
-
     setCsrf(res.csrf);
-    getGoodsDetail();
-    setConfirmState(false);
+    refreshInfo();
+    switch (res.data.status) {
+      case "success":
+      case "not need to access":
+        getGoodsDetail();
+        setConfirmState(false);
+        break;
+      case "full access":
+        addSnackbar({ message: "สิทธิการเข้าถึงเต็ม", variant: "error" });
+        break;
+      case "balance not enough":
+        addSnackbar({ message: "จำนวนเงินไม่เพียงพอ", variant: "error" });
+        break;
+      default:
+        setConfirmState(false);
+        break;
+    }
   }
 
-  async function accessFormFree() {
+  async function accessFormInitial() {
     const res = await _xhrPost({
       csrf,
       url: "usersystem",
       body: {
         action: "accessform",
         type: "customer",
-        formid
-      }
+        formid,
+      },
     });
-
     setCsrf(res.csrf);
   }
 
   function realtimeAccess() {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.emit("boardlist", {
       action: "boardlist",
-      formid
+      formid,
     });
+  }
+
+  function getStatusText(status: string) {
+    switch (status) {
+      case "wrong formid":
+        return `ไม่พบสินค้า ID ${formid}`;
+      case "full access":
+        return "สิทธิการเข้าถึงเต็ม";
+      case "balance not enough":
+        return "จำนวนเงินไม่เพียงพอ";
+      default:
+        return "";
+    }
   }
 
   useEffect(() => {
@@ -206,14 +233,44 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
       <IconButton onClick={() => history.replace("/market")}>
         <ArrowBackIos fontSize="small" />
       </IconButton>
-      {data && (
+      {data && !("status" in data) && (
+        <div style={{ padding: 12 }}>
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography variant="h6" gutterBottom style={{ width: 100 }}>
+              สถานที่
+            </Typography>
+            <Typography gutterBottom style={{ flex: 1 }}>
+              {_parseLocation(data.location).label}
+            </Typography>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography variant="h6" gutterBottom style={{ width: 100 }}>
+              สินค้า
+            </Typography>
+            <Typography style={{ flex: 1 }}>
+              {data.product.length > 0
+                ? data.product.map((d: any) => d.product).join(", ")
+                : "ไม่มีวัสดุ"}
+            </Typography>
+          </div>
+          {/* <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography variant="h6" gutterBottom style={{ width: 100 }}>
+              หมายเลข
+            </Typography>
+            <Typography gutterBottom style={{ flex: 1 }}>
+              {_parseLocation(data.location).label}
+            </Typography>
+          </div> */}
+        </div>
+      )}
+      {data && !("status" in data) && (
         <div style={{ height: 400, width: "auto" }}>
           <ResponsivePie
             data={data.product.map((item: any) => {
               return {
                 id: item.product,
                 label: item.value,
-                value: 1
+                value: 1,
               };
             })}
             sliceLabel={(d: any) => `${d.label}`}
@@ -245,7 +302,7 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
                 color: "rgba(255, 255, 255, 0.3)",
                 size: 4,
                 padding: 1,
-                stagger: true
+                stagger: true,
               },
               {
                 id: "lines",
@@ -254,58 +311,58 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
                 color: "rgba(255, 255, 255, 0.3)",
                 rotation: -45,
                 lineWidth: 6,
-                spacing: 10
-              }
+                spacing: 10,
+              },
             ]}
             fill={[
               {
                 match: {
-                  id: "ruby"
+                  id: "ruby",
                 },
-                id: "dots"
+                id: "dots",
               },
               {
                 match: {
-                  id: "c"
+                  id: "c",
                 },
-                id: "dots"
+                id: "dots",
               },
               {
                 match: {
-                  id: "go"
+                  id: "go",
                 },
-                id: "dots"
+                id: "dots",
               },
               {
                 match: {
-                  id: "python"
+                  id: "python",
                 },
-                id: "dots"
+                id: "dots",
               },
               {
                 match: {
-                  id: "scala"
+                  id: "scala",
                 },
-                id: "lines"
+                id: "lines",
               },
               {
                 match: {
-                  id: "lisp"
+                  id: "lisp",
                 },
-                id: "lines"
+                id: "lines",
               },
               {
                 match: {
-                  id: "elixir"
+                  id: "elixir",
                 },
-                id: "lines"
+                id: "lines",
               },
               {
                 match: {
-                  id: "javascript"
+                  id: "javascript",
                 },
-                id: "lines"
-              }
+                id: "lines",
+              },
             ]}
             legends={[
               {
@@ -321,41 +378,41 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
                   {
                     on: "hover",
                     style: {
-                      itemTextColor: "#000"
-                    }
-                  }
-                ]
-              }
+                      itemTextColor: "#000",
+                    },
+                  },
+                ],
+              },
             ]}
           />
         </div>
       )}
       {data &&
-        ("status" in data && data.status === "wrong formid" ? (
+        ("status" in data ? (
           <Typography
             style={{ margin: "24px 0" }}
             align="center"
             variant="h4"
             color="textSecondary"
           >
-            ไม่พบสินค้า ID {formid}
+            {getStatusText(data.status)}
           </Typography>
         ) : Object.keys(data).length < 15 ? (
           <div style={{ padding: 12 }}>
             <Typography variant="h6" style={{ flex: 1 }}>
-              ชื่อบริษัท
+              ชื่อกิจการ
             </Typography>
             <Typography gutterBottom style={{ flex: 1 }}>
               {data.business_name}
             </Typography>
             <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              ตำแหน่ง
+            {/* <Typography variant="h6" style={{ flex: 1 }}>
+              ผู้ให้ข้อมูล
             </Typography>
             <Typography gutterBottom style={{ flex: 1 }}>
               {data.position}
             </Typography>
-            <MarginDivider />
+            <MarginDivider /> */}
             <Typography variant="h6" style={{ flex: 1 }}>
               วัสดุเหลือใช้ที่ต้องการจัดจำหน่าย
             </Typography>
@@ -393,61 +450,30 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
               data.filelist.length > 0 &&
               data.filelist.length <= 10 && (
                 <PreviewImage
+                  editting={true}
                   files={data.filelist.map((file: any) =>
                     getFormImg({
                       userid: data.userid,
                       formid,
-                      file
+                      file,
                     })
                   )}
                 />
               )}
-            {data.formcode && (
-              <React.Fragment>
-                <Typography variant="h6" style={{ flex: 1 }}>
-                  รหัส
-                </Typography>
-                <div style={{ display: "flex" }}>
-                  <Typography gutterBottom style={{ width: 100 }}>
-                    รหัสสินค้า
-                  </Typography>
-                  <Typography gutterBottom style={{ flex: 1 }}>
-                    {data.formcode.sector ? data.formcode.sector : "-"}
-                  </Typography>
-                </div>
-                <div style={{ display: "flex" }}>
-                  <Typography gutterBottom style={{ width: 100 }}>
-                    รหัสจังหวัด
-                  </Typography>
-                  <Typography gutterBottom style={{ flex: 1 }}>
-                    {data.formcode.province ? data.formcode.province : "-"}
-                  </Typography>
-                </div>
-                <div style={{ display: "flex" }}>
-                  <Typography gutterBottom style={{ width: 100 }}>
-                    หมายเลข
-                  </Typography>
-                  <Typography gutterBottom style={{ flex: 1 }}>
-                    {data.formcode.number ? data.formcode.number : "-"}
-                  </Typography>
-                </div>
-                <MarginDivider />
-              </React.Fragment>
-            )}
-
+            <MarginDivider />
             <Typography variant="h6" style={{ flex: 1 }}>
-              ชื่อบริษัท
+              ชื่อกิจการ
             </Typography>
             <Typography gutterBottom style={{ flex: 1 }}>
               {data.business_name}
             </Typography>
             <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              ตำแหน่ง
+            {/* <Typography variant="h6" style={{ flex: 1 }}>
+              ผู้ให้ข้อมูล
             </Typography>
             <Typography gutterBottom style={{ flex: 1 }}>
               {data.position}
-            </Typography>
+            </Typography> */}
             <MarginDivider />
             <Typography variant="h6" style={{ flex: 1 }}>
               วัสดุเหลือใช้ที่ต้องการจัดจำหน่าย
@@ -466,10 +492,10 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
             )}
             <MarginDivider />
             <Typography variant="h6" style={{ flex: 1 }}>
-              สถานที่รับวัสดุเหลือใช้
+              เขตพิ้นที่รับเศษวัสดุเหลือใช้
             </Typography>
             <Typography gutterBottom style={{ flex: 1 }}>
-              {data.location}
+              {_parseLocation(data.location).label}
             </Typography>
             <MarginDivider />
             <Typography variant="h6" style={{ flex: 1 }}>
@@ -543,7 +569,10 @@ const MarketGoods: React.FC<MarketGoodsProps> = props => {
             <Typography variant="h6" style={{ flex: 1 }}>
               เงื่อนไขการขาย
             </Typography>
-            <Typography gutterBottom style={{ flex: 1, whiteSpace: "pre-line" }}>
+            <Typography
+              gutterBottom
+              style={{ flex: 1, whiteSpace: "pre-line" }}
+            >
               {data.sale_condition}
             </Typography>
           </div>

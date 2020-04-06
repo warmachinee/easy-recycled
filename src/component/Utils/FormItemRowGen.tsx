@@ -30,11 +30,20 @@ const FormItemRowGen: React.FC<any> = ({ text, onEdit }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [textValue, setTextValue] = useState<string>(text);
 
+  React.useEffect(() => {
+    setTextValue(text);
+  }, [text]);
+
   return (
     <React.Fragment>
       <div style={{ display: "flex", maxWidth: 600, alignItems: "baseline" }}>
         <Typography variant="h6">รายละเอียดบัญชีที่ใช้รับโอนเงิน</Typography>
-        <IconButton onClick={() => setIsEditing(prev => !prev)}>
+        <IconButton
+          onClick={() => {
+            setIsEditing(prev => !prev);
+            setTextValue(text);
+          }}
+        >
           <Create />
         </IconButton>
       </div>
@@ -75,7 +84,10 @@ const FormItemRowGen: React.FC<any> = ({ text, onEdit }) => {
               variant="text"
               buttonColor={green}
               style={{ marginBottom: "auto" }}
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                setTextValue(text);
+              }}
             >
               ยกเลิก
             </AppButton>

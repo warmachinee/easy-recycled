@@ -250,9 +250,12 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     useConfirmDeleteItem,
     checkSession,
     _onLocalhost,
-    realtimeAccess
+    realtimeAccess,
+    addSnackbar,
+    userInfo,
+    setUserInfo
   } = useContext(AppContext);
-  const [userInfo, setUserInfo] = useState<any>(null);
+
   const [
     { addTopup, topupList, noti, userProfile },
     booleanDispatch
@@ -324,6 +327,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     setCsrf(res.csrf);
     realtimeAccess();
     if (res.data.status === "success") {
+      addSnackbar({ message: "เพิ่มเงินสำเร็จ", variant: "success" });
       const imgRes = await _fetchFile({
         url: "usersystem",
         csrf,
@@ -334,48 +338,24 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         },
         body: { receiptimage: slip }
       });
-      setSlip(null);
-      setTopup(50);
-      setTopupEtc(0);
       setCsrf(imgRes.csrf);
-      getInfo();
-      booleanDispatch({ type: "falseAll" });
-      onCreate({ action: "cancel" });
-      realtimeAccess();
+      if (imgRes.data.status === "success") {
+        addSnackbar({ message: "อัพโหลดสลิปสำเร็จ", variant: "success" });
+        setSlip(null);
+        setTopup(50);
+        setTopupEtc(0);
+        getInfo();
+        booleanDispatch({ type: "falseAll" });
+        onCreate({ action: "cancel" });
+      } else {
+        addSnackbar({ message: "อัพโหลดสลิปไม่สำเร็จ", variant: "success" });
+      }
+    } else {
+      addSnackbar({ message: "เพิ่มเงินไม่สำเร็จ", variant: "error" });
     }
   }
 
   useEffect(() => {
-    if (/localhost/.test(window.location.href)) {
-      setUserInfo({
-        info: {
-          displayname: "P.R.E.M.I.O.R",
-          fullname: "Sippakorn",
-          lastname: "Suphapinyo",
-          tel: 80670057,
-          statusmassage: "UI/UX Developer at PDS Co.,Ltd.",
-          picture:
-            "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-          business_name: "PDS Co.,Ltd.",
-          business_type: "รถรับซื้อของเก่า/ซาเล้ง",
-          location: "นนทบุรี",
-          org_size: "พนักงาน 6-20 คน",
-          document: {
-            document: [
-              "บิลเงินสด",
-              "etc",
-              "ภพ.20",
-              "ใบอนุญาตค้าของเก่า",
-              "หนังสือรับรองบริษัท"
-            ],
-            etc: "Transcript"
-          },
-          transport: { transport: ["etc"], etc: "Taxi" },
-          balance: 0
-        },
-        docs: ["log.txt", "topup"]
-      });
-    }
     if (profileData) {
       getInfo();
     }
@@ -460,7 +440,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         dividers={false}
         contentStyle={{ padding: 0 }}
       >
-        <NotificationsList />
+        <NotificationsList type="customer" />
       </GeneralDialog>
       <GeneralDialog
         open={userProfile}

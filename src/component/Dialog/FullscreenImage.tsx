@@ -14,9 +14,10 @@ import { Close as CloseIcon } from "@material-ui/icons";
 const useStyles = makeStyles(theme => ({
   closeButton: {
     position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500]
+    right: 0,
+    top: 0,
+    color: theme.palette.grey[500],
+    zIndex: 1500
   }
 }));
 
@@ -57,7 +58,7 @@ const FullscreenImage: React.FC<FullscreenImageProps> = props => {
       fullScreen={fullScreen}
       {...other}
     >
-      <DialogTitle style={{ padding: 0 }}>
+      <DialogTitle style={{ ...(!title && { backgroundColor: "black" }) }}>
         {title}
         <IconButton className={classes.closeButton} onClick={onClose}>
           <CloseIcon />
@@ -70,8 +71,8 @@ const FullscreenImage: React.FC<FullscreenImageProps> = props => {
           padding: 0,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-around"
-          // backgroundColor: "black"
+          justifyContent: "space-around",
+          backgroundColor: "black"
         }}
       >
         {children}

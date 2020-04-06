@@ -19,11 +19,11 @@ const Position: React.FC<PositionProps> = ({ data }) => {
   return (
     <FormSetupPaper>
       <Typography variant="h6" style={{ marginBottom: 16 }}>
-        ตำแหน่ง
+        ผู้ให้ข้อมูล
       </Typography>
       <FormItemInsert
         rawData={data}
-        textFieldLabel="เพิ่มตำแหน่ง"
+        textFieldLabel="เพิ่มผู้ให้ข้อมูล"
         buttonLabel="เพิ่ม"
         onClick={(obj: any) => onInserForm({ ...obj, type: "position" })}
       />

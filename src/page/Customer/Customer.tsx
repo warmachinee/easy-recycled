@@ -8,7 +8,7 @@ import {
   Typography,
   AppBar,
   Toolbar,
-  IconButton
+  IconButton,
 } from "@material-ui/core";
 import { Menu as MenuIcon, Close as CloseIcon } from "@material-ui/icons";
 import { LineProfileData } from "apptype";
@@ -19,37 +19,37 @@ import { RouteComponentProps, withRouter } from "react-router-dom";
 const CustomerRegister = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'CustomerRegister' */ "./CustomerRegister"),
-  loading: () => null
+  loading: () => null,
 });
 
 const CustomerDashboard = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'CustomerDashboard' */ "./CustomerDashboard"),
-  loading: () => null
+  loading: () => null,
 });
 
 const CustomerBackdrop = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'CustomerBackdrop' */ "./CustomerBackdrop"),
-  loading: () => null
+  loading: () => null,
 });
 
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   profileCard: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     margin: 36,
     padding: 16,
-    width: 200
+    width: 200,
   },
-  title: { flexGrow: 1 }
+  title: { flexGrow: 1 },
 }));
 
 const liff = window.liff;
@@ -89,9 +89,9 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     closeSnackbar,
     _xhrPost,
     _xhrGet,
-    _onLocalhost,
-    _onLocalhostFn
+    _isDesktopBrowser,
   } = useContext(AppContext);
+  const [userInfo, setUserInfo] = useState<any>(null);
   const [profileData, setProfileData] = useState<LineProfileData | null>(null);
   const [sess, setSess] = useState<any | null>(null);
   const [backDrop, setBackDrop] = useState<any | null>(null);
@@ -110,14 +110,17 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     notiPage,
     setNotiPage,
     readNotifications,
-    realtimeAccess
+    realtimeAccess,
+    userInfo,
+    setUserInfo,
+    getInfo,
   };
 
   function addSnackbar({ message, variant }: any) {
     enQSnackbar({
       message,
       variant,
-      action
+      action,
     });
   }
 
@@ -128,7 +131,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
         setProfileData(profile);
         getSess(profile);
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }
 
   async function handleLogout() {
@@ -143,7 +146,8 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   async function checkSession() {
     const res = await _xhrGet("logout");
     setCsrf(res.csrf);
-    handleFetch();
+    // handleFetch();
+    window.location.reload();
   }
 
   function handleFetch() {
@@ -154,7 +158,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
         getProfile();
       } else {
         liff.login({
-          redirectUri: "https://easyrecycle.ml/"
+          redirectUri: "https://easyrecycle.ml/",
         });
       }
     });
@@ -164,9 +168,14 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadusersystem",
-      body: { action: "info", type: "customer" }
+      body: {
+        action: "info",
+        linetoken: profileData && profileData.userId,
+        type: "customer",
+      },
     });
     setCsrf(res.csrf);
+    setUserInfo(res.data);
   }
 
   async function getSess(profile: any) {
@@ -175,7 +184,7 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     const res = await _xhrPost({
       csrf,
       url: "session",
-      body: { linetoken: profile.userId, type: "customer" }
+      body: { linetoken: profile.userId, type: "customer" },
     });
     setCsrf(res.csrf);
     setSess(res.data);
@@ -191,8 +200,8 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
         linetoken: profile.userId,
         type: "customer",
         startindex: 0,
-        lastindex: (notiPage + 1) * 10
-      }
+        lastindex: (notiPage + 1) * 10,
+      },
     });
     setCsrf(res.csrf);
 
@@ -215,8 +224,8 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
       body: {
         action: "readnoti",
         linetoken: profileData && profileData.userId,
-        type: "customer"
-      }
+        type: "customer",
+      },
     });
     setCsrf(res.csrf);
 
@@ -225,25 +234,29 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
 
   function realtimeAccess() {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.emit("noti", {
       action: "noti",
       linetoken: profileData && profileData.userId,
       type: "customer",
       startindex: 0,
-      lastindex: (notiPage + 1) * 10
+      lastindex: (notiPage + 1) * 10,
     });
   }
 
   function realtimeNoti(thisSess: any) {
     const socket = socketIOClient("https://easyrecycle.ml", {
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
     socket.on(`noti-${thisSess.userid}`, (messageNew: any) => {
       if (messageNew && messageNew.status === "success") {
         const { list } = messageNew.result;
         setNotifications(list);
+        const { method } = list[0].activity;
+        if (method === "approve topup") {
+          getInfo();
+        }
       }
     });
   }
@@ -256,18 +269,13 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   }, [sess, profileData, notiPage]);
 
   useEffect(() => {
-    if (/localhost/.test(window.location.href)) {
-      setProfileData({
-        userId: "U34854b16de48d84b63c751717c9d2771",
-        displayName: "P.R.E.M.I.O.R",
-        pictureUrl:
-          "https://profile.line-scdn.net/0hPyKQa5SXD1Z2KCciVYpwAUptATsBBgkeDh0UNVooWDJcT05USkhFY1F9AW9dEU8CShsUN1N7UmUJ",
-        statusMessage: "UI/UX Developer at PDS Co.,Ltd."
-      });
-    } else {
-      handleFetch();
-    }
-    setDense(true);
+    // if (_isDesktopBrowser()) {
+    //   history.replace("/admin");
+    // } else {
+    //   handleFetch();
+    //   setDense(true);
+    // }
+    handleFetch();
   }, []);
 
   const action = (key: any) => (
@@ -291,4 +299,4 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   );
 };
 
-export default withRouter(props => <Customer {...props} />);
+export default withRouter((props) => <Customer {...props} />);

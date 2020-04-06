@@ -35,6 +35,9 @@ import { AppContext } from "../../AppContext";
 import AppButton from "../../AppComponent/AppButton";
 import { green, red } from "@material-ui/core/colors";
 import { DatePicker } from "@material-ui/pickers";
+import Province from "../../component/Dropdown/Province";
+import District from "../../component/Dropdown/District";
+import Subdistrict from "../../component/Dropdown/Subdistrict";
 
 const PreviewImage = Loadable({
   loader: () =>
@@ -75,7 +78,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   buttonGroup: {
     display: "flex",
     padding: 8,
-    position: "absolute",
+    position: "fixed",
     bottom: 0,
     width: "100%",
     boxSizing: "border-box",
@@ -243,7 +246,7 @@ const ComponentStep0: React.FC<any> = ({
       <TextField
         fullWidth
         name="business_name"
-        label="ชื่อบริษัท"
+        label="ชื่อกิจการ"
         value={form.business_name}
         style={{ marginBottom: 16 }}
         variant="outlined"
@@ -279,7 +282,7 @@ const ComponentStep0: React.FC<any> = ({
             style={{ marginBottom: 16 }}
             fullWidth
           >
-            <FormLabel component="legend">ตำแหน่ง</FormLabel>
+            <FormLabel component="legend">ผู้ให้ข้อมูล</FormLabel>
             <RadioGroup
               name="position"
               value={form.position}
@@ -312,10 +315,21 @@ const ComponentStep1: React.FC<any> = ({
   setAlbumDisplay
 }) => {
   const classes = useStyles();
-  const { _dateToString } = useContext(AppContext);
+  const { _dateToString, _parseLocation } = useContext(AppContext);
   const [productArr, setProductArr] = useState<any>([]);
   const [productVal, setProductVal] = useState<any>("0");
   const [productAmount, setProductAmount] = useState<any>("0");
+  const [province, setProvince] = useState<any>(null);
+  const [district, setDistrict] = useState<any>(null);
+  const [subdistrict, setSubdistrict] = useState<any>(null);
+  const locationProps: any = {
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict
+  };
 
   const productChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setProductVal(event.target.value as string);
@@ -381,7 +395,20 @@ const ComponentStep1: React.FC<any> = ({
       thisArr.push({ product: form.product[i], amount: form.productvalue[i] });
     });
     setProductArr(thisArr);
+    setProvince(_parseLocation(form.location).province);
+    setDistrict(_parseLocation(form.location).district);
+    setSubdistrict(_parseLocation(form.location).subdistrict);
   }, []);
+
+  useEffect(() => {
+    if (province || district || subdistrict) {
+      setForm({
+        ...form,
+        location: JSON.stringify({ province, district, subdistrict })
+        // location: `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
+      });
+    }
+  }, [province, district, subdistrict]);
 
   return (
     <div>
@@ -390,7 +417,6 @@ const ComponentStep1: React.FC<any> = ({
         เลือกเฉพาะสินค้าที่ต้องการจำหน่าย กรณีพาเลทไม้เปลี่ยนจากหน่วย kg เป็น
         ตัว (pcs)
       </Typography>
-
       {productArr.map((d: any, i: number) => (
         <div style={{ display: "flex", alignItems: "center" }} key={i}>
           <Typography variant="body2" style={{ flex: 1 }}>
@@ -404,7 +430,6 @@ const ComponentStep1: React.FC<any> = ({
           </IconButton>
         </div>
       ))}
-
       <div style={{ display: "flex", margin: "16px 0" }}>
         <div style={{ flex: 1 }}>
           <SelectProduct
@@ -432,7 +457,6 @@ const ComponentStep1: React.FC<any> = ({
           เพิ่ม
         </AppButton>
       </div>
-
       <div style={{ marginTop: 16, display: "flex" }}>
         <UploadAlbum
           fullWidth
@@ -464,22 +488,25 @@ const ComponentStep1: React.FC<any> = ({
       {albumDisplay && albumDisplay.length <= 10 && (
         <PreviewImage {...{ editting }} files={albumDisplay} />
       )}
-      <Divider />
-      <TextField
-        fullWidth
-        name="location"
-        label="สถานที่รับวัสดุเหลือใช้"
-        value={form.location}
-        style={{ margin: "16px 0" }}
-        variant="outlined"
-        size="small"
-        onChange={e =>
-          setForm({
-            ...form,
-            location: (e.target as HTMLInputElement).value
-          })
-        }
-      />
+      <Divider style={{ margin: "16px 0" }} />
+      <Typography variant="h6">เขตพิ้นที่รับเศษวัสดุเหลือใช้</Typography>
+      {(province || district || subdistrict) && (
+        <Typography>
+          {province.name}
+          {district ? ` > ${district.name}` : ""}
+          {subdistrict
+            ? ` > ${subdistrict.name} (${subdistrict.zip_code})`
+            : ""}
+        </Typography>
+      )}
+      <div style={{ height: 12 }} />
+      <Province {...locationProps} />
+      {province && <District {...locationProps} />}
+      {province && district && <Subdistrict {...locationProps} />}
+
+      <Typography variant="h6" style={{ marginBottom: 12 }}>
+        วันนัดดูสินค้า และ วันเปิดประมูล
+      </Typography>
       <DatePicker
         clearable
         fullWidth
@@ -724,6 +751,7 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
 };
 
 const ComponentStep3: React.FC<any> = ({
+  editting,
   businessForm,
   form,
   setForm,
@@ -732,7 +760,7 @@ const ComponentStep3: React.FC<any> = ({
   checked,
   setChecked
 }) => {
-  const { _dateToString } = useContext(AppContext);
+  const { _dateToString, _parseLocation } = useContext(AppContext);
   const [conState, setConState] = useState<any>(false);
   const MarginDivider = () => {
     return <div style={{ marginBottom: 12 }} />;
@@ -755,9 +783,11 @@ const ComponentStep3: React.FC<any> = ({
           ยอมรับเงื่อนไขและข้อตกลง
         </AppButton>
       </div>
-      {albumDisplay && <PreviewImage files={albumDisplay} />}
+      {albumDisplay && albumDisplay.length <= 10 && (
+        <PreviewImage {...{ editting }} files={albumDisplay} />
+      )}
       <Typography variant="h6" style={{ flex: 1 }}>
-        ชื่อบริษัท
+        ชื่อกิจการ
       </Typography>
       {form.business_name === "" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
@@ -775,7 +805,7 @@ const ComponentStep3: React.FC<any> = ({
       )}
       <MarginDivider />
       <Typography variant="h6" style={{ flex: 1 }}>
-        ตำแหน่ง
+        ผู้ให้ข้อมูล
       </Typography>
       <Typography gutterBottom style={{ flex: 1 }}>
         {businessForm["position"][form.position]}
@@ -808,9 +838,9 @@ const ComponentStep3: React.FC<any> = ({
       )}
       <MarginDivider />
       <Typography variant="h6" style={{ flex: 1 }}>
-        สถานที่รับวัสดุเหลือใช้
+        เขตพิ้นที่รับเศษวัสดุเหลือใช้
       </Typography>
-      {form.location === "" ? (
+      {_parseLocation(form.location).label === "" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
           <MaterialLink
             style={{ color: red[600] }}
@@ -821,7 +851,7 @@ const ComponentStep3: React.FC<any> = ({
         </Typography>
       ) : (
         <Typography gutterBottom style={{ flex: 1 }}>
-          {form.location}
+          {_parseLocation(form.location).label}
         </Typography>
       )}
       <MarginDivider />
@@ -923,7 +953,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     getFormImg,
     useConfirmDeleteItem,
     realtimeAccess,
-    realtimeEndOfSale
+    realtimeEndOfSale,
+    _parseLocation
   } = useContext(AppContext);
   const [open, setOpen] = useState(
     window.location.pathname === "/business/create"
@@ -1041,6 +1072,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       transport: [],
       transetc: ""
     });
+    // console.log({ location, parsed: JSON.parse(location) });
+
     if (thisForm["position"].indexOf(d.position) !== -1) {
       Object.assign(obj, {
         position: thisForm["position"].indexOf(d.position)
@@ -1112,12 +1145,52 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       url: "formsystem",
       body: sendObj
     });
+    setCsrf(res.csrf);
     if (res.data.status === "success") {
-      if (album && album.length <= 5) {
-        uploadAlbum(res.data.formid, res.csrf);
+      if (album) {
+        if (album.length <= 10) {
+          uploadAlbumCreate(res.data.formid, res.csrf);
+        } else {
+          addSnackbar({
+            message: "กรุณาอัพโหลดไม่เกิน 10 รูป",
+            variant: "error"
+          });
+        }
       } else {
+        addSnackbar({ message: "สร้างสำเร็จ", variant: "success" });
         history.push("/business");
       }
+    } else {
+      addSnackbar({ message: "สร้างไม่สำเร็จ", variant: "error" });
+    }
+  }
+
+  async function uploadAlbumCreate(formid: any, csrf: any) {
+    const imgRes = await _fetchFileMultiple({
+      url: "formsystem",
+      csrf,
+      headers: {
+        action: "album",
+        linetoken: profileData.userId,
+        formid
+      },
+      body: { albumimage: album }
+    });
+    setAlbum(null);
+    setCsrf(imgRes.csrf);
+    switch (imgRes.data.status) {
+      case "success":
+        addSnackbar({ message: "สร้างสำเร็จ", variant: "success" });
+        history.push("/business");
+        break;
+      case "please delete your picture before":
+        addSnackbar({
+          message: "กรูณาลบอัลบัมเก่าก่อนอัพโหลด",
+          variant: "error"
+        });
+        break;
+      default:
+        break;
     }
   }
 
@@ -1133,10 +1206,21 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: { albumimage: album }
     });
     setAlbum(null);
-    if (imgRes.data.status === "success") {
-      addSnackbar({ message: "สร้างสำเร็จ", variant: "success" });
+    setCsrf(imgRes.csrf);
+    switch (imgRes.data.status) {
+      case "success":
+        addSnackbar({ message: "อัพโหลดอัลบัมสำเร็จ", variant: "success" });
+        history.push("/business");
+        break;
+      case "please delete your picture before":
+        addSnackbar({
+          message: "กรูณาลบอัลบัมเก่าก่อนอัพโหลด",
+          variant: "error"
+        });
+        break;
+      default:
+        break;
     }
-    history.push("/business");
   }
 
   async function editForm() {
@@ -1199,12 +1283,22 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: sendObj
     });
     setCsrf(res.csrf);
-
-    realtimeAccess();
-    if (album && album.length <= 5) {
-      uploadAlbum(parseInt(formid), res.csrf);
+    if (res.data.product === "success") {
+      addSnackbar({ message: "แก้ไขสำเร็จ", variant: "success" });
+      if (album) {
+        if (album.length <= 10) {
+          uploadAlbum(parseInt(formid), res.csrf);
+        } else {
+          addSnackbar({
+            message: "กรุณาอัพโหลดไม่เกิน 10 รูป",
+            variant: "error"
+          });
+        }
+      } else {
+        history.push("/business");
+      }
     } else {
-      history.push("/business");
+      addSnackbar({ message: "แก้ไขไม่สำเร็จ", variant: "error" });
     }
   }
 
@@ -1220,7 +1314,6 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       }
     });
     setCsrf(res.csrf);
-
     realtimeEndOfSale(profileData);
     if (res.data.status === "success") {
       addSnackbar({ message: "จบการขายสำเร็จ", variant: "success" });
@@ -1229,81 +1322,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   }
 
   useEffect(() => {
-    if (/localhost/.test(window.location.href)) {
-      setBusinessForm({
-        form_condition: [],
-        position: [
-          "ผู้จัดการ",
-          "จัดซื้อ-จัดจ้าง",
-          "บุคคล",
-          "หัวหน้าแผนก",
-          "เจ้าหน้าที่ SAFETY"
-        ],
-        product: [
-          "ทองแดง",
-          "ทองเหลือง",
-          "อลูมิเนียม",
-          "สแตนเลส",
-          "เหล็ก",
-          "พลาสติก",
-          "กระดาษ",
-          "พาเลทไม้"
-        ],
-        productvalue: [
-          "มากกว่า 5000 kg",
-          "น้ำหนัก 2001-5000 kg",
-          "น้ำหนัก 501-2000 kg",
-          "น้ำหนัก 201-500 kg",
-          "น้ำหนัก 51-200 kg",
-          "น้ำหนัก 1-50 kg"
-        ],
-        org_size: [
-          "พนักงาน 1-5 คน",
-          "พนักงาน 6-20 คน",
-          "พนักงาน 21-40 คน",
-          "พนักงาน 41-100 คน",
-          "มากกว่า 100 คน"
-        ],
-        document: [
-          "บิลเงินสด",
-          "ใบอนุญาตค้าของเก่า",
-          "ภพ.20",
-          "หนังสือรับรองบริษัท",
-          "ใบรง.4 ลำดับที่ 105 (คัดแยกขยะที่ไม่เป็นอันตราย)",
-          "ใบรง.ลำดับที่ 106 (กำจัดขยะประเภทอันตราย)"
-        ],
-        transport: [
-          "รถกะบะ Pickup",
-          "รถบรรทุก 6 ล้อ",
-          "รถบรรทุกติดเฮี๊ยบ(มือขยุ้ม)",
-          "รถสไลด์(วางกะบะเหล็ก)",
-          "แม็คโครปากคีบ/แม็คโครแม่เหล็ก"
-        ]
-      });
-      const al = {
-        filelist: [
-          "545905.jpg",
-          "704014176bc1f285c0c627b4910b64ae.jpg",
-          "817623.jpg",
-          "87172689_589578534931043_4570709075486048256_o.jpg",
-          "thumb-1920-764519.jpg",
-          "uchiha sasuke naruto shippuden naruto uzumaki 2560x1600 wallpaper_www.wallpaperhi.com_5.jpg"
-        ]
-      };
-      let thisAl;
-      if (al && al.filelist.length > 0) {
-        thisAl = al.filelist.map((file: any) =>
-          getFormImg({
-            userid: 8069118,
-            formid: 9259780,
-            file
-          })
-        );
-      }
-      setAlbumDisplay(thisAl);
-    } else {
-      loadBusinessForm();
-    }
+    loadBusinessForm();
     if (editting) {
       setOpen(true);
     }
@@ -1359,9 +1378,10 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
                 form.business_name === "" ||
                 form.sale_condition === "" ||
                 form.product.length === 0 ||
-                form.location === "" ||
+                _parseLocation(form.location).label === "" ||
                 form.transport.length === 0 ||
                 form.document.length === 0 ||
+                (albumDisplay && albumDisplay.length > 0) ||
                 !checked
               }
             >

@@ -1,4 +1,5 @@
 import * as Handler from "./Handler";
+import * as NotificationsHandler from "./NotificationsHandler";
 const api: any = {
   /**---------- /user ----------*/
   session: "/user/session",
@@ -35,6 +36,18 @@ function _xhrGet(url: string) {
   return new Promise(resolve => {
     var req = new XMLHttpRequest();
     req.open("GET", apiUrl(url), false);
+    req.send(null);
+    resolve({
+      csrf: req.getResponseHeader("csrf-token"),
+      data: JSON.parse(req.responseText)
+    });
+  });
+}
+
+function _xhrGetP(url: string) {
+  return new Promise(resolve => {
+    var req = new XMLHttpRequest();
+    req.open("GET", url, false);
     req.send(null);
     resolve({
       csrf: req.getResponseHeader("csrf-token"),
@@ -152,8 +165,10 @@ function getCSRF() {
 
 export const exportApi = {
   ...Handler,
+  ...NotificationsHandler,
   apiUrl,
   _xhrGet,
+  _xhrGetP,
   _xhrPost,
   _fetchFile,
   _fetchFileMultiple

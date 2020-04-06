@@ -102,7 +102,8 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     <AppBar position="static" color="inherit" className={classes.appBar}>
       <Toolbar style={{ paddingRight: 0 }}>
         <Typography variant="h6" className={classes.title} color="primary">
-          {sess ? `${sess.fullname} ${sess.lastname}` : "Admin"}
+          {/* {sess ? `${sess.fullname} ${sess.lastname}` : "Admin"} */}
+          รีไซเคิลเป็นเรื่องง่าย "แค่ปลายนิ้วคลิก"
         </Typography>
         {notifications && (
           <IconButton
@@ -162,7 +163,7 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
         }}
         PaperProps={{ style: { width: 360, maxHeight: "60%" } }}
       >
-        <NotificationsList />
+        <NotificationsList type={sess.type} />
       </Popover>
     </AppBar>
   );

@@ -59,7 +59,9 @@ const GoodsListItem: React.FC<any> = ({ match, data, index, loadForm }) => {
     _dateToString,
     useConfirmDeleteItem,
     profileData,
-    _xhrPost
+    _xhrPost,
+    addSnackbar,
+    _parseLocation
   } = useContext(AppContext);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -87,7 +89,11 @@ const GoodsListItem: React.FC<any> = ({ match, data, index, loadForm }) => {
       }
     });
     setCsrf(res.csrf);
-
+    if (res.data.status === "success") {
+      addSnackbar({ message: "ลบสำเร็จ", variant: "success" });
+    } else {
+      addSnackbar({ message: "ลบไม่สำเร็จ", variant: "error" });
+    }
     loadForm();
   }
 
@@ -118,7 +124,7 @@ const GoodsListItem: React.FC<any> = ({ match, data, index, loadForm }) => {
                   <MoreVert />
                 </IconButton>
               </div>
-              <Typography>{data.location}</Typography>
+              <Typography>{_parseLocation(data.location).label}</Typography>
               <span style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ display: "flex" }}>
                   <Typography

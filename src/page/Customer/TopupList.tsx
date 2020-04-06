@@ -90,7 +90,14 @@ const TopupItem: React.FC<any> = ({ data, onClickDetail }) => {
 const TopupDetail: React.FC<any> = props => {
   const classes = useStyles();
   const { sess } = useContext(AppContext);
-  const { topupDetail, slip, setSlip, uploadSlip } = props;
+  const {
+    topupDetail,
+    slip,
+    setSlip,
+    uploadSlip,
+    slipDisplay,
+    setSlipDisplay
+  } = props;
   const { getTopupImg } = useContext(AppContext);
   return (
     <div>
@@ -100,10 +107,17 @@ const TopupDetail: React.FC<any> = props => {
             <UploadButton
               fullWidth
               label="อัพโหลดสลิป"
-              {...{ slip, setSlip }}
+              {...{ slip, setSlip, setSlipDisplay }}
             />
             {slip && (
-              <AppButton onClick={() => setSlip(null)}>รีเซ็ต</AppButton>
+              <AppButton
+                onClick={() => {
+                  setSlip(null);
+                  setSlipDisplay(null);
+                }}
+              >
+                รีเซ็ต
+              </AppButton>
             )}
           </div>
           {slip && <Typography variant="caption">{slip.name}</Typography>}
@@ -114,11 +128,15 @@ const TopupDetail: React.FC<any> = props => {
         <img
           style={{ width: "100%" }}
           alt={sess.userid}
-          src={getTopupImg({
-            customerid: sess.userid,
-            requestid: topupDetail.requestid,
-            type: "jpg"
-          })}
+          src={
+            slipDisplay
+              ? slipDisplay
+              : getTopupImg({
+                  customerid: sess.userid,
+                  requestid: topupDetail.requestid,
+                  type: "jpg"
+                })
+          }
         />
       ) : (
         <Typography align="center" style={{ margin: "24px 0" }}>
@@ -148,7 +166,8 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
     profileData,
     _xhrPost,
     _fetchFile,
-    booleanReducer
+    booleanReducer,
+    addSnackbar
   } = useContext(AppContext);
   const [backDrop, setBackDrop] = useState<any | null>(null);
   const [topupList, setTopupList] = useState<any>(null);
@@ -157,6 +176,7 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
   >(booleanReducer, { detail: false });
   const [topupDetail, setTopupDetail] = useState<any>(null);
   const [slip, setSlip] = useState<any>(null);
+  const [slipDisplay, setSlipDisplay] = useState<any>(null);
 
   function onClickDetail(detail: any) {
     setTopupDetail(detail);
@@ -192,41 +212,18 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
     });
     setCsrf(imgRes.csrf);
     if (imgRes.data.status === "success") {
+      addSnackbar({ message: "อัพโหลดสลิปสำเร็จ", variant: "success" });
       detailDispatch({ type: "false", key: "detail" });
       getTopup();
       setTopupDetail(null);
       setSlip(null);
+    } else {
+      addSnackbar({ message: "อัพโหลดสลิปไม่สำเร็จ", variant: "success" });
     }
   }
 
   useEffect(() => {
-    if (/localhost/.test(window.location.href)) {
-      setTopupList([
-        {
-          requestid: 1,
-          value: 500,
-          bill: 500,
-          createdate: new Date(),
-          status: 0
-        },
-        {
-          requestid: 2,
-          value: 150,
-          bill: 150,
-          createdate: new Date(),
-          status: 1
-        },
-        {
-          requestid: 3,
-          value: 1000,
-          bill: 1000,
-          createdate: new Date(),
-          status: 2
-        }
-      ]);
-    } else {
-      getTopup();
-    }
+    getTopup();
   }, []);
 
   useEffect(() => {
@@ -261,7 +258,16 @@ const TopupList: React.FC<any> = React.memo(({ location, booleanDispatch }) => {
         title="รายละเอียดการเติมเงิน"
       >
         {topupDetail && (
-          <TopupDetail {...{ topupDetail, slip, setSlip, uploadSlip }} />
+          <TopupDetail
+            {...{
+              topupDetail,
+              slip,
+              setSlip,
+              uploadSlip,
+              slipDisplay,
+              setSlipDisplay
+            }}
+          />
         )}
       </GeneralDialog>
     </div>
