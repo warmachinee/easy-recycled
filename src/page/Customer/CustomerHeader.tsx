@@ -8,13 +8,13 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  Badge
+  Badge,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
   MoreVert,
   ExitToApp,
-  Notifications
+  Notifications,
 } from "@material-ui/icons";
 import { green, grey } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
@@ -24,7 +24,7 @@ import { Link } from "react-router-dom";
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -32,22 +32,22 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({ title: { flexGrow: 1 } }));
+const useStyles = makeStyles((theme) => ({ title: { flexGrow: 1 } }));
 
 const CustomerHeader: React.FC<any> = ({
   userInfo,
   handleLogout,
-  booleanDispatch
+  booleanDispatch,
 }) => {
   const classes = useStyles();
   const {
     useConfirmDeleteItem,
     profileData,
     notifications,
-    readNotifications
+    readNotifications,
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -70,11 +70,12 @@ const CustomerHeader: React.FC<any> = ({
             handleClose();
             booleanDispatch({
               type: "true",
-              key: "userProfile"
+              key: "userProfile",
             });
           }}
         >
-          {userInfo && userInfo.info && <Avatar src={userInfo.info.picture} />}
+          {/* {userInfo && userInfo.info && <Avatar src={userInfo.info.picture} />} */}
+          {profileData && <Avatar src={profileData.pictureUrl} />}
         </IconButton>
         <Typography variant="h6" className={classes.title} color="primary">
           EasyRecycled
@@ -83,10 +84,14 @@ const CustomerHeader: React.FC<any> = ({
           <IconButton
             style={{ marginRight: 16 }}
             onClick={() => {
-              readNotifications();
+              if (
+                notifications.filter((item: any) => item.read === 0).length > 0
+              ) {
+                readNotifications();
+              }
               booleanDispatch({
                 type: "true",
-                key: "noti"
+                key: "noti",
               });
             }}
           >
@@ -122,7 +127,7 @@ const CustomerHeader: React.FC<any> = ({
               handleClose();
               booleanDispatch({
                 type: "true",
-                key: "userProfile"
+                key: "userProfile",
               });
             }}
           >

@@ -233,6 +233,23 @@ const MarketGoods: React.FC<MarketGoodsProps> = (props) => {
       <IconButton onClick={() => history.replace("/market")}>
         <ArrowBackIos fontSize="small" />
       </IconButton>
+      {data &&
+        !("status" in data) &&
+        data.filelist &&
+        data.filelist.length > 0 &&
+        data.filelist.length <= 10 && (
+          <PreviewImage
+            editting={true}
+            files={data.filelist.map((file: any) =>
+              getFormImg({
+                userid: data.userid,
+                formid,
+                file,
+              })
+            )}
+          />
+        )}
+      <MarginDivider />
       {data && !("status" in data) && (
         <div style={{ padding: 12 }}>
           <div style={{ display: "flex", alignItems: "baseline" }}>
@@ -397,184 +414,185 @@ const MarketGoods: React.FC<MarketGoodsProps> = (props) => {
           >
             {getStatusText(data.status)}
           </Typography>
-        ) : Object.keys(data).length < 15 ? (
-          <div style={{ padding: 12 }}>
-            <Typography variant="h6" style={{ flex: 1 }}>
-              ชื่อกิจการ
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {data.business_name}
-            </Typography>
-            <MarginDivider />
-            {/* <Typography variant="h6" style={{ flex: 1 }}>
-              ผู้ให้ข้อมูล
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {data.position}
-            </Typography>
-            <MarginDivider /> */}
-            <Typography variant="h6" style={{ flex: 1 }}>
-              วัสดุเหลือใช้ที่ต้องการจัดจำหน่าย
-            </Typography>
-            {data.product.length > 0 ? (
-              data.product.map((d: any, i: number) => (
-                <div key={i} style={{ display: "flex" }}>
-                  <Typography style={{ flex: 1 }}>{d.product}</Typography>
-                  <Typography style={{ flex: 1 }}>{d.value}</Typography>
-                </div>
-              ))
-            ) : (
-              <Typography gutterBottom style={{ flex: 1 }}>
-                ไม่มีวัสดุ
-              </Typography>
-            )}
-            <MarginDivider />
-            <div style={{ display: "flex", alignItems: "baseline" }}>
-              <Typography variant="h6" style={{ flex: 1, marginTop: 24 }}>
-                ดูรายละเอียดเพิ่มเติม
-              </Typography>
-              <AppButton
-                style={{ fontSize: 18 }}
-                variant="contained"
-                buttonColor={green}
-                startIcon={<ShoppingBasket />}
-                onClick={() => setConfirmState(true)}
-              >
-                {data.price} บาท
-              </AppButton>
-            </div>
-          </div>
         ) : (
           <div style={{ padding: 12 }}>
-            {data.filelist &&
-              data.filelist.length > 0 &&
-              data.filelist.length <= 10 && (
-                <PreviewImage
-                  editting={true}
-                  files={data.filelist.map((file: any) =>
-                    getFormImg({
-                      userid: data.userid,
-                      formid,
-                      file,
-                    })
+            {data.business_name && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  ชื่อกิจการ
+                </Typography>
+                <Typography gutterBottom style={{ flex: 1 }}>
+                  {data.business_name}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.position && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  ผู้ให้ข้อมูล
+                </Typography>
+                <Typography gutterBottom style={{ flex: 1 }}>
+                  {data.position}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.product && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  วัสดุเหลือใช้ที่ต้องการจัดจำหน่าย
+                </Typography>
+                {data.product.length > 0 ? (
+                  data.product.map((d: any, i: number) => (
+                    <div key={i} style={{ display: "flex" }}>
+                      <Typography style={{ flex: 1 }}>{d.product}</Typography>
+                      <Typography style={{ flex: 1 }}>{d.value}</Typography>
+                    </div>
+                  ))
+                ) : (
+                  <Typography gutterBottom style={{ flex: 1 }}>
+                    ไม่มีวัสดุ
+                  </Typography>
+                )}
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.location && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  เขตพื้นที่รับเศษวัสดุเหลือใช้
+                </Typography>
+                <Typography gutterBottom style={{ flex: 1 }}>
+                  {_parseLocation(data.location).label}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.appointment && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  วันนัดดูสินค้า
+                </Typography>
+                <Typography gutterBottom style={{ flex: 1 }}>
+                  {_dateToString(data.appointment)}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.auctiondate && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  วันเปิดประมูล
+                </Typography>
+                <Typography gutterBottom style={{ flex: 1 }}>
+                  {_dateToString(data.auctiondate)}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.transport && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  รถที่ต้องการใช้ขนส่ง
+                </Typography>
+                {data.transport.transport.length > 0 &&
+                  data.transport.transport
+                    .filter((item: any) => item !== "etc")
+                    .map((d: any) => (
+                      <Typography key={d} style={{ flex: 1 }}>
+                        {d}
+                      </Typography>
+                    ))}
+                {data.transport.etc !== "none" && (
+                  <Typography style={{ flex: 1 }}>
+                    {data.transport.etc}
+                  </Typography>
+                )}
+                {data.transport.transport.length === 0 &&
+                  data.transport.etc === "none" && (
+                    <Typography style={{ flex: 1 }}>
+                      ไม่มีรถที่ใช้ขนส่ง
+                    </Typography>
                   )}
-                />
-              )}
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              ชื่อกิจการ
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {data.business_name}
-            </Typography>
-            <MarginDivider />
-            {/* <Typography variant="h6" style={{ flex: 1 }}>
-              ผู้ให้ข้อมูล
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {data.position}
-            </Typography> */}
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              วัสดุเหลือใช้ที่ต้องการจัดจำหน่าย
-            </Typography>
-            {data.product.length > 0 ? (
-              data.product.map((d: any, i: number) => (
-                <div key={i} style={{ display: "flex" }}>
-                  <Typography style={{ flex: 1 }}>{d.product}</Typography>
-                  <Typography style={{ flex: 1 }}>{d.value}</Typography>
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.document && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  เอกสารที่ต้องการควบคู่กับการซื้อขายวัสดุเหลือใช้
+                </Typography>
+                {data.document.document.length > 0 &&
+                  data.document.document
+                    .filter((item: any) => item !== "etc")
+                    .map((d: any) => (
+                      <Typography key={d} style={{ flex: 1 }}>
+                        {d}
+                      </Typography>
+                    ))}
+                {data.document.etc !== "none" && (
+                  <Typography style={{ flex: 1 }}>
+                    {data.document.etc}
+                  </Typography>
+                )}
+                {data.document.document.length === 0 &&
+                  data.document.etc === "none" && (
+                    <Typography style={{ flex: 1 }}>ไม่มีเอกสาร</Typography>
+                  )}
+                <MarginDivider />
+              </React.Fragment>
+            )}
+            {data.tel && data.email && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  ช่องทางติดต่อ
+                </Typography>
+                <div style={{ display: "flex" }}>
+                  <Typography style={{ width: 100 }}>เบอร์โทรศัพท์</Typography>
+                  <Typography style={{ flex: 1 }}>
+                    {stringToPhone(`0${data.tel}`)
+                      ? stringToPhone(`0${data.tel}`)
+                      : data.tel}
+                  </Typography>
                 </div>
-              ))
-            ) : (
-              <Typography gutterBottom style={{ flex: 1 }}>
-                ไม่มีวัสดุ
-              </Typography>
+                <div style={{ display: "flex" }}>
+                  <Typography style={{ width: 100 }}>อีเมล</Typography>
+                  <Typography style={{ flex: 1 }}>{data.email}</Typography>
+                </div>
+                <MarginDivider />
+              </React.Fragment>
             )}
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              เขตพิ้นที่รับเศษวัสดุเหลือใช้
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {_parseLocation(data.location).label}
-            </Typography>
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              วันนัดดูสินค้า
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {_dateToString(data.appointment)}
-            </Typography>
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              วันเปิดประมูล
-            </Typography>
-            <Typography gutterBottom style={{ flex: 1 }}>
-              {_dateToString(data.auctiondate)}
-            </Typography>
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              รถที่ต้องการใช้ขนส่ง
-            </Typography>
-            {data.transport.transport.length > 0 &&
-              data.transport.transport
-                .filter((item: any) => item !== "etc")
-                .map((d: any) => (
-                  <Typography key={d} style={{ flex: 1 }}>
-                    {d}
-                  </Typography>
-                ))}
-            {data.transport.etc !== "none" && (
-              <Typography style={{ flex: 1 }}>{data.transport.etc}</Typography>
+            {data.sale_condition && (
+              <React.Fragment>
+                <Typography variant="h6" style={{ flex: 1 }}>
+                  เงื่อนไขการขาย Scarp
+                </Typography>
+                <Typography
+                  gutterBottom
+                  style={{ flex: 1, whiteSpace: "pre-line" }}
+                >
+                  {data.sale_condition}
+                </Typography>
+                <MarginDivider />
+              </React.Fragment>
             )}
-            {data.transport.transport.length === 0 &&
-              data.transport.etc === "none" && (
-                <Typography style={{ flex: 1 }}>ไม่มีรถที่ใช้ขนส่ง</Typography>
-              )}
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              เอกสารที่ต้องการควบคู่กับการซื้อขายวัสดุเหลือใช้
-            </Typography>
-            {data.document.document.length > 0 &&
-              data.document.document
-                .filter((item: any) => item !== "etc")
-                .map((d: any) => (
-                  <Typography key={d} style={{ flex: 1 }}>
-                    {d}
-                  </Typography>
-                ))}
-            {data.document.etc !== "none" && (
-              <Typography style={{ flex: 1 }}>{data.document.etc}</Typography>
+            {Object.keys(data).length < 15 && (
+              <div style={{ display: "flex", alignItems: "baseline" }}>
+                <Typography variant="h6" style={{ flex: 1, marginTop: 24 }}>
+                  ดูรายละเอียดเพิ่มเติม
+                </Typography>
+                <AppButton
+                  style={{ fontSize: 18 }}
+                  variant="contained"
+                  buttonColor={green}
+                  startIcon={<ShoppingBasket />}
+                  onClick={() => setConfirmState(true)}
+                >
+                  {data.price} บาท
+                </AppButton>
+              </div>
             )}
-            {data.document.document.length === 0 &&
-              data.document.etc === "none" && (
-                <Typography style={{ flex: 1 }}>ไม่มีเอกสาร</Typography>
-              )}
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              ช่องทางติดต่อ
-            </Typography>
-            <div style={{ display: "flex" }}>
-              <Typography style={{ width: 100 }}>เบอร์โทรศัพท์</Typography>
-              <Typography style={{ flex: 1 }}>
-                {stringToPhone(`0${data.tel}`)
-                  ? stringToPhone(`0${data.tel}`)
-                  : data.tel}
-              </Typography>
-            </div>
-            <div style={{ display: "flex" }}>
-              <Typography style={{ width: 100 }}>อีเมล</Typography>
-              <Typography style={{ flex: 1 }}>{data.email}</Typography>
-            </div>
-            <MarginDivider />
-            <Typography variant="h6" style={{ flex: 1 }}>
-              เงื่อนไขการขาย
-            </Typography>
-            <Typography
-              gutterBottom
-              style={{ flex: 1, whiteSpace: "pre-line" }}
-            >
-              {data.sale_condition}
-            </Typography>
           </div>
         ))}
       <ConfirmDialog

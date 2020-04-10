@@ -9,7 +9,7 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  Badge
+  Badge,
 } from "@material-ui/core";
 import { MoreVert, ExitToApp, Notifications } from "@material-ui/icons";
 import { green, grey } from "@material-ui/core/colors";
@@ -21,10 +21,10 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({ title: { flexGrow: 1 } }));
+const useStyles = makeStyles((theme) => ({ title: { flexGrow: 1 } }));
 
 const Header: React.FC<any> = ({ profileData, handleLogout }) => {
   const classes = useStyles();
@@ -32,7 +32,7 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
     useConfirmDeleteItem,
     notifications,
     readNotifications,
-    booleanDispatch
+    booleanDispatch,
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -64,8 +64,12 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
         {notifications && !("status" in notifications) && (
           <IconButton
             onClick={() => {
+              if (
+                notifications.filter((item: any) => item.read === 0).length > 0
+              ) {
+                readNotifications();
+              }
               booleanDispatch({ type: "true", key: "noti" });
-              readNotifications();
             }}
             style={{ marginRight: 16 }}
           >

@@ -14,7 +14,7 @@ import { Menu as MenuIcon, Close as CloseIcon } from "@material-ui/icons";
 import { LineProfileData } from "apptype";
 import { green } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { RouteComponentProps, withRouter, Route } from "react-router-dom";
 
 const CustomerRegister = Loadable({
   loader: () =>
@@ -79,8 +79,7 @@ const Header: React.FC = () => {
   );
 };
 
-const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
-  const classes = useStyles();
+const DefaultComponent: React.FC<any> = () => {
   const {
     csrf,
     setCsrf,
@@ -90,106 +89,24 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     _xhrPost,
     _xhrGet,
     _isDesktopBrowser,
+    sess,
+    profileData,
+    backDrop,
+    setBackDrop,
+    checkSession,
+    getInfo,
   } = useContext(AppContext);
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [profileData, setProfileData] = useState<LineProfileData | null>(null);
-  const [sess, setSess] = useState<any | null>(null);
-  const [backDrop, setBackDrop] = useState<any | null>(null);
   const [notifications, setNotifications] = useState<any | null>(null);
   const [notiPage, setNotiPage] = React.useState(0);
   const passingProps: any = {
     ...useContext(AppContext),
-    sess,
-    getSess,
-    profileData,
-    addSnackbar,
-    handleLogout,
-    checkSession,
     notifications,
     setNotifications,
     notiPage,
     setNotiPage,
     readNotifications,
     realtimeAccess,
-    userInfo,
-    setUserInfo,
-    getInfo,
   };
-
-  function addSnackbar({ message, variant }: any) {
-    enQSnackbar({
-      message,
-      variant,
-      action,
-    });
-  }
-
-  function getProfile() {
-    liff
-      .getProfile()
-      .then((profile: any) => {
-        setProfileData(profile);
-        getSess(profile);
-      })
-      .catch((err) => console.error(err));
-  }
-
-  async function handleLogout() {
-    const res = await _xhrGet("logout");
-    setCsrf(res.csrf);
-    if (liff.isLoggedIn()) {
-      liff.logout();
-    }
-    window.location.reload();
-  }
-
-  async function checkSession() {
-    const res = await _xhrGet("logout");
-    setCsrf(res.csrf);
-    // handleFetch();
-    window.location.reload();
-  }
-
-  function handleFetch() {
-    // const myLiffId = "1653861118-Pa7l4bay"; // /market
-    const myLiffId = "1653861118-DAld6Lv2"; // customer
-    liff.init({ liffId: myLiffId }, async () => {
-      if (liff.isLoggedIn()) {
-        getProfile();
-      } else {
-        liff.login({
-          redirectUri: "https://easyrecycle.ml/",
-        });
-      }
-    });
-  }
-
-  async function getInfo() {
-    const res = await _xhrPost({
-      csrf,
-      url: "loadusersystem",
-      body: {
-        action: "info",
-        linetoken: profileData && profileData.userId,
-        type: "customer",
-      },
-    });
-    setCsrf(res.csrf);
-    setUserInfo(res.data);
-  }
-
-  async function getSess(profile: any) {
-    setSess(null);
-    setBackDrop(null);
-    const res = await _xhrPost({
-      csrf,
-      url: "session",
-      body: { linetoken: profile.userId, type: "customer" },
-    });
-    setCsrf(res.csrf);
-    setSess(res.data);
-    setBackDrop(res.data);
-  }
 
   async function getNotifications(profile: any) {
     const res = await _xhrPost({
@@ -268,22 +185,6 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
     }
   }, [sess, profileData, notiPage]);
 
-  useEffect(() => {
-    // if (_isDesktopBrowser()) {
-    //   history.replace("/admin");
-    // } else {
-    //   handleFetch();
-    //   setDense(true);
-    // }
-    handleFetch();
-  }, []);
-
-  const action = (key: any) => (
-    <IconButton onClick={() => closeSnackbar(key)}>
-      <CloseIcon style={{ color: "white" }} />
-    </IconButton>
-  );
-
   return (
     <AppContext.Provider value={...passingProps}>
       <div>
@@ -295,6 +196,143 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
           ))}
         <CustomerBackdrop {...{ backDrop, setBackDrop }} />
       </div>
+    </AppContext.Provider>
+  );
+};
+
+const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
+  const classes = useStyles();
+  const {
+    csrf,
+    setCsrf,
+    setDense,
+    enQSnackbar,
+    closeSnackbar,
+    _xhrPost,
+    _xhrGet,
+    _isDesktopBrowser,
+    userInfo,
+    setUserInfo,
+    profileData,
+    setProfileData,
+    sess,
+    setSess,
+    backDrop,
+    setBackDrop,
+  } = useContext(AppContext);
+
+  const passingProps: any = {
+    ...useContext(AppContext),
+    sess,
+    getSess,
+    addSnackbar,
+    handleLogout,
+    checkSession,
+    getInfo,
+    getProfile,
+    liffLogin: handleFetch,
+  };
+
+  function addSnackbar({ message, variant }: any) {
+    enQSnackbar({
+      message,
+      variant,
+      action,
+    });
+  }
+
+  function getProfile() {
+    liff
+      .getProfile()
+      .then((profile: any) => {
+        setProfileData(profile);
+        getSess(profile);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  async function handleLogout() {
+    const res = await _xhrGet("logout");
+    setCsrf(res.csrf);
+    if (liff.isLoggedIn()) {
+      liff.logout();
+    }
+    window.location.reload();
+  }
+
+  async function checkSession() {
+    const res = await _xhrGet("logout");
+    setCsrf(res.csrf);
+    // handleFetch();
+    window.location.reload();
+  }
+
+  function handleFetch() {
+    const myLiffId = "1653861118-DAld6Lv2"; // customer
+    liff.init({ liffId: myLiffId }, async () => {
+      if (liff.isLoggedIn()) {
+        getProfile();
+      } else {
+        liff.login({
+          redirectUri: "https://easyrecycle.ml/",
+        });
+      }
+    });
+  }
+
+  async function getInfo() {
+    const res = await _xhrPost({
+      csrf,
+      url: "loadusersystem",
+      body: {
+        action: "info",
+        linetoken: profileData && profileData.userId,
+        type: "customer",
+      },
+    });
+    setCsrf(res.csrf);
+    setUserInfo(res.data);
+  }
+
+  async function getSess(profile: any) {
+    setSess(null);
+    setBackDrop(null);
+    const res = await _xhrPost({
+      csrf,
+      url: "session",
+      body: { linetoken: profile.userId, type: "customer" },
+    });
+    setCsrf(res.csrf);
+    setSess(res.data);
+    setBackDrop(res.data);
+  }
+
+  useEffect(() => {
+    // if (_isDesktopBrowser()) {
+    //   history.replace("/admin");
+    // } else {
+    //   handleFetch();
+    //   setDense(true);
+    // }
+    if (profileData) {
+      // getSess(profileData);
+      setBackDrop(true);
+    } else {
+      handleFetch();
+    }
+
+    setDense(true);
+  }, []);
+
+  const action = (key: any) => (
+    <IconButton onClick={() => closeSnackbar(key)}>
+      <CloseIcon style={{ color: "white" }} />
+    </IconButton>
+  );
+
+  return (
+    <AppContext.Provider value={...passingProps}>
+      <DefaultComponent />
     </AppContext.Provider>
   );
 };

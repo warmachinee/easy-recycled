@@ -24,48 +24,48 @@ function customer({ method, data }: any) {
     case "edit profile":
       return {
         primary: "แก้ไขโปรไฟล์",
-        secondary: data.map((d: any) => getCustomerData(d)).join("\n")
+        secondary: data.map((d: any) => getCustomerData(d)).join("\n"),
       };
     case "admin delete form":
       return {
         primary: "แอดมินลบสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "host delete form":
       return {
         primary: "ผู้ขายลบสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "endofsale form":
       return {
         primary: "สินค้าจบการขายแล้ว",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "edit form":
       return {
         primary: "สินค้าถูกแก้ไข",
-        secondary: data.map((d: any) => getCustomerData(d)).join("\n")
+        secondary: data.map((d: any) => getCustomerData(d)).join("\n"),
       };
     case "balancewarning":
       return {
         primary: "เงินคงเหลือใกล้หมด",
         secondary: getCustomerData(data),
-        warning: true
+        warning: true,
       };
     case "access form":
       return {
         primary: "คุณเข้าชมสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "approve topup":
       return {
         primary: "เติมเงินสำเร็จ",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "create topup":
       return {
         primary: "คุณเติมเงิน",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     default:
       return { primary: "", secondary: "" };
@@ -89,22 +89,22 @@ function getCustomerData(data: any) {
     case "business_name":
       return `ชื่อกิจการ : ${thisData}`;
     case "sale_condition":
-      return `เงื่อนไขการขาย : ${thisData}`;
+      return `เงื่อนไขการขาย Scarp : ${thisData}`;
     case "position":
       return `ผู้ให้ข้อมูล : ${thisData}`;
     case "appointment":
       return `วันนัดดูสินค้า : ${Handler._dateToString(new Date(thisData))}`;
     case "location":
-      return `เขตพิ้นที่รับเศษวัสดุ : ${
+      return `เขตพื้นที่รับเศษวัสดุ : ${
         Handler._parseLocation(thisData).label
       }`;
     case "document":
-      return `เอกสาร : ${thisData.document.join(", ")}`;
+      return `เอกสาร : ${thisData.join(", ")}`;
     case "transport":
-      return `รถที่ใช้ขนส่ง : ${thisData.transport.join(", ")}`;
+      return `รถที่ใช้ขนส่ง : ${thisData.join(", ")}`;
     case "product":
-      const arrProduct: any = thisData.product.map(
-        (d: any, i: number) => `${d} (${thisData.value[i]})`
+      const arrProduct: any = thisData.map(
+        (d: any, i: number) => `${d.product} (${thisData[i].value})`
       );
       return `สินค้า : ${arrProduct.join(", ")}`;
     case "balance":
@@ -123,38 +123,38 @@ function business({ method, data }: any) {
     case "edit profile":
       return {
         primary: "แก้ไขโปรไฟล์",
-        secondary: data.map((d: any) => getBusinessData(d)).join("\n")
+        secondary: data.map((d: any) => getBusinessData(d)).join("\n"),
       };
     case "admin delete form":
       return {
         primary: "แอดมินลบสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "delete form":
       return {
         primary: "คุณลบสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "endofsale form":
       return {
         primary: "คุณจบการขายสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     case "edit form":
       return {
         primary: "คุณแก้ไขสินค้า",
-        secondary: data.map((d: any) => getCustomerData(d)).join("\n")
+        secondary: data.map((d: any) => getCustomerData(d)).join("\n"),
       };
     case "zero_access form":
       return {
         primary: "สิทธิการเข้าถึงสินค้าหมด กรุณาติดต่อแอดมิน",
         secondary: getCustomerData(data),
-        warning: true
+        warning: true,
       };
     case "create form":
       return {
         primary: "คุณสร้างสินค้า",
-        secondary: getCustomerData(data)
+        secondary: getCustomerData(data),
       };
     default:
       return { primary: "", secondary: "" };
@@ -180,22 +180,22 @@ function getBusinessData(data: any) {
     case "business_name":
       return `ชื่อกิจการ : ${thisData}`;
     case "sale_condition":
-      return `เงื่อนไขการขาย : ${thisData}`;
+      return `เงื่อนไขการขาย Scarp : ${thisData}`;
     case "position":
       return `ผู้ให้ข้อมูล : ${thisData}`;
     case "appointment":
       return `วันนัดดูสินค้า : ${Handler._dateToString(new Date(thisData))}`;
     case "location":
-      return `เขตพิ้นที่รับเศษวัสดุ : ${
+      return `เขตพื้นที่รับเศษวัสดุ : ${
         Handler._parseLocation(thisData).label
       }`;
     case "document":
-      return `เอกสาร : ${thisData.document.join(", ")}`;
+      return `เอกสาร : ${thisData.join(", ")}`;
     case "transport":
-      return `รถที่ใช้ขนส่ง : ${thisData.transport.join(", ")}`;
+      return `รถที่ใช้ขนส่ง : ${thisData.join(", ")}`;
     case "product":
-      const arrProduct: any = thisData.product.map(
-        (d: any, i: number) => `${d} (${thisData.value[i]})`
+      const arrProduct: any = thisData.map(
+        (d: any, i: number) => `${d.product} (${thisData[i].value})`
       );
       return `สินค้า : ${arrProduct.join(", ")}`;
     default:
@@ -208,37 +208,37 @@ function mainAdmin({ method, data }: any) {
     case "edit profile":
       return {
         primary: "แก้ไขโปรไฟล์",
-        secondary: data.map((d: any) => getMainAdminData(d)).join("\n")
+        secondary: data.map((d: any) => getMainAdminData(d)).join("\n"),
       };
     case "customer edit profile":
       return {
         primary: "ลูกค้าแก้ไขโปรไฟล์",
-        secondary: data.map((d: any) => getMainAdminData(d)).join("\n")
+        secondary: data.map((d: any) => getMainAdminData(d)).join("\n"),
       };
     case "business edit profile":
       return {
         primary: "ผู้ขายแก้ไขโปรไฟล์",
-        secondary: data.map((d: any) => getMainAdminData(d)).join("\n")
+        secondary: data.map((d: any) => getMainAdminData(d)).join("\n"),
       };
     case "admin delete form":
       return {
         primary: "แอดมินลบสินค้า",
-        secondary: getMainAdminData(data)
+        secondary: getMainAdminData(data),
       };
     case "edit form":
       return {
         primary: "แก้ไขสินค้า",
-        secondary: data.map((d: any) => getMainAdminData(d)).join("\n")
+        secondary: data.map((d: any) => getMainAdminData(d)).join("\n"),
       };
     case "delete form":
       return {
         primary: "ลบสินค้า",
-        secondary: getMainAdminData(data)
+        secondary: getMainAdminData(data),
       };
     case "edit topup":
       return {
         primary: "จัดการการเติมเงิน",
-        secondary: data.map((d: any) => getMainAdminData(d)).join("\n")
+        secondary: data.map((d: any) => getMainAdminData(d)).join("\n"),
       };
     default:
       return { primary: "", secondary: "" };
@@ -278,22 +278,22 @@ function getMainAdminData(data: any) {
     case "org_size":
       return `ขนาดกิจการ : ${thisData}`;
     case "sale_condition":
-      return `เงื่อนไขการขาย : ${thisData}`;
+      return `เงื่อนไขการขาย Scarp : ${thisData}`;
     case "position":
       return `ผู้ให้ข้อมูล : ${thisData}`;
     case "appointment":
       return `วันนัดดูสินค้า : ${Handler._dateToString(new Date(thisData))}`;
     case "location":
-      return `เขตพิ้นที่รับเศษวัสดุ : ${
+      return `เขตพื้นที่รับเศษวัสดุ : ${
         Handler._parseLocation(thisData).label
       }`;
     case "document":
-      return `เอกสาร : ${thisData.document.join(", ")}`;
+      return `เอกสาร : ${thisData.join(", ")}`;
     case "transport":
-      return `รถที่ใช้ขนส่ง : ${thisData.transport.join(", ")}`;
+      return `รถที่ใช้ขนส่ง : ${thisData.join(", ")}`;
     case "product":
-      const arrProduct: any = thisData.product.map(
-        (d: any, i: number) => `${d} (${thisData.value[i]})`
+      const arrProduct: any = thisData.map(
+        (d: any, i: number) => `${d.product} (${thisData[i].value})`
       );
       return `สินค้า : ${arrProduct.join(", ")}`;
     case "price":
@@ -301,7 +301,7 @@ function getMainAdminData(data: any) {
     case "topup":
       return `ราคา : ${thisData} บาท`;
     case "topupstatus":
-      return `สถานะ : ${(function() {
+      return `สถานะ : ${(function () {
         switch (thisData) {
           case -1:
             return "ไม่อนุมัติ";

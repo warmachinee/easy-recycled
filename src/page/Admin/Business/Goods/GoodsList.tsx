@@ -14,7 +14,7 @@ import {
   Divider,
   Link,
   Menu,
-  Chip
+  Chip,
 } from "@material-ui/core";
 import { red, green, grey } from "@material-ui/core/colors";
 import { MoreVert, Storefront } from "@material-ui/icons";
@@ -27,7 +27,7 @@ const Progress = Loadable({
     import(
       /* webpackChunkName: 'Progress' */ "../../../../component/Utils/Progress"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -35,7 +35,7 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -43,12 +43,12 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GoodsDetail = Loadable({
   loader: () => import(/* webpackChunkName: 'GoodsDetail' */ "./GoodsDetail"),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -57,13 +57,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: "relative",
     margin: theme.spacing(2, 0),
     padding: 16,
-    minWidth: 650
-  }
+    minWidth: 650,
+  },
 }));
 
 export type GoodsListProps = RouteComponentProps<{ businessid: string }>;
 
-const GoodsItemList: React.FC<any> = props => {
+const GoodsItemList: React.FC<any> = (props) => {
   const { goods, goodsType } = props;
   const { _parseLocation } = useContext(AppContext);
   const arr = getArr();
@@ -105,7 +105,7 @@ const GoodsItemList: React.FC<any> = props => {
   );
 };
 
-const GoodsItem: React.FC<any> = props => {
+const GoodsItem: React.FC<any> = (props) => {
   const classes = useStyles();
   const { data, onDeleteGoods, onClickGoods } = props;
   const { _dateToString, sess, _parseLocation } = useContext(AppContext);
@@ -143,8 +143,8 @@ const GoodsItem: React.FC<any> = props => {
       style={{
         ...(data.endofsale === 1 && {
           backgroundColor: "inherit",
-          opacity: 0.7
-        })
+          opacity: 0.7,
+        }),
       }}
     >
       {per3 && (
@@ -163,7 +163,7 @@ const GoodsItem: React.FC<any> = props => {
             style={{
               marginRight: 16,
               color: "white",
-              backgroundColor: green[700]
+              backgroundColor: green[700],
             }}
           />
         )}
@@ -189,7 +189,7 @@ const GoodsItem: React.FC<any> = props => {
           variant="h6"
           style={{
             color: data.accessremain === 0 ? red[600] : green[600],
-            marginRight: 24
+            marginRight: 24,
           }}
         >{`${data.accessremain}/${data.accesstotal}`}</Typography>
         <Typography style={{ marginRight: 8 }}>วันนัดดูสินค้า</Typography>
@@ -202,7 +202,7 @@ const GoodsItem: React.FC<any> = props => {
         </Typography>
       </div>
       <div style={{ display: "flex" }}>
-        <Typography style={{ width: 100 }}>เขตพิ้นที่รับ</Typography>
+        <Typography style={{ width: 100 }}>เขตพื้นที่รับ</Typography>
         <Typography style={{ fontWeight: 600 }}>
           {_parseLocation(data.location).label}
         </Typography>
@@ -232,17 +232,18 @@ const GoodsItem: React.FC<any> = props => {
 const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
   const classes = useStyles();
   const {
+    sess,
     csrf,
     setCsrf,
     _xhrPost,
     _onLocalhostFn,
-    useConfirmDeleteItem
+    useConfirmDeleteItem,
   } = useContext(AppContext);
   const [goods, setGoods] = useState<any>(null);
   const [goodsType, setGoodsType] = useState<any>(10);
   const [
     { confirmState, item: itemOnDelete },
-    onDeleteGoods
+    onDeleteGoods,
   ] = useConfirmDeleteItem();
   const [goodsDetail, setGoodsDetail] = useState<any>(null);
   const [goodsDetailState, setGoodsDetailState] = useState<boolean>(false);
@@ -282,8 +283,8 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       url: "abusinesssystem",
       body: {
         action: "form_delete",
-        formid: itemOnDelete.formid
-      }
+        formid: itemOnDelete.formid,
+      },
     });
     setCsrf(res.csrf);
 
@@ -300,8 +301,8 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
         action: "form_list",
         startindex: (goodsPage - 1) * 10,
         lastindex: goodsPage * 10,
-        businessid: parseInt(match.params.businessid)
-      }
+        businessid: parseInt(match.params.businessid),
+      },
     });
 
     setCsrf(res.csrf);
@@ -337,7 +338,7 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
               onDeleteGoods,
               onClickGoods,
               paginationChange,
-              goodsPage
+              goodsPage,
             }}
           />
         ) : (
@@ -389,4 +390,4 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
     </div>
   );
 };
-export default withRouter(props => <GoodsList {...props} />);
+export default withRouter((props) => <GoodsList {...props} />);

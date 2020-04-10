@@ -14,7 +14,7 @@ import {
   Checkbox,
   Divider,
   Switch,
-  Chip
+  Chip,
 } from "@material-ui/core";
 import { Create } from "@material-ui/icons";
 import AppButton from "../../../AppComponent/AppButton";
@@ -23,10 +23,11 @@ import { DatePicker } from "@material-ui/pickers";
 import District from "../../../component/Dropdown/District";
 import Subdistrict from "../../../component/Dropdown/Subdistrict";
 import Province from "../../../component/Dropdown/Province";
+import PreviewImage from "../../../component/Utils/PreviewImage";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   editButton: { padding: 6, marginBottom: 6, marginLeft: 8 },
-  dateText: { width: "50%" }
+  dateText: { width: "50%" },
 }));
 
 const GeneralDialog = Loadable({
@@ -34,7 +35,7 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const StatusSetup: React.FC<any> = ({ value }) => {
@@ -45,7 +46,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
     _xhrPost,
     getGoodsDetail,
     detail,
-    realtimeEndOfSale
+    realtimeEndOfSale,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [state, setState] = useState<any>({
@@ -54,12 +55,12 @@ const StatusSetup: React.FC<any> = ({ value }) => {
     endofsale: value.endofsale,
     formcode_sector: value.formcode ? value.formcode.sector : "",
     formcode_province: value.formcode ? value.formcode.province : "",
-    formcode_number: value.formcode ? value.formcode.number : ""
+    formcode_number: value.formcode ? value.formcode.number : "",
   });
 
   async function handleSave({
     thisValue,
-    keys
+    keys,
   }: {
     thisValue: any;
     keys: string;
@@ -70,8 +71,8 @@ const StatusSetup: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        [keys]: thisValue
-      }
+        [keys]: thisValue,
+      },
     });
 
     setCsrf(res.csrf);
@@ -98,7 +99,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
                 formcode_province: value.formcode
                   ? value.formcode.province
                   : "",
-                formcode_number: value.formcode ? value.formcode.number : ""
+                formcode_number: value.formcode ? value.formcode.number : "",
               });
             }}
           >
@@ -285,7 +286,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               label="ขายบนร้านค้า"
               style={{
                 marginRight: 4,
-                ...(state.boarddisplay === 1 && { color: "white" })
+                ...(state.boarddisplay === 1 && { color: "white" }),
               }}
               {...(state.boarddisplay === 0 && { variant: "outlined" })}
               {...(state.boarddisplay === 1 && { color: "primary" })}
@@ -313,7 +314,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
             {...(value.boarddisplay === 0 && { variant: "outlined" })}
             {...(value.boarddisplay === 1 && {
               color: "primary",
-              style: { color: "white" }
+              style: { color: "white" },
             })}
           />
         )}
@@ -328,7 +329,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
               label="ขายต่อ"
               style={{
                 marginRight: 4,
-                ...(state.endofsale === 0 && { color: "white" })
+                ...(state.endofsale === 0 && { color: "white" }),
               }}
               {...(state.endofsale === 1 && { variant: "outlined" })}
               {...(state.endofsale === 0 && { color: "primary" })}
@@ -354,7 +355,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
             {...(value.endofsale === 1 && { variant: "outlined" })}
             {...(value.endofsale === 0 && {
               color: "primary",
-              style: { color: "white" }
+              style: { color: "white" },
             })}
           />
         )}
@@ -415,7 +416,7 @@ const StatusSetup: React.FC<any> = ({ value }) => {
                 formcode_province: value.formcode
                   ? value.formcode.province
                   : "",
-                formcode_number: value.formcode ? value.formcode.number : ""
+                formcode_number: value.formcode ? value.formcode.number : "",
               });
             }}
           >
@@ -436,7 +437,7 @@ const BusinessName: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -448,8 +449,8 @@ const BusinessName: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        business_name: thisValue
-      }
+        business_name: thisValue,
+      },
     });
 
     setCsrf(res.csrf);
@@ -464,7 +465,7 @@ const BusinessName: React.FC<any> = ({ value }) => {
         ชิ่อบริษัท
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -476,7 +477,7 @@ const BusinessName: React.FC<any> = ({ value }) => {
             fullWidth
             autoFocus={editing}
             value={thisValue}
-            onChange={e => setThisValue(e.target.value)}
+            onChange={(e) => setThisValue(e.target.value)}
             onKeyPress={_onEnter(handleSave)}
           />
           <AppButton
@@ -514,7 +515,7 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
     getGoodsDetail,
     detail,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>("0");
@@ -526,8 +527,8 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        accessremain: parseInt(thisValue)
-      }
+        accessremain: parseInt(thisValue),
+      },
     });
 
     setEditing(false);
@@ -546,7 +547,7 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
           {`${remain}/${total}`}
           <IconButton
             className={classes.editButton}
-            onClick={() => setEditing(prev => !prev)}
+            onClick={() => setEditing((prev) => !prev)}
           >
             <Create fontSize="small" />
           </IconButton>
@@ -564,7 +565,7 @@ const BusinessAccess: React.FC<any> = ({ remain, total }) => {
               autoFocus={editing}
               value={thisValue}
               type="number"
-              onChange={e => setThisValue(e.target.value)}
+              onChange={(e) => setThisValue(e.target.value)}
               onKeyPress={_onEnter(handleSave)}
             />
             <AppButton
@@ -609,7 +610,7 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -621,8 +622,8 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        price: thisValue
-      }
+        price: thisValue,
+      },
     });
 
     setEditing(false);
@@ -645,7 +646,7 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
               autoFocus={editing}
               value={thisValue}
               type="number"
-              onChange={e => setThisValue(e.target.value)}
+              onChange={(e) => setThisValue(e.target.value)}
               onKeyPress={_onEnter(handleSave)}
             />
             <AppButton
@@ -672,7 +673,7 @@ const BusinessAccessPrice: React.FC<any> = ({ value }) => {
             {value === "" ? "-" : value} บาท
             <IconButton
               className={classes.editButton}
-              onClick={() => setEditing(prev => !prev)}
+              onClick={() => setEditing((prev) => !prev)}
             >
               <Create fontSize="small" />
             </IconButton>
@@ -693,7 +694,7 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     detail,
     _onEnter,
     realtimeAccess,
-    _parseLocation
+    _parseLocation,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -708,7 +709,7 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     district,
     setDistrict,
     subdistrict,
-    setSubdistrict
+    setSubdistrict,
   };
 
   function onCancel() {
@@ -726,8 +727,8 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        location: thisValue
-      }
+        location: thisValue,
+      },
     });
 
     setEditing(false);
@@ -748,10 +749,10 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        เขตพิ้นที่รับเศษวัสดุเหลือใช้
+        เขตพื้นที่รับเศษวัสดุเหลือใช้
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -816,11 +817,11 @@ const BusinessDate: React.FC<any> = ({ appointment, auctiondate }) => {
     detail,
     _dateToString,
     _dateToAPI,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<{ [keys: string]: boolean }>({
     appointment: false,
-    auctiondate: false
+    auctiondate: false,
   });
 
   async function handleSave({ date, keys }: { date: any; keys: string }) {
@@ -830,8 +831,8 @@ const BusinessDate: React.FC<any> = ({ appointment, auctiondate }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        [keys]: _dateToAPI(date)
-      }
+        [keys]: _dateToAPI(date),
+      },
     });
 
     setCsrf(res.csrf);
@@ -935,7 +936,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     businessForm,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -947,8 +948,8 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        position: thisValue
-      }
+        position: thisValue,
+      },
     });
 
     setEditing(false);
@@ -963,7 +964,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
         ผู้ให้ข้อมูล
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -985,7 +986,7 @@ const BusinessPosition: React.FC<any> = ({ value }) => {
           <FormLabel component="legend">ผู้ให้ข้อมูล</FormLabel>
           <RadioGroup
             value={thisValue}
-            onChange={e => setThisValue(e.target.value)}
+            onChange={(e) => setThisValue(e.target.value)}
           >
             {businessForm.position.map((d: any, i: number) => (
               <FormControlLabel
@@ -1034,7 +1035,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
     detail,
     businessForm,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<any>(value.transport);
@@ -1074,9 +1075,9 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
         formid: detail.formid,
         transport: thisValue,
         ...(thisValue.some((item: any) => item === "etc") && {
-          transetc: thisEtc
-        })
-      }
+          transetc: thisEtc,
+        }),
+      },
     });
 
     setEditing(false);
@@ -1091,7 +1092,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
         รถที่ใช้ขนส่ง
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -1137,7 +1138,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
                 alignItems: "center",
                 marginLeft: -11,
                 marginRight: 16,
-                verticalAlign: "middle"
+                verticalAlign: "middle",
               }}
             >
               <Checkbox
@@ -1152,7 +1153,7 @@ const BusinessTransport: React.FC<any> = ({ value }) => {
                 label="อื่นๆ"
                 size="small"
                 value={thisEtc}
-                onChange={e => setThisEtc(e.target.value)}
+                onChange={(e) => setThisEtc(e.target.value)}
                 onKeyPress={_onEnter(handleSave)}
               />
             </div>
@@ -1204,7 +1205,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
     detail,
     businessForm,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<any>(value.document);
@@ -1244,9 +1245,9 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
         formid: detail.formid,
         document: thisValue,
         ...(thisValue.some((item: any) => item === "etc") && {
-          docsetc: thisEtc
-        })
-      }
+          docsetc: thisEtc,
+        }),
+      },
     });
 
     setEditing(false);
@@ -1261,7 +1262,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
         เอกสาร
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -1307,7 +1308,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
                 alignItems: "center",
                 marginLeft: -11,
                 marginRight: 16,
-                verticalAlign: "middle"
+                verticalAlign: "middle",
               }}
             >
               <Checkbox
@@ -1322,7 +1323,7 @@ const BusinessDocument: React.FC<any> = ({ value }) => {
                 label="อื่นๆ"
                 size="small"
                 value={thisEtc}
-                onChange={e => setThisEtc(e.target.value)}
+                onChange={(e) => setThisEtc(e.target.value)}
                 onKeyPress={_onEnter(handleSave)}
               />
             </div>
@@ -1373,7 +1374,7 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     _onEnter,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
@@ -1385,8 +1386,8 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
       body: {
         action: "form_edit",
         formid: detail.formid,
-        sale_condition: thisValue
-      }
+        sale_condition: thisValue,
+      },
     });
 
     setCsrf(res.csrf);
@@ -1398,26 +1399,66 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        เงื่อนไขการขาย
+        เงื่อนไขการขาย Scarp
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
         </IconButton>
       </Typography>
-      {editing ? (
-        <div style={{ display: "flex" }}>
-          <TextField
-            style={{ marginRight: 16 }}
-            fullWidth
-            autoFocus={editing}
+      <Typography style={{ whiteSpace: "pre-line" }}>{value}</Typography>
+      <GeneralDialog
+        open={editing}
+        onClose={() => {
+          setEditing(false);
+          setThisValue(value);
+        }}
+        title="เงื่อนไขการขาย Scarp"
+      >
+        <FormControl
+          component="fieldset"
+          fullWidth
+          style={{ marginBottom: 16, marginTop: 16 }}
+        >
+          <RadioGroup
             value={thisValue}
-            variant="outlined"
-            multiline
-            rowsMax="10"
-            onChange={e => setThisValue(e.target.value)}
-          />
+            onChange={(e) => setThisValue(e.target.value)}
+          >
+            <FormControlLabel
+              value="เช็คราคา Scarp"
+              control={<Radio color="primary" />}
+              label="เช็คราคา Scarp"
+            />
+            <FormControlLabel
+              value="ขายด่วน"
+              control={<Radio color="primary" />}
+              label="ขายด่วน"
+            />
+            <FormControlLabel
+              value="ขาย (เฉพาะครั้งนี้)"
+              control={<Radio color="primary" />}
+              label="ขาย (เฉพาะครั้งนี้)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 3 เดือน)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 3 เดือน)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 6 เดือน)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 6 เดือน)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 1 ปี)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 1 ปี)"
+            />
+          </RadioGroup>
+        </FormControl>
+
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <AppButton
             disabled={thisValue === value}
             variant="contained"
@@ -1439,23 +1480,21 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
             ยกเลิก
           </AppButton>
         </div>
-      ) : (
-        <Typography style={{ whiteSpace: "pre-line" }}>{value}</Typography>
-      )}
+      </GeneralDialog>
     </div>
   );
 };
 
 const GoodsDetail: React.FC<any> = ({ detail }) => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const { csrf, setCsrf, _xhrPost, getFormImg } = useContext(AppContext);
   const [data, setData] = useState<any>(null);
   const [businessForm, setBusinessForm] = useState<any>(null);
   const passingProps: any = {
     ...useContext(AppContext),
     getGoodsDetail,
     detail,
-    businessForm
+    businessForm,
   };
 
   async function getGoodsDetail() {
@@ -1464,16 +1503,16 @@ const GoodsDetail: React.FC<any> = ({ detail }) => {
       url: "aloadbusiness",
       body: {
         action: "form_detail",
-        formid: detail.formid
-      }
+        formid: detail.formid,
+      },
     });
     setData(res.data);
     const formRes = await _xhrPost({
       csrf: res.csrf,
       url: "aloadbusiness",
       body: {
-        action: "business_form"
-      }
+        action: "business_form",
+      },
     });
     setCsrf(formRes.csrf);
     setBusinessForm(formRes.data);
@@ -1491,6 +1530,18 @@ const GoodsDetail: React.FC<any> = ({ detail }) => {
         <div>
           <StatusSetup value={data} />
           <Divider style={{ margin: "16px 0" }} />
+          {data.filelist && data.filelist.length > 0 && (
+            <PreviewImage
+              thisFormId={detail.formid}
+              files={data.filelist.map((file: any) =>
+                getFormImg({
+                  userid: data.userid,
+                  formid: detail.formid,
+                  file,
+                })
+              )}
+            />
+          )}
           <BusinessName value={data.business_name} />
           <BusinessAccess remain={data.accessremain} total={data.accesstotal} />
           <BusinessAccessPrice value={data.price} />

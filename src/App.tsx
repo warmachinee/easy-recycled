@@ -9,6 +9,7 @@ import { AppContext } from "./AppContext";
 import { createMuiTheme } from "@material-ui/core";
 import { green } from "@material-ui/core/colors";
 import * as API from "./api";
+import { LineProfileData } from "apptype";
 const api: any = API.exportApi;
 
 const ErrorBoundary = Loadable({
@@ -16,58 +17,62 @@ const ErrorBoundary = Loadable({
     import(
       /* webpackChunkName: 'ErrorBoundary' */ "./component/Utils/ErrorBoundary"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const RouteCustomer = Loadable.Map({
   loader: {
     Customer: () =>
-      import(/* webpackChunkName: 'RouteCustomer' */ "./page/Customer/Customer")
+      import(
+        /* webpackChunkName: 'RouteCustomer' */ "./page/Customer/Customer"
+      ),
   },
   render(loaded: any, props: any) {
     let Component = loaded.Customer.default;
     return <Route {...props} render={() => <Component {...props} />} />;
   },
-  loading: () => null
+  loading: () => null,
 });
 
 const RouteMarket = Loadable.Map({
   loader: {
     Market: () =>
-      import(/* webpackChunkName: 'RouteMarket' */ "./page/Market/Market")
+      import(/* webpackChunkName: 'RouteMarket' */ "./page/Market/Market"),
   },
   render(loaded: any, props: any) {
     let Component = loaded.Market.default;
     return <Route {...props} render={() => <Component {...props} />} />;
   },
-  loading: () => null
+  loading: () => null,
 });
 
 const RouteBusiness = Loadable.Map({
   loader: {
     Business: () =>
-      import(/* webpackChunkName: 'RouteBusiness' */ "./page/Business/Business")
+      import(
+        /* webpackChunkName: 'RouteBusiness' */ "./page/Business/Business"
+      ),
   },
   render(loaded: any, props: any) {
     let Component = loaded.Business.default;
     return <Route {...props} render={() => <Component {...props} />} />;
   },
-  loading: () => null
+  loading: () => null,
 });
 
 const RouteAdmin = Loadable.Map({
   loader: {
     Admin: () =>
-      import(/* webpackChunkName: 'RouteAdmin' */ "./page/Admin/Admin")
+      import(/* webpackChunkName: 'RouteAdmin' */ "./page/Admin/Admin"),
   },
   render(loaded: any, props: any) {
     let Component = loaded.Admin.default;
     return <Route {...props} render={() => <Component {...props} />} />;
   },
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({}));
+const useStyles = makeStyles((theme) => ({}));
 
 export interface AppProps {}
 
@@ -77,32 +82,50 @@ interface enQSnackbarProps {
   action?: any;
 }
 
-const ThisRoute: React.FC<any> = props => {
+const ThisRoute: React.FC<any> = (props) => {
   const { enqueueSnackbar, closeSnackbar } = props;
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [profileData, setProfileData] = useState<LineProfileData | null>(null);
+  const [sess, setSess] = useState<any | null>(null);
+  const [backDrop, setBackDrop] = useState<any | null>(null);
 
   const passingProps: any = {
     ...useContext(AppContext),
     enQSnackbar,
-    closeSnackbar
+    closeSnackbar,
+  };
+
+  const customerProps: any = {
+    ...passingProps,
+    userInfo,
+    setUserInfo,
+    profileData,
+    setProfileData,
+    sess,
+    setSess,
+    backDrop,
+    setBackDrop,
   };
 
   function enQSnackbar({ message, variant, action }: enQSnackbarProps) {
     enqueueSnackbar(message, {
       variant,
       autoHideDuration: 5000,
-      action
+      action,
     });
   }
 
   return (
-    <AppContext.Provider value={...passingProps}>
-      <Switch>
-        <RouteCustomer exact path="/" />
-        <RouteMarket path="/market" />
+    <Switch>
+      <AppContext.Provider value={...passingProps}>
+        <AppContext.Provider value={...customerProps}>
+          <RouteCustomer exact path="/" />
+          <RouteMarket path="/market" />
+        </AppContext.Provider>
         <RouteBusiness path="/business" />
         <RouteAdmin path="/admin" />
-      </Switch>
-    </AppContext.Provider>
+      </AppContext.Provider>
+    </Switch>
   );
 };
 
@@ -117,7 +140,7 @@ const App: React.FC<AppProps> = () => {
   const appTheme = createMuiTheme({
     palette: {
       type: isDarkMode ? "dark" : "light",
-      primary: green
+      primary: green,
     },
     typography: {
       fontFamily: [
@@ -130,9 +153,9 @@ const App: React.FC<AppProps> = () => {
         "sans-serif",
         '"Apple Color Emoji"',
         '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"'
-      ].join(",")
-    }
+        '"Segoe UI Symbol"',
+      ].join(","),
+    },
   });
 
   const passingProps: any = {
@@ -142,11 +165,11 @@ const App: React.FC<AppProps> = () => {
     dense,
     setDense,
     csrf,
-    setCsrf
+    setCsrf,
   };
 
   function getInit() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       var req = new XMLHttpRequest();
       req.open("GET", window.location.origin, false);
       req.send(null);

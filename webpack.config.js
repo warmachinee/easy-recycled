@@ -2,22 +2,22 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-module.exports = function() {
-  var mode = "production"; /*production*/ /*development*/
+module.exports = function () {
+  var mode = "development"; /*development*/ /*production*/
 
   var entry = {
-    app: "./src/index.tsx"
+    app: "./src/index.tsx",
   };
 
   var output = {
     filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
-    publicPath: "/"
+    publicPath: "/",
   };
 
   var resolve = {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: [".tsx", ".ts", ".js"]
+    extensions: [".tsx", ".ts", ".js"],
   };
 
   var plugins = [
@@ -28,10 +28,10 @@ module.exports = function() {
       template: "./templateHTML.html",
       meta: {
         charset: "utf-8",
-        viewport: "width=device-width, initial-scale=1, shrink-to-fit=no"
+        viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
       },
-      favicon: "./public/favicon.ico"
-    })
+      favicon: "./public/favicon.ico",
+    }),
   ];
 
   return {
@@ -45,7 +45,7 @@ module.exports = function() {
       compress: true,
       watchContentBase: true,
       historyApiFallback: true /** Localhost react-router-dom test */,
-      hot: true /** Localhost react-router-dom test */
+      hot: true /** Localhost react-router-dom test */,
     },
     module: {
       rules: [
@@ -64,30 +64,30 @@ module.exports = function() {
                   require("babel-plugin-transform-imports"),
                   {
                     "@material-ui/core": {
-                      transform: function(importName, matches) {
+                      transform: function (importName, matches) {
                         return "@material-ui/core/esm/" + importName;
                       },
-                      preventFullImport: true
+                      preventFullImport: true,
                     },
                     "@material-ui/icons": {
-                      transform: function(importName, matches) {
+                      transform: function (importName, matches) {
                         return "@material-ui/icons/esm/" + importName;
                       },
-                      preventFullImport: true
-                    }
-                  }
-                ]
-              ]
-            }
-          }
+                      preventFullImport: true,
+                    },
+                  },
+                ],
+              ],
+            },
+          },
         },
         {
           test: /plugin\.css$/,
-          loaders: ["style-loader", "css"]
+          loaders: ["style-loader", "css"],
         },
         {
           test: /\.css$/i,
-          use: ["style-loader", "css-loader"]
+          use: ["style-loader", "css-loader"],
         },
         {
           test: /\.(svg|png|jpe?g|gif|pdf)$/,
@@ -95,36 +95,36 @@ module.exports = function() {
             {
               loader: "file-loader",
               options: {
-                name: "[path][name].[ext]"
-              }
-            }
+                name: "[path][name].[ext]",
+              },
+            },
           ],
-          exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/]
+          exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
         },
         {
           test: /\.(png|jpg|gif)$/i,
           use: [
             {
-              loader: "url-loader"
-            }
-          ]
+              loader: "url-loader",
+            },
+          ],
         },
         {
           test: /\.ts(x?)$/,
           exclude: /node_modules/,
           use: [
             {
-              loader: "ts-loader"
-            }
-          ]
+              loader: "ts-loader",
+            },
+          ],
         },
         {
           enforce: "pre",
           test: /\.js$/,
-          loader: "source-map-loader"
-        }
-      ]
+          loader: "source-map-loader",
+        },
+      ],
     },
-    plugins: plugins
+    plugins: plugins,
   };
 };

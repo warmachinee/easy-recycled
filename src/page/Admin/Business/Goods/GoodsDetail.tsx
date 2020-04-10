@@ -19,6 +19,10 @@ import {
 import { Create } from "@material-ui/icons";
 import { green, red } from "@material-ui/core/colors";
 import { DatePicker } from "@material-ui/pickers";
+import Subdistrict from "../../../../component/Dropdown/Subdistrict";
+import Province from "../../../../component/Dropdown/Province";
+import District from "../../../../component/Dropdown/District";
+import PreviewImage from "../../../../component/Utils/PreviewImage";
 
 const AppButton = Loadable({
   loader: () =>
@@ -676,9 +680,31 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     getGoodsDetail,
     detail,
     _onEnter,
+    _parseLocation,
   } = useContext(AppContext);
   const [editing, setEditing] = useState<boolean>(false);
   const [thisValue, setThisValue] = useState<string>(value);
+  const [province, setProvince] = useState<any>(_parseLocation(value).province);
+  const [district, setDistrict] = useState<any>(_parseLocation(value).district);
+  const [subdistrict, setSubdistrict] = useState<any>(
+    _parseLocation(value).subdistrict
+  );
+  const locationProps: any = {
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict,
+  };
+
+  function onCancel() {
+    setEditing(false);
+    setThisValue(value);
+    setProvince(_parseLocation(value).province);
+    setDistrict(_parseLocation(value).district);
+    setSubdistrict(_parseLocation(value).subdistrict);
+  }
 
   async function handleSave() {
     const res = await _xhrPost({
@@ -696,48 +722,63 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
     getGoodsDetail();
   }
 
+  React.useEffect(() => {
+    if (province || district || subdistrict) {
+      // setThisValue(
+      //   `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
+      // );
+      setThisValue(JSON.stringify({ province, district, subdistrict }));
+    }
+  }, [province, district, subdistrict]);
+
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        สถานที่
-        {/* <IconButton
+        เขตพื้นที่รับเศษวัสดุเหลือใช้
+        <IconButton
           className={classes.editButton}
-          onClick={() => setEditing(prev => !prev)}
+          onClick={() => setEditing((prev) => !prev)}
         >
           <Create fontSize="small" />
-        </IconButton> */}
+        </IconButton>
       </Typography>
-      {editing ? (
-        <div style={{ display: "flex" }}>
-          <TextField
-            style={{ marginRight: 16 }}
-            fullWidth
-            autoFocus={editing}
-            value={thisValue}
-            onChange={(e) => setThisValue(e.target.value)}
-            onKeyPress={_onEnter(handleSave)}
-          />
-          <AppButton
-            disabled={thisValue === value}
-            variant="contained"
-            buttonColor={green}
-            onClick={handleSave}
-          >
-            บันทึก
-          </AppButton>
-          <AppButton
-            variant="text"
-            buttonColor={green}
-            onClick={() => {
-              setEditing(false);
-              setThisValue(value);
-            }}
-          >
-            ยกเลิก
-          </AppButton>
+      {(province || district || subdistrict) && (
+        <Typography>
+          {province.name}
+          {district ? ` > ${district.name}` : ""}
+          {subdistrict
+            ? ` > ${subdistrict.name} (${subdistrict.zip_code})`
+            : ""}
+        </Typography>
+      )}
+      {editing && (
+        <div style={{ display: "flex", marginTop: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <Province {...locationProps} />
+            {province && <District {...locationProps} />}
+            {province && district && <Subdistrict {...locationProps} />}
+          </div>
+          <div style={{ marginLeft: 16, marginBottom: "auto" }}>
+            <AppButton
+              disabled={thisValue === value}
+              variant="contained"
+              buttonColor={green}
+              onClick={handleSave}
+            >
+              บันทึก
+            </AppButton>
+            <AppButton
+              variant="text"
+              buttonColor={green}
+              onClick={() => {
+                setEditing(false);
+                setThisValue(value);
+              }}
+            >
+              ยกเลิก
+            </AppButton>
+          </div>
         </div>
-      ) : (
-        <Typography>{value}</Typography>
       )}
     </div>
   );
@@ -1325,7 +1366,7 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
   return (
     <div style={{ marginBottom: 12 }}>
       <Typography variant="h6">
-        เงื่อนไขการขาย
+        เงื่อนไขการขาย Scarp
         <IconButton
           className={classes.editButton}
           onClick={() => setEditing((prev) => !prev)}
@@ -1333,18 +1374,58 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
           <Create fontSize="small" />
         </IconButton>
       </Typography>
-      {editing ? (
-        <div style={{ display: "flex" }}>
-          <TextField
-            style={{ marginRight: 16 }}
-            fullWidth
-            autoFocus={editing}
+      <Typography style={{ whiteSpace: "pre-line" }}>{value}</Typography>
+      <GeneralDialog
+        open={editing}
+        onClose={() => {
+          setEditing(false);
+          setThisValue(value);
+        }}
+        title="เงื่อนไขการขาย Scarp"
+      >
+        <FormControl
+          component="fieldset"
+          fullWidth
+          style={{ marginBottom: 16, marginTop: 16 }}
+        >
+          <RadioGroup
             value={thisValue}
-            variant="outlined"
-            multiline
-            rowsMax="10"
             onChange={(e) => setThisValue(e.target.value)}
-          />
+          >
+            <FormControlLabel
+              value="เช็คราคา Scarp"
+              control={<Radio color="primary" />}
+              label="เช็คราคา Scarp"
+            />
+            <FormControlLabel
+              value="ขายด่วน"
+              control={<Radio color="primary" />}
+              label="ขายด่วน"
+            />
+            <FormControlLabel
+              value="ขาย (เฉพาะครั้งนี้)"
+              control={<Radio color="primary" />}
+              label="ขาย (เฉพาะครั้งนี้)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 3 เดือน)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 3 เดือน)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 6 เดือน)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 6 เดือน)"
+            />
+            <FormControlLabel
+              value="ขาย (สัญญา 1 ปี)"
+              control={<Radio color="primary" />}
+              label="ขาย (สัญญา 1 ปี)"
+            />
+          </RadioGroup>
+        </FormControl>
+
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <AppButton
             disabled={thisValue === value}
             variant="contained"
@@ -1366,16 +1447,14 @@ const BusinessSaleCondition: React.FC<any> = ({ value }) => {
             ยกเลิก
           </AppButton>
         </div>
-      ) : (
-        <Typography style={{ whiteSpace: "pre-line" }}>{value}</Typography>
-      )}
+      </GeneralDialog>
     </div>
   );
 };
 
 const GoodsDetail: React.FC<any> = ({ detail }) => {
   const classes = useStyles();
-  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const { csrf, setCsrf, _xhrPost, getFormImg } = useContext(AppContext);
   const [data, setData] = useState<any>(null);
   const [businessForm, setBusinessForm] = useState<any>(null);
   const passingProps: any = {
@@ -1419,6 +1498,18 @@ const GoodsDetail: React.FC<any> = ({ detail }) => {
           <div>
             <StatusSetup value={data} />
             <Divider style={{ margin: "16px 0" }} />
+            {data.filelist && data.filelist.length > 0 && (
+              <PreviewImage
+                thisFormId={detail.formid}
+                files={data.filelist.map((file: any) =>
+                  getFormImg({
+                    userid: data.userid,
+                    formid: detail.formid,
+                    file,
+                  })
+                )}
+              />
+            )}
             <BusinessName value={data.business_name} />
             <BusinessAccess
               remain={data.accessremain}

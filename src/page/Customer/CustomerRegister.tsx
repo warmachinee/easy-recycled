@@ -16,7 +16,7 @@ import {
   MobileStepper,
   useTheme,
   Checkbox,
-  Link as MaterialLink
+  Link as MaterialLink,
 } from "@material-ui/core";
 import { AppContext } from "../../AppContext";
 import { Link } from "react-router-dom";
@@ -34,14 +34,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    padding: 16
+    padding: 16,
   },
   avatar: { width: 100, height: 100, margin: "8px auto" },
   displayName: { fontWeight: 600 },
   status: {},
   textField: { marginBottom: 8 },
   stepperRoot: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   buttonGroup: {
     display: "flex",
@@ -50,8 +50,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     bottom: 0,
     width: "100%",
     boxSizing: "border-box",
-    backgroundColor: theme.palette.background.default
-  }
+    backgroundColor: theme.palette.background.default,
+  },
 }));
 
 interface TextMaskCustomProps {
@@ -81,7 +81,7 @@ function TextMaskCustom(props: TextMaskCustomProps) {
         /\d/,
         /\d/,
         /\d/,
-        /\d/
+        /\d/,
       ]}
       placeholderChar={"\u2000"}
     />
@@ -98,7 +98,7 @@ const FormTitle: React.FC<any> = () => {
   );
 };
 
-const FormStepper: React.FC<any> = props => {
+const FormStepper: React.FC<any> = (props) => {
   const classes = useStyles();
   const theme = useTheme();
   const { inputForm, activeStep, setActiveStep } = props;
@@ -181,7 +181,7 @@ const Component0: React.FC<any> = ({ form, ...other }) => {
   );
 };
 
-const Component1: React.FC<any> = props => {
+const Component1: React.FC<any> = (props) => {
   const classes = useStyles();
 
   const {
@@ -193,7 +193,7 @@ const Component1: React.FC<any> = props => {
     district,
     setDistrict,
     subdistrict,
-    setSubdistrict
+    setSubdistrict,
   } = props;
 
   const locationProps: any = {
@@ -202,7 +202,7 @@ const Component1: React.FC<any> = props => {
     district,
     setDistrict,
     subdistrict,
-    setSubdistrict
+    setSubdistrict,
   };
 
   function onFormChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -212,14 +212,14 @@ const Component1: React.FC<any> = props => {
   const orgTypeSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
-      business_type: parseInt((event.target as HTMLInputElement).value)
+      business_type: parseInt((event.target as HTMLInputElement).value),
     });
   };
 
   const orgSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
-      org_size: parseInt((event.target as HTMLInputElement).value)
+      org_size: parseInt((event.target as HTMLInputElement).value),
     });
   };
 
@@ -239,16 +239,16 @@ const Component1: React.FC<any> = props => {
         className={classes.textField}
         fullWidth
         name="location"
-        label="เขตพิ้นที่รับเศษวัสดุเหลือใช้"
+        label="เขตพื้นที่รับเศษวัสดุเหลือใช้"
         value={form.location}
-        onChange={e =>
+        onChange={(e) =>
           setForm({
             ...form,
-            location: (e.target as HTMLInputElement).value
+            location: (e.target as HTMLInputElement).value,
           })
         }
       />
-      {/* <Typography variant="h6">เขตพิ้นที่รับเศษวัสดุเหลือใช้</Typography>
+      {/* <Typography variant="h6">เขตพื้นที่รับเศษวัสดุเหลือใช้</Typography>
       {(province || district || subdistrict) && (
         <Typography>
           {province.name}
@@ -315,8 +315,8 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
         ...form,
         transport: thisTransport,
         ...(form.transport.some((item: any) => item !== "etc") && {
-          transetc: ""
-        })
+          transetc: "",
+        }),
       });
     } else {
       setForm({
@@ -325,8 +325,8 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
           (d: any) => d !== (isEtc ? "etc" : event.target.value)
         ),
         ...(form.transport.some((item: any) => item !== "etc") && {
-          transetc: ""
-        })
+          transetc: "",
+        }),
       });
     }
   };
@@ -340,8 +340,8 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
         ...form,
         document: thisDocument,
         ...(form.document.some((item: any) => item !== "etc") && {
-          docsetc: ""
-        })
+          docsetc: "",
+        }),
       });
     } else {
       setForm({
@@ -350,8 +350,8 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
           (d: any) => d !== (isEtc ? "etc" : event.target.value)
         ),
         ...(form.document.some((item: any) => item !== "etc") && {
-          docsetc: ""
-        })
+          docsetc: "",
+        }),
       });
     }
   };
@@ -388,7 +388,7 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
                   alignItems: "center",
                   marginLeft: -11,
                   marginRight: 16,
-                  verticalAlign: "middle"
+                  verticalAlign: "middle",
                 }}
               >
                 <Checkbox
@@ -403,10 +403,10 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
                   label="อื่นๆ"
                   size="small"
                   value={form.transetc}
-                  onChange={e =>
+                  onChange={(e) =>
                     setForm({
                       ...form,
-                      transetc: (e.target as HTMLInputElement).value
+                      transetc: (e.target as HTMLInputElement).value,
                     })
                   }
                 />
@@ -455,7 +455,7 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
                   alignItems: "center",
                   marginLeft: -11,
                   marginRight: 16,
-                  verticalAlign: "middle"
+                  verticalAlign: "middle",
                 }}
               >
                 <Checkbox
@@ -470,10 +470,10 @@ const Component2: React.FC<any> = ({ inputForm, form, setForm }) => {
                   label="อื่นๆ"
                   size="small"
                   value={form.docsetc}
-                  onChange={e =>
+                  onChange={(e) =>
                     setForm({
                       ...form,
-                      docsetc: (e.target as HTMLInputElement).value
+                      docsetc: (e.target as HTMLInputElement).value,
                     })
                   }
                 />
@@ -504,7 +504,7 @@ const Component3: React.FC<any> = ({
   setForm,
   setActiveStep,
   checked,
-  setChecked
+  setChecked,
 }) => {
   const classes = useStyles();
   const { _dateToString, _parseLocation } = useContext(AppContext);
@@ -711,7 +711,7 @@ const RegisterForm: React.FC<any> = ({
   form,
   setForm,
   inputForm,
-  setInputForm
+  setInputForm,
 }) => {
   const classes = useStyles();
 
@@ -755,7 +755,7 @@ const RegisterForm: React.FC<any> = ({
         name="tel"
         label="เบอร์โทรศัพท์"
         InputProps={{
-          inputComponent: TextMaskCustom as any
+          inputComponent: TextMaskCustom as any,
         }}
         value={form.tel}
         onChange={onFormChange}
@@ -772,7 +772,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     _xhrPost,
     phoneFormatToNumber,
     getSess,
-    _parseLocation
+    _parseLocation,
   } = useContext(AppContext);
   const [form, setForm] = useState<any>(null);
   const [activeStep, setActiveStep] = React.useState<any>(0);
@@ -794,7 +794,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadregister",
-      body: { action: "customer_register", type: "customer" }
+      body: { action: "customer_register", type: "customer" },
     });
     setCsrf(res.csrf);
 
@@ -811,12 +811,12 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
       business_type: inputForm["business_type"][business_type],
       org_size: inputForm["org_size"][org_size],
       ...(docsetc !== "" && { docsetc }),
-      ...(transetc !== "" && { transetc })
+      ...(transetc !== "" && { transetc }),
     };
     const res = await _xhrPost({
       csrf,
       url: "register",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -841,7 +841,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
         document: [],
         docsetc: "",
         transport: [],
-        transetc: ""
+        transetc: "",
       });
     }
   }, [profileData]);
@@ -869,7 +869,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
             form,
             setForm,
             checked,
-            setChecked
+            setChecked,
           }}
           // {...locationProps}
         />

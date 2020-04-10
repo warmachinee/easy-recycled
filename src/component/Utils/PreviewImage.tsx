@@ -6,11 +6,13 @@ import {
   Close,
   Fullscreen as FullscreenIcon,
   ArrowBackIos,
-  ArrowForwardIos
+  ArrowForwardIos,
 } from "@material-ui/icons";
 import { AppContext } from "../../AppContext";
 import FullscreenImage from "../Dialog/FullscreenImage";
-import { grey } from "@material-ui/core/colors";
+import { grey, red } from "@material-ui/core/colors";
+import AppButton from "../../AppComponent/AppButton";
+import ConfirmDialog from "../Dialog/ConfirmDialog";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -19,40 +21,53 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "space-around",
     overflow: "hidden",
     backgroundColor: theme.palette.background.paper,
-    margin: "16px 0"
+    margin: "16px 0",
   },
   slider: {
     position: "relative",
-    width: "100%"
+    width: "100%",
   },
   itemGrid: {
-    height: 240,
+    height: 300,
     backgroundColor: grey[900],
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   item: {
-    maxHeight: 240,
+    maxHeight: 300,
     width: "100%",
-    display: "block"
-  }
+    display: "block",
+    objectFit: "contain",
+  },
 }));
 
 export interface PreviewImageProps {}
 
 const PreviewImage: React.FC<PreviewImageProps | any> = ({
   files,
-  editting
+  editting,
+  rawAlbum,
+  loadBusinessForm,
+  thisFormId,
 }) => {
   const classes = useStyles();
-  const { _openFullScreen, _closeFullscreen } = useContext(AppContext);
+  const {
+    csrf,
+    setCsrf,
+    _xhrPost,
+    addSnackbar,
+    _openFullScreen,
+    _closeFullscreen,
+    profileData,
+  } = useContext(AppContext);
   const [open, setOpen] = useState<any>(false);
   const [fullscreenItem, setFullscreenItem] = useState<any>(0);
   const imgArr = [...(editting ? files : Array.from(files))];
+  const [onDeleteState, setOnDeleteState] = useState<any>(false);
 
   function handleOpen(image: any) {
     setOpen(true);
@@ -77,6 +92,38 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
     setFullscreenItem((item: any) => (item + 1) % imgArr.length);
   }
 
+  function onDeleteImage() {
+    setOnDeleteState(true);
+  }
+
+  function onCancelDelete() {
+    setOnDeleteState(false);
+  }
+
+  async function onDeletePic() {
+    const sendObj = {
+      action: "delpic",
+      formid: thisFormId,
+      linetoken: profileData.userId,
+      picpath: rawAlbum[fullscreenItem],
+    };
+    console.log(sendObj);
+    const res = await _xhrPost({
+      csrf,
+      url: "formsystem",
+      body: sendObj,
+    });
+    setCsrf(res.csrf);
+    if (res.data.status === "success") {
+      addSnackbar({ message: "ลบรูปสำเร็จ", variant: "success" });
+      loadBusinessForm();
+      onCancelDelete();
+      onBack();
+    } else {
+      addSnackbar({ message: "ลบรูปไม่สำเร็จ", variant: "error" });
+    }
+  }
+
   return (
     <div className={classes.root}>
       <div className={classes.slider}>
@@ -92,30 +139,49 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
             </div>
           ))}
         </SwipeableViews>
-        <IconButton
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "calc(50% - 12px)",
-            backgroundColor: "white",
-            opacity: 0.8
-          }}
-          onClick={onBack}
-        >
-          <ArrowBackIos />
-        </IconButton>
-        <IconButton
-          style={{
-            position: "absolute",
-            right: 0,
-            top: "calc(50% - 12px)",
-            backgroundColor: "white",
-            opacity: 0.8
-          }}
-          onClick={onNext}
-        >
-          <ArrowForwardIos />
-        </IconButton>
+        {imgArr.length > 1 && (
+          <React.Fragment>
+            <IconButton
+              style={{
+                position: "absolute",
+                left: 0,
+                top: "calc(50% - 12px)",
+                backgroundColor: "white",
+                opacity: 0.8,
+              }}
+              onClick={onBack}
+            >
+              <ArrowBackIos />
+            </IconButton>
+            <IconButton
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "calc(50% - 12px)",
+                backgroundColor: "white",
+                opacity: 0.8,
+              }}
+              onClick={onNext}
+            >
+              <ArrowForwardIos />
+            </IconButton>
+          </React.Fragment>
+        )}
+        {rawAlbum && profileData && (
+          <AppButton
+            buttonColor={red}
+            variant="contained"
+            size="small"
+            style={{
+              position: "absolute",
+              right: 4,
+              bottom: 4,
+            }}
+            onClick={onDeleteImage}
+          >
+            ลบรูป
+          </AppButton>
+        )}
       </div>
       <FullscreenImage open={open} onClose={handleClose} fullScreen>
         <div
@@ -124,40 +190,78 @@ const PreviewImage: React.FC<PreviewImageProps | any> = ({
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           <SwipeableViews index={fullscreenItem}>
             {imgArr.map((image: any, i: number) => (
-              <img key={i} style={{ width: "100%" }} src={image} alt={`${i}`} />
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  height: "100%",
+                }}
+              >
+                <img
+                  style={{
+                    width: "100%",
+                    maxHeight: window.innerHeight - 48,
+                    objectFit: "contain",
+                  }}
+                  src={image}
+                  alt={`${i}`}
+                />
+              </div>
             ))}
           </SwipeableViews>
-          <IconButton
-            style={{
-              position: "absolute",
-              left: 0,
-              top: "calc(50% - 12px)",
-              backgroundColor: "white",
-              opacity: 0.8
-            }}
-            onClick={onBack}
-          >
-            <ArrowBackIos />
-          </IconButton>
-          <IconButton
-            style={{
-              position: "absolute",
-              right: 0,
-              top: "calc(50% - 12px)",
-              backgroundColor: "white",
-              opacity: 0.8
-            }}
-            onClick={onNext}
-          >
-            <ArrowForwardIos />
-          </IconButton>
+          {imgArr.length > 1 && (
+            <React.Fragment>
+              <IconButton
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: "calc(50% - 12px)",
+                  backgroundColor: "white",
+                  opacity: 0.8,
+                }}
+                onClick={onBack}
+              >
+                <ArrowBackIos />
+              </IconButton>
+              <IconButton
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "calc(50% - 12px)",
+                  backgroundColor: "white",
+                  opacity: 0.8,
+                }}
+                onClick={onNext}
+              >
+                <ArrowForwardIos />
+              </IconButton>
+            </React.Fragment>
+          )}
         </div>
       </FullscreenImage>
+      {rawAlbum && profileData && (
+        <ConfirmDialog
+          type="delete"
+          open={onDeleteState}
+          onClose={onCancelDelete}
+          onCancel={onCancelDelete}
+          onSubmit={onDeletePic}
+          title="คุณแน่ใจหรือไม่ว่าต้องการจะลบรูป ?"
+        >
+          <img
+            style={{ width: "100%" }}
+            src={imgArr[fullscreenItem]}
+            alt={rawAlbum[fullscreenItem]}
+          />
+        </ConfirmDialog>
+      )}
     </div>
   );
 };

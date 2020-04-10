@@ -10,13 +10,13 @@ import {
   Menu,
   MenuItem,
   Popover,
-  Badge
+  Badge,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
   MoreVert,
   ExitToApp,
-  Notifications
+  Notifications,
 } from "@material-ui/icons";
 import { green, grey } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
@@ -27,13 +27,13 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
 const NotificationsList = Loadable({
@@ -41,20 +41,20 @@ const NotificationsList = Loadable({
     import(
       /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   title: { flexGrow: 1 },
-  appBar: { width: `calc(100% - ${drawerWidth}px)`, marginLeft: drawerWidth }
+  appBar: { width: `calc(100% - ${drawerWidth}px)`, marginLeft: drawerWidth },
 }));
 
 const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
   match,
   history,
-  location
+  location,
 }) => {
   const classes = useStyles();
   const {
@@ -66,7 +66,7 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     sess,
     _onLocalhostFn,
     notifications,
-    readNotifications
+    readNotifications,
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -108,7 +108,12 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
         {notifications && (
           <IconButton
             onClick={(e: any) => {
-              readNotifications();
+              if (
+                notifications.list.filter((item: any) => item.read === 0)
+                  .length > 0
+              ) {
+                readNotifications();
+              }
               notiClick(e);
             }}
           >
@@ -155,11 +160,11 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
         onClose={notiClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right"
+          horizontal: "right",
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right"
+          horizontal: "right",
         }}
         PaperProps={{ style: { width: 360, maxHeight: "60%" } }}
       >
@@ -168,4 +173,4 @@ const AdminHeader: React.FC<RouteComponentProps<{}>> = ({
     </AppBar>
   );
 };
-export default withRouter(props => <AdminHeader {...props} />);
+export default withRouter((props) => <AdminHeader {...props} />);

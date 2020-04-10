@@ -7,13 +7,13 @@ import {
   Typography,
   Avatar,
   Menu,
-  MenuItem
+  MenuItem,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
   MoreVert,
   ExitToApp,
-  Refresh
+  Refresh,
 } from "@material-ui/icons";
 import { green, grey } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
@@ -23,7 +23,7 @@ import { withRouter, RouteComponentProps } from "react-router-dom";
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -31,21 +31,26 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({
-  avatar: { position: "absolute", left: 0 }
+const useStyles = makeStyles((theme) => ({
+  avatar: { position: "absolute", left: 0 },
 }));
 
 const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
   userInfo,
   handleLogout,
   history,
-  location
+  location,
 }) => {
   const classes = useStyles();
-  const { useConfirmDeleteItem, sess, getMarketPlace } = useContext(AppContext);
+  const {
+    useConfirmDeleteItem,
+    sess,
+    getMarketPlace,
+    profileData,
+  } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -62,8 +67,8 @@ const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
     <AppBar position="fixed" color="inherit">
       <Toolbar style={{ paddingRight: 0 }}>
         <IconButton style={{ padding: 0 }} onClick={() => history.replace("/")}>
-          {userInfo && userInfo.info ? (
-            <Avatar src={userInfo.info.picture} className={classes.avatar} />
+          {profileData ? (
+            <Avatar src={profileData.pictureUrl} className={classes.avatar} />
           ) : (
             <Avatar style={{ marginRight: 16 }} className={classes.avatar}>
               {sess ? sess.fullname.charAt(0) : "M"}
@@ -109,4 +114,4 @@ const MarketHeader: React.FC<any | RouteComponentProps<{}>> = ({
     </AppBar>
   );
 };
-export default withRouter(props => <MarketHeader {...props} />);
+export default withRouter((props) => <MarketHeader {...props} />);

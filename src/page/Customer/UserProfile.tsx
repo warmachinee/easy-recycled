@@ -11,7 +11,7 @@ import {
   Select,
   MenuItem,
   Link as MaterialLink,
-  Button
+  Button,
 } from "@material-ui/core";
 import { Settings, ArrowBackIos } from "@material-ui/icons";
 import MaskedInput from "react-text-mask";
@@ -24,7 +24,7 @@ const FullscreenImage = Loadable({
     import(
       /* webpackChunkName: 'FullscreenImage' */ "../../component/Dialog/FullscreenImage"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -32,7 +32,7 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const UploadDocs = Loadable({
@@ -40,14 +40,14 @@ const UploadDocs = Loadable({
     import(
       /* webpackChunkName: 'UploadDocs' */ "../../component/Utils/UploadDocs"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   avatar: { height: 128, width: 128, margin: "auto" },
   label: { fontWeight: 700, width: "30%" },
   text: { width: "70%" },
-  textField: { marginBottom: 12 }
+  textField: { marginBottom: 12 },
 }));
 
 export interface UserProfileProps {}
@@ -79,7 +79,7 @@ function TextMaskCustom(props: TextMaskCustomProps) {
         /\d/,
         /\d/,
         /\d/,
-        /\d/
+        /\d/,
       ]}
       placeholderChar={"\u2000"}
     />
@@ -93,7 +93,7 @@ const docsArr = [
   "cert_book",
   "doc_20",
   "doc_105",
-  "doc_106"
+  "doc_106",
 ];
 
 const docsArrString = [
@@ -103,7 +103,7 @@ const docsArrString = [
   "หนังสือรับรองบริษัท",
   "ภพ. 20",
   "ใบรง. 4 ลำดับที่ 105",
-  "ใบรง. 4 ลำดับที่ 106"
+  "ใบรง. 4 ลำดับที่ 106",
 ];
 
 const docsLabel: any = {
@@ -113,10 +113,10 @@ const docsLabel: any = {
   cert_book: "หนังสือรับรองบริษัท",
   doc_20: "ภพ. 20",
   doc_105: "ใบรง. 4 ลำดับที่ 105",
-  doc_106: "ใบรง. 4 ลำดับที่ 106"
+  doc_106: "ใบรง. 4 ลำดับที่ 106",
 };
 
-const DocsForm: React.FC<any> = props => {
+const DocsForm: React.FC<any> = (props) => {
   const classes = useStyles();
   const {
     csrf,
@@ -124,7 +124,7 @@ const DocsForm: React.FC<any> = props => {
     profileData,
     _xhrPost,
     _fetchFile,
-    addSnackbar
+    addSnackbar,
   } = useContext(AppContext);
   const {
     docsType,
@@ -135,7 +135,7 @@ const DocsForm: React.FC<any> = props => {
     docs,
     setDocs,
     setIsUpload,
-    getInfo
+    getInfo,
   } = props;
 
   async function uploadDocs() {
@@ -145,9 +145,9 @@ const DocsForm: React.FC<any> = props => {
       headers: {
         action: "docs",
         type: "customer",
-        docstype: docsType
+        docstype: docsType,
       },
-      body: { [`${docsType}image`]: docs }
+      body: { [`${docsType}image`]: docs },
     });
     if (imgRes.data.status === "success") {
       addSnackbar({ message: "อัพโหลดเอกสารสำเร็จ", variant: "success" });
@@ -168,7 +168,9 @@ const DocsForm: React.FC<any> = props => {
         <FormControl>
           <Select value={docsType} onChange={handleChange} variant="outlined">
             {docsArr.map((d: any, i: number) => (
-              <MenuItem value={d}>{docsArrString[i]}</MenuItem>
+              <MenuItem key={i} value={d}>
+                {docsArrString[i]}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -240,7 +242,7 @@ const ProfileComponent: React.FC<any> = ({
   data,
   booleanDispatch,
   getInfo,
-  userDocs
+  userDocs,
 }) => {
   const classes = useStyles();
   const {
@@ -251,12 +253,12 @@ const ProfileComponent: React.FC<any> = ({
     checkSession,
     phoneFormatToNumber,
     stringToPhone,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState<any>(false);
   const [thisData, setThisData] = useState<any>({
     ...data,
-    tel: stringToPhone(`0${data.tel}`)
+    tel: stringToPhone(`0${data.tel}`),
   });
   const [docs, setDocs] = useState<any>(null);
   const [docsDisplay, setDocsDisplay] = useState<any>(null);
@@ -292,7 +294,7 @@ const ProfileComponent: React.FC<any> = ({
       action: "editprofile",
       linetoken: profileData.userId,
       type: "customer",
-      picture: profileData.pictureUrl
+      picture: profileData.pictureUrl,
     };
     const keyArr = ["displayname", "fullname", "lastname", "business_name"];
     for (var i = 0; i < keyArr.length; i++) {
@@ -306,7 +308,7 @@ const ProfileComponent: React.FC<any> = ({
     const res = await _xhrPost({
       csrf,
       url: "usersystem",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -341,7 +343,7 @@ const ProfileComponent: React.FC<any> = ({
             fullWidth
             label="ชื่อที่แสดง"
             value={thisData.displayname}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, displayname: e.target.value })
             }
           />
@@ -350,7 +352,7 @@ const ProfileComponent: React.FC<any> = ({
             fullWidth
             label="ชื่อ"
             value={thisData.fullname}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, fullname: e.target.value })
             }
           />
@@ -359,7 +361,7 @@ const ProfileComponent: React.FC<any> = ({
             fullWidth
             label="นามสกุล"
             value={thisData.lastname}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, lastname: e.target.value })
             }
           />
@@ -369,17 +371,17 @@ const ProfileComponent: React.FC<any> = ({
             fullWidth
             label="เบอร์โทรศัพท์"
             InputProps={{
-              inputComponent: TextMaskCustom as any
+              inputComponent: TextMaskCustom as any,
             }}
             value={thisData.tel}
-            onChange={e => setThisData({ ...thisData, tel: e.target.value })}
+            onChange={(e) => setThisData({ ...thisData, tel: e.target.value })}
           />
           <TextField
             className={classes.textField}
             fullWidth
             label="ชื่อกิจการ"
             value={thisData.business_name}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, business_name: e.target.value })
             }
           />
@@ -392,7 +394,7 @@ const ProfileComponent: React.FC<any> = ({
               onClick={() => {
                 setThisData({
                   ...data,
-                  tel: `0${data.tel}`
+                  tel: `0${data.tel}`,
                 });
                 setIsEditing(false);
               }}
@@ -490,7 +492,7 @@ const ProfileComponent: React.FC<any> = ({
             setDocsType,
             handleChange,
             getInfo,
-            setIsUpload
+            setIsUpload,
           }}
         />
       </GeneralDialog>
@@ -498,7 +500,7 @@ const ProfileComponent: React.FC<any> = ({
   );
 };
 
-const UserProfile: React.FC<UserProfileProps | any> = props => {
+const UserProfile: React.FC<UserProfileProps | any> = (props) => {
   const classes = useStyles();
   const { userInfo } = props;
   const { info, docs } = userInfo;

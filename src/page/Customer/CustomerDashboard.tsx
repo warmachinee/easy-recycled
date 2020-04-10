@@ -10,7 +10,7 @@ import {
   Paper,
   IconButton,
   Divider,
-  TextField
+  TextField,
 } from "@material-ui/core";
 import { green, grey } from "@material-ui/core/colors";
 import { Add, AttachMoney } from "@material-ui/icons";
@@ -19,18 +19,18 @@ import { BooleanReducerState, BooleanReducerActions } from "apptype";
 const AppButton = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'AppButton' */ "../../AppComponent/AppButton"),
-  loading: () => null
+  loading: () => null,
 });
 
 const TopupList = Loadable({
   loader: () => import(/* webpackChunkName: 'TopupList' */ "./TopupList"),
-  loading: () => null
+  loading: () => null,
 });
 
 const MarketHistory = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'MarketHistory' */ "./MarketHistory"),
-  loading: () => null
+  loading: () => null,
 });
 
 const NotificationsList = Loadable({
@@ -38,18 +38,18 @@ const NotificationsList = Loadable({
     import(
       /* webpackChunkName: 'NotificationsList' */ "../../component/Utils/NotificationsList"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const CustomerHeader = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'CustomerHeader' */ "./CustomerHeader"),
-  loading: () => null
+  loading: () => null,
 });
 
 const UserProfile = Loadable({
   loader: () => import(/* webpackChunkName: 'UserProfile' */ "./UserProfile"),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -57,7 +57,7 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -65,7 +65,7 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const UploadButton = Loadable({
@@ -73,22 +73,22 @@ const UploadButton = Loadable({
     import(
       /* webpackChunkName: 'UploadButton' */ "../../component/Utils/UploadButton"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
-const TopupListRoute = withRouter(props => <TopupList {...props} />);
+const TopupListRoute = withRouter((props) => <TopupList {...props} />);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     padding: 16,
     margin: "8px 16px",
-    borderRadius: 8
-  }
+    borderRadius: 8,
+  },
 }));
 
 export type CustomerDashboardProps = RouteComponentProps<{}>;
 
-const BalanceCard: React.FC<any> = props => {
+const BalanceCard: React.FC<any> = (props) => {
   const classes = useStyles();
   const {
     csrf,
@@ -96,7 +96,7 @@ const BalanceCard: React.FC<any> = props => {
     profileData,
     _xhrPost,
     handleLogout,
-    _thousandSeperater
+    _thousandSeperater,
   } = useContext(AppContext);
   const { userInfo, booleanDispatch } = props;
   return (
@@ -105,7 +105,7 @@ const BalanceCard: React.FC<any> = props => {
         style={{
           display: "flex",
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
         <Typography variant="h6" style={{ marginRight: 16 }}>
@@ -161,7 +161,7 @@ const AppTopupChoice: React.FC<any> = ({ value, topup, setTopup }) => {
   );
 };
 
-const AddTopup: React.FC<any> = props => {
+const AddTopup: React.FC<any> = (props) => {
   const {
     topupEtc,
     topup,
@@ -170,7 +170,7 @@ const AddTopup: React.FC<any> = props => {
     onCreate,
     slip,
     setSlip,
-    bankDetail
+    bankDetail,
   } = props;
   return (
     <div>
@@ -211,7 +211,7 @@ const AddTopup: React.FC<any> = props => {
           size="small"
           type="number"
           label="จำนวนเงิน"
-          onChange={e => setTopupEtc(parseInt(e.target.value))}
+          onChange={(e) => setTopupEtc(parseInt(e.target.value))}
         />
       )}
       <Divider style={{ margin: "16px 0" }} />
@@ -236,7 +236,7 @@ const AddTopup: React.FC<any> = props => {
 
 const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
   history,
-  location
+  location,
 }) => {
   const classes = useStyles();
   const {
@@ -253,19 +253,20 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     realtimeAccess,
     addSnackbar,
     userInfo,
-    setUserInfo
+    setUserInfo,
+    liffLogin,
   } = useContext(AppContext);
 
   const [
     { addTopup, topupList, noti, userProfile },
-    booleanDispatch
+    booleanDispatch,
   ] = useReducer<React.Reducer<BooleanReducerState, BooleanReducerActions>>(
     booleanReducer,
     {
       forgot: false,
       topupList: location.hash === "#topup_list",
       noti: false,
-      userProfile: false
+      userProfile: false,
     }
   );
   const [topup, setTopup] = useState<any>(50);
@@ -274,14 +275,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
   const [bankDetail, setBankDetail] = useState<any>(null);
   const [
     { confirmState, item: itemOnCreate },
-    onCreate
+    onCreate,
   ] = useConfirmDeleteItem();
 
   async function getInfo() {
     const res = await _xhrPost({
       csrf,
       url: "loadusersystem",
-      body: { action: "info", linetoken: profileData.userId, type: "customer" }
+      body: { action: "info", linetoken: profileData.userId, type: "customer" },
     });
 
     setCsrf(res.csrf);
@@ -291,9 +292,34 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     ) {
       checkSession();
     } else {
-      setUserInfo(res.data);
-      getBankDetail();
+      const thisData = res.data;
+      const thisInfo = thisData.info;
+      if (
+        // thisInfo.statusmassage !== profileData.statusMessage ||
+        thisInfo.picture !== profileData.pictureUrl
+      ) {
+        updateProfile();
+      } else {
+        setUserInfo(thisData);
+        getBankDetail();
+      }
     }
+  }
+
+  async function updateProfile() {
+    const res = await _xhrPost({
+      csrf,
+      url: "usersystem",
+      body: {
+        action: "editprofile",
+        linetoken: profileData.userId,
+        type: "customer",
+        picture: profileData.pictureUrl,
+        statusmassage: profileData.statusMessage,
+      },
+    });
+    setCsrf(res.csrf);
+    liffLogin();
   }
 
   async function getBankDetail() {
@@ -303,8 +329,8 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       body: {
         action: "howtotopup",
         linetoken: profileData.userId,
-        type: "customer"
-      }
+        type: "customer",
+      },
     });
 
     setCsrf(res.csrf);
@@ -316,12 +342,12 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       action: "createtopup",
       linetoken: profileData.userId,
       type: "customer",
-      value: topup === "เลือกจำนวนเงิน" ? parseInt(topupEtc) : topup
+      value: topup === "เลือกจำนวนเงิน" ? parseInt(topupEtc) : topup,
     };
     const res = await _xhrPost({
       csrf,
       url: "usersystem",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -334,9 +360,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
         headers: {
           action: "receipt",
           type: "customer",
-          requestid: res.data.requestid
+          requestid: res.data.requestid,
         },
-        body: { receiptimage: slip }
+        body: { receiptimage: slip },
       });
       setCsrf(imgRes.csrf);
       if (imgRes.data.status === "success") {
@@ -364,7 +390,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
   useEffect(() => {
     booleanDispatch({
       type: `${location.hash === "#topup_list"}`,
-      key: "topupList"
+      key: "topupList",
     });
   }, [location]);
 
@@ -381,7 +407,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           width: "calc(100% - 32px)",
           fontSize: 24,
           letterSpacing: 4,
-          padding: 24
+          padding: 24,
         }}
         onClick={() => history.replace("/market")}
       >
@@ -428,7 +454,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
             onCreate,
             slip,
             setSlip,
-            bankDetail
+            bankDetail,
           }}
         />
       </GeneralDialog>
@@ -454,4 +480,4 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
   );
 };
 
-export default withRouter(props => <CustomerDashboard {...props} />);
+export default withRouter((props) => <CustomerDashboard {...props} />);

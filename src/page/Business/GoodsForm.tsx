@@ -23,13 +23,13 @@ import {
   Link as MaterialLink,
   Theme,
   GridList,
-  GridListTile
+  GridListTile,
 } from "@material-ui/core";
 import {
   Close as CloseIcon,
   KeyboardArrowRight,
   KeyboardArrowLeft,
-  Cancel
+  Cancel,
 } from "@material-ui/icons";
 import { AppContext } from "../../AppContext";
 import AppButton from "../../AppComponent/AppButton";
@@ -44,7 +44,7 @@ const PreviewImage = Loadable({
     import(
       /* webpackChunkName: 'PreviewImage' */ "../../component/Utils/PreviewImage"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const UploadAlbum = Loadable({
@@ -52,7 +52,7 @@ const UploadAlbum = Loadable({
     import(
       /* webpackChunkName: 'UploadAlbum' */ "../../component/Utils/UploadAlbum"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -60,7 +60,7 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -68,12 +68,12 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
   stepperRoot: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   buttonGroup: {
     display: "flex",
@@ -82,13 +82,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     bottom: 0,
     width: "100%",
     boxSizing: "border-box",
-    backgroundColor: theme.palette.background.default
+    backgroundColor: theme.palette.background.default,
   },
   gridList: {
     flexWrap: "nowrap",
     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: "translateZ(0)"
-  }
+    transform: "translateZ(0)",
+  },
 }));
 
 const FormTitle: React.FC<any> = () => {
@@ -101,7 +101,7 @@ const FormTitle: React.FC<any> = () => {
 
 const formStep = 4;
 
-const FormStepper: React.FC<any> = props => {
+const FormStepper: React.FC<any> = (props) => {
   const classes = useStyles();
   const theme = useTheme();
   const { businessForm, activeStep, setActiveStep } = props;
@@ -175,7 +175,7 @@ const ComponentFromStep: React.FC<any> = ({ activeStep, ...other }) => {
   }
 };
 
-const SelectProduct: React.FC<any> = props => {
+const SelectProduct: React.FC<any> = (props) => {
   const { label, value, onChange, menuArr } = props;
   const inputLabel = React.useRef<HTMLLabelElement>(null);
   const [labelWidth, setLabelWidth] = React.useState(0);
@@ -204,19 +204,19 @@ const ComponentStep0: React.FC<any> = ({
   businessForm,
   form,
   setForm,
-  onEndSale
+  onEndSale,
 }) => {
   const positionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
-      position: parseInt((event.target as HTMLInputElement).value)
+      position: parseInt((event.target as HTMLInputElement).value),
     });
   };
 
   const orgSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
-      org_size: parseInt((event.target as HTMLInputElement).value)
+      org_size: parseInt((event.target as HTMLInputElement).value),
     });
   };
 
@@ -251,15 +251,15 @@ const ComponentStep0: React.FC<any> = ({
         style={{ marginBottom: 16 }}
         variant="outlined"
         size="small"
-        onChange={e =>
+        onChange={(e) =>
           setForm({
             ...form,
-            business_name: (e.target as HTMLInputElement).value
+            business_name: (e.target as HTMLInputElement).value,
           })
         }
       />
-      <Typography variant="h6">เงื่อนไขการขาย</Typography>
-      <TextField
+      {/* <Typography variant="h6">เงื่อนไขการขาย Scarp</Typography> */}
+      {/* <TextField
         fullWidth
         name="sale_condition"
         value={form.sale_condition}
@@ -268,13 +268,60 @@ const ComponentStep0: React.FC<any> = ({
         multiline
         size="small"
         rowsMax="10"
-        onChange={e =>
+        onChange={(e) =>
           setForm({
             ...form,
-            sale_condition: (e.target as HTMLInputElement).value
+            sale_condition: (e.target as HTMLInputElement).value,
           })
         }
-      />
+      /> */}
+      <FormControl
+        component="fieldset"
+        fullWidth
+        style={{ marginBottom: 16, marginTop: 16 }}
+      >
+        <FormLabel component="legend">เงื่อนไขการขาย Scarp</FormLabel>
+        <RadioGroup
+          value={form.sale_condition}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              sale_condition: (e.target as HTMLInputElement).value,
+            })
+          }
+        >
+          <FormControlLabel
+            value="เช็คราคา Scarp"
+            control={<Radio color="primary" />}
+            label="เช็คราคา Scarp"
+          />
+          <FormControlLabel
+            value="ขายด่วน"
+            control={<Radio color="primary" />}
+            label="ขายด่วน"
+          />
+          <FormControlLabel
+            value="ขาย (เฉพาะครั้งนี้)"
+            control={<Radio color="primary" />}
+            label="ขาย (เฉพาะครั้งนี้)"
+          />
+          <FormControlLabel
+            value="ขาย (สัญญา 3 เดือน)"
+            control={<Radio color="primary" />}
+            label="ขาย (สัญญา 3 เดือน)"
+          />
+          <FormControlLabel
+            value="ขาย (สัญญา 6 เดือน)"
+            control={<Radio color="primary" />}
+            label="ขาย (สัญญา 6 เดือน)"
+          />
+          <FormControlLabel
+            value="ขาย (สัญญา 1 ปี)"
+            control={<Radio color="primary" />}
+            label="ขาย (สัญญา 1 ปี)"
+          />
+        </RadioGroup>
+      </FormControl>
       {businessForm && (
         <React.Fragment>
           <FormControl
@@ -312,7 +359,10 @@ const ComponentStep1: React.FC<any> = ({
   album,
   setAlbum,
   albumDisplay,
-  setAlbumDisplay
+  setAlbumDisplay,
+  rawAlbum,
+  loadBusinessForm,
+  thisFormId,
 }) => {
   const classes = useStyles();
   const { _dateToString, _parseLocation } = useContext(AppContext);
@@ -328,7 +378,7 @@ const ComponentStep1: React.FC<any> = ({
     district,
     setDistrict,
     subdistrict,
-    setSubdistrict
+    setSubdistrict,
   };
 
   const productChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -356,13 +406,13 @@ const ComponentStep1: React.FC<any> = ({
     const thisArr = [...productArr];
     thisArr.push({
       product: getProduct({ type: "product", value: productVal }),
-      amount: getProduct({ type: "amount", value: productAmount })
+      amount: getProduct({ type: "amount", value: productAmount }),
     });
     setProductArr(thisArr);
     setForm({
       ...form,
-      product: thisArr.map(d => d.product),
-      productvalue: thisArr.map(d => d.amount)
+      product: thisArr.map((d) => d.product),
+      productvalue: thisArr.map((d) => d.amount),
     });
     setProductVal("0");
     setProductAmount("0");
@@ -375,10 +425,10 @@ const ComponentStep1: React.FC<any> = ({
       ...form,
       product: thisArr
         .filter((d: any, i: number) => i !== index)
-        .map(d => d.product),
+        .map((d) => d.product),
       productvalue: thisArr
         .filter((d: any, i: number) => i !== index)
-        .map(d => d.amount)
+        .map((d) => d.amount),
     });
   }
 
@@ -395,16 +445,18 @@ const ComponentStep1: React.FC<any> = ({
       thisArr.push({ product: form.product[i], amount: form.productvalue[i] });
     });
     setProductArr(thisArr);
-    setProvince(_parseLocation(form.location).province);
-    setDistrict(_parseLocation(form.location).district);
-    setSubdistrict(_parseLocation(form.location).subdistrict);
+    if (editting) {
+      setProvince(_parseLocation(form.location).province);
+      setDistrict(_parseLocation(form.location).district);
+      setSubdistrict(_parseLocation(form.location).subdistrict);
+    }
   }, []);
 
   useEffect(() => {
     if (province || district || subdistrict) {
       setForm({
         ...form,
-        location: JSON.stringify({ province, district, subdistrict })
+        location: JSON.stringify({ province, district, subdistrict }),
         // location: `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
       });
     }
@@ -461,9 +513,9 @@ const ComponentStep1: React.FC<any> = ({
         <UploadAlbum
           fullWidth
           label="อัพโหลดอัลบัมสินค้า"
-          {...{ album, setAlbum, albumDisplay, setAlbumDisplay }}
+          {...{ album, setAlbum, albumDisplay, setAlbumDisplay, editting }}
         />
-        {album && album.length > 0 && album.length <= 10 && (
+        {album && album.length > 0 && (
           <AppButton
             buttonColor={green}
             onClick={() => {
@@ -485,11 +537,14 @@ const ComponentStep1: React.FC<any> = ({
             รูปทั้งหมด {album.length}
           </Typography>
         ))}
-      {albumDisplay && albumDisplay.length <= 10 && (
-        <PreviewImage {...{ editting }} files={albumDisplay} />
+      {albumDisplay && albumDisplay.length > 0 && (
+        <PreviewImage
+          {...{ editting, rawAlbum, loadBusinessForm, thisFormId }}
+          files={albumDisplay.slice(0, 10)}
+        />
       )}
       <Divider style={{ margin: "16px 0" }} />
-      <Typography variant="h6">เขตพิ้นที่รับเศษวัสดุเหลือใช้</Typography>
+      <Typography variant="h6">เขตพื้นที่รับเศษวัสดุเหลือใช้</Typography>
       {(province || district || subdistrict) && (
         <Typography>
           {province.name}
@@ -520,7 +575,7 @@ const ComponentStep1: React.FC<any> = ({
         onChange={(d: any) =>
           setForm({
             ...form,
-            appointment: d
+            appointment: d,
           })
         }
         labelFunc={() => {
@@ -543,7 +598,7 @@ const ComponentStep1: React.FC<any> = ({
         onChange={(d: any) =>
           setForm({
             ...form,
-            auctiondate: d
+            auctiondate: d,
           })
         }
         labelFunc={() => {
@@ -567,8 +622,8 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
         ...form,
         transport: thisTransport,
         ...(form.transport.some((item: any) => item !== "etc") && {
-          transetc: ""
-        })
+          transetc: "",
+        }),
       });
     } else {
       setForm({
@@ -577,8 +632,8 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
           (d: any) => d !== (isEtc ? "etc" : event.target.value)
         ),
         ...(form.transport.some((item: any) => item !== "etc") && {
-          transetc: ""
-        })
+          transetc: "",
+        }),
       });
     }
   };
@@ -592,8 +647,8 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
         ...form,
         document: thisDocument,
         ...(form.document.some((item: any) => item !== "etc") && {
-          docsetc: ""
-        })
+          docsetc: "",
+        }),
       });
     } else {
       setForm({
@@ -602,8 +657,8 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
           (d: any) => d !== (isEtc ? "etc" : event.target.value)
         ),
         ...(form.document.some((item: any) => item !== "etc") && {
-          docsetc: ""
-        })
+          docsetc: "",
+        }),
       });
     }
   };
@@ -640,7 +695,7 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
                   alignItems: "center",
                   marginLeft: -11,
                   marginRight: 16,
-                  verticalAlign: "middle"
+                  verticalAlign: "middle",
                 }}
               >
                 <Checkbox
@@ -655,10 +710,10 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
                   label="อื่นๆ"
                   size="small"
                   value={form.transetc}
-                  onChange={e =>
+                  onChange={(e) =>
                     setForm({
                       ...form,
-                      transetc: (e.target as HTMLInputElement).value
+                      transetc: (e.target as HTMLInputElement).value,
                     })
                   }
                 />
@@ -707,7 +762,7 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
                   alignItems: "center",
                   marginLeft: -11,
                   marginRight: 16,
-                  verticalAlign: "middle"
+                  verticalAlign: "middle",
                 }}
               >
                 <Checkbox
@@ -722,10 +777,10 @@ const ComponentStep2: React.FC<any> = ({ businessForm, form, setForm }) => {
                   label="อื่นๆ"
                   size="small"
                   value={form.docsetc}
-                  onChange={e =>
+                  onChange={(e) =>
                     setForm({
                       ...form,
-                      docsetc: (e.target as HTMLInputElement).value
+                      docsetc: (e.target as HTMLInputElement).value,
                     })
                   }
                 />
@@ -758,7 +813,7 @@ const ComponentStep3: React.FC<any> = ({
   setActiveStep,
   albumDisplay,
   checked,
-  setChecked
+  setChecked,
 }) => {
   const { _dateToString, _parseLocation } = useContext(AppContext);
   const [conState, setConState] = useState<any>(false);
@@ -767,24 +822,26 @@ const ComponentStep3: React.FC<any> = ({
   };
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <Checkbox
-          color="primary"
-          checked={checked}
-          onChange={(e: any) => setChecked(e.target.checked)}
-          style={{ marginRight: 16 }}
-        />
-        <AppButton
-          style={{ padding: 0 }}
-          buttonColor={green}
-          variant="text"
-          onClick={() => setConState(true)}
-        >
-          ยอมรับเงื่อนไขและข้อตกลง
-        </AppButton>
-      </div>
-      {albumDisplay && albumDisplay.length <= 10 && (
-        <PreviewImage {...{ editting }} files={albumDisplay} />
+      {!editting && (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Checkbox
+            color="primary"
+            checked={checked}
+            onChange={(e: any) => setChecked(e.target.checked)}
+            style={{ marginRight: 16 }}
+          />
+          <AppButton
+            style={{ padding: 0 }}
+            buttonColor={green}
+            variant="text"
+            onClick={() => setConState(true)}
+          >
+            ยอมรับเงื่อนไขและข้อตกลง
+          </AppButton>
+        </div>
+      )}
+      {albumDisplay && albumDisplay.length > 0 && (
+        <PreviewImage {...{ editting }} files={albumDisplay.slice(0, 10)} />
       )}
       <Typography variant="h6" style={{ flex: 1 }}>
         ชื่อกิจการ
@@ -838,9 +895,11 @@ const ComponentStep3: React.FC<any> = ({
       )}
       <MarginDivider />
       <Typography variant="h6" style={{ flex: 1 }}>
-        เขตพิ้นที่รับเศษวัสดุเหลือใช้
+        เขตพื้นที่รับเศษวัสดุเหลือใช้
       </Typography>
-      {_parseLocation(form.location).label === "" ? (
+      {_parseLocation(form.location).label === "" ||
+      _parseLocation(form.location).label ===
+        "จังหวัด > เขต/อำเภอ > ตำบล (1)" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
           <MaterialLink
             style={{ color: red[600] }}
@@ -906,7 +965,7 @@ const ComponentStep3: React.FC<any> = ({
       )}
       <MarginDivider />
       <Typography variant="h6" style={{ flex: 1 }}>
-        เงื่อนไขการขาย
+        เงื่อนไขการขาย Scarp
       </Typography>
       {form.sale_condition === "" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
@@ -954,7 +1013,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     useConfirmDeleteItem,
     realtimeAccess,
     realtimeEndOfSale,
-    _parseLocation
+    _parseLocation,
   } = useContext(AppContext);
   const [open, setOpen] = useState(
     window.location.pathname === "/business/create"
@@ -963,7 +1022,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
   const [form, setForm] = useState<any>({
     business_name: "",
     position: 0,
-    sale_condition: "",
+    sale_condition: "เช็คราคา Scarp",
     org_size: 0,
 
     product: [],
@@ -975,23 +1034,25 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     document: [],
     docsetc: "",
     transport: [],
-    transetc: ""
+    transetc: "",
   });
   const [goodsDetail, setGoodsDetail] = useState<any | null>(null);
   const [businessForm, setBusinessForm] = useState<any | null>(null);
   const [checked, setChecked] = useState<any>(false);
   const [
     { confirmState, item: itemOnEndSale },
-    onEndSale
+    onEndSale,
   ] = useConfirmDeleteItem();
   const [album, setAlbum] = useState<any | null>(null);
   const [albumDisplay, setAlbumDisplay] = useState<any | null>(null);
+  const [rawAlbum, setRawAlbum] = useState<any | null>(null);
+  const [thisFormId, setThisFormId] = useState<any | null>(null);
 
   async function loadBusinessForm() {
     const res = await _xhrPost({
       csrf,
       url: "loadregister",
-      body: { action: "business_form", type: "business" }
+      body: { action: "business_form", type: "business" },
     });
     setCsrf(res.csrf);
 
@@ -999,6 +1060,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     if (editting && match) {
       const { formid } = match.params;
       if (formid) {
+        setThisFormId(parseInt(formid));
         loadBusinessDetail(parseInt(formid), res.data);
         loadBusinessAlbum(parseInt(formid));
       }
@@ -1009,7 +1071,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadform",
-      body: { action: "detail", formid, linetoken: profileData.userId }
+      body: { action: "detail", formid, linetoken: profileData.userId },
     });
     setCsrf(res.csrf);
 
@@ -1025,7 +1087,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadform",
-      body: { action: "album", formid, linetoken: profileData.userId }
+      body: { action: "album", formid, linetoken: profileData.userId },
     });
     setCsrf(res.csrf);
 
@@ -1035,10 +1097,11 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
           getFormImg({
             userid: sess.userid,
             formid,
-            file
+            file,
           })
         )
       );
+      setRawAlbum(res.data.filelist);
     }
   }
 
@@ -1051,7 +1114,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       location,
       product,
       document,
-      transport
+      transport,
     } = d;
     const obj = {
       business_name,
@@ -1059,7 +1122,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       org_size: 0,
       appointment,
       auctiondate,
-      location
+      location,
     };
     // setAlbumDisplay();
     Object.assign(obj, {
@@ -1070,39 +1133,39 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       document: [],
       docsetc: "",
       transport: [],
-      transetc: ""
+      transetc: "",
     });
     // console.log({ location, parsed: JSON.parse(location) });
 
     if (thisForm["position"].indexOf(d.position) !== -1) {
       Object.assign(obj, {
-        position: thisForm["position"].indexOf(d.position)
+        position: thisForm["position"].indexOf(d.position),
       });
     }
     if (product.length > 0) {
       Object.assign(obj, {
         product: product.map((item: any) => item.product),
-        productvalue: product.map((item: any) => item.value)
+        productvalue: product.map((item: any) => item.value),
       });
     }
     if (document.document && document.document.length > 0) {
       Object.assign(obj, {
-        document: document.document
+        document: document.document,
       });
     }
     if (transport.transport && transport.transport.length > 0) {
       Object.assign(obj, {
-        transport: transport.transport
+        transport: transport.transport,
       });
     }
     if (document.etc !== "none") {
       Object.assign(obj, {
-        docsetc: document.etc
+        docsetc: document.etc,
       });
     }
     if (transport.etc !== "none") {
       Object.assign(obj, {
-        transetc: transport.etc
+        transetc: transport.etc,
       });
     }
     setForm(obj);
@@ -1122,7 +1185,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       document,
       transport,
       docsetc,
-      transetc
+      transetc,
     } = form;
     const sendObj = {
       action: "create",
@@ -1138,12 +1201,12 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       transport,
       document,
       ...(docsetc !== "" && { docsetc }),
-      ...(transetc !== "" && { transetc })
+      ...(transetc !== "" && { transetc }),
     };
     const res = await _xhrPost({
       csrf,
       url: "formsystem",
-      body: sendObj
+      body: sendObj,
     });
     setCsrf(res.csrf);
     if (res.data.status === "success") {
@@ -1153,7 +1216,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
         } else {
           addSnackbar({
             message: "กรุณาอัพโหลดไม่เกิน 10 รูป",
-            variant: "error"
+            variant: "error",
           });
         }
       } else {
@@ -1172,9 +1235,9 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       headers: {
         action: "album",
         linetoken: profileData.userId,
-        formid
+        formid,
       },
-      body: { albumimage: album }
+      body: { albumimage: album.slice(0, 10) },
     });
     setAlbum(null);
     setCsrf(imgRes.csrf);
@@ -1186,7 +1249,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       case "please delete your picture before":
         addSnackbar({
           message: "กรูณาลบอัลบัมเก่าก่อนอัพโหลด",
-          variant: "error"
+          variant: "error",
         });
         break;
       default:
@@ -1201,9 +1264,9 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       headers: {
         action: "album",
         linetoken: profileData.userId,
-        formid
+        formid,
       },
-      body: { albumimage: album }
+      body: { albumimage: album.slice(0, 10) },
     });
     setAlbum(null);
     setCsrf(imgRes.csrf);
@@ -1215,7 +1278,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       case "please delete your picture before":
         addSnackbar({
           message: "กรูณาลบอัลบัมเก่าก่อนอัพโหลด",
-          variant: "error"
+          variant: "error",
         });
         break;
       default:
@@ -1236,7 +1299,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       docsetc,
       transetc,
       product,
-      productvalue
+      productvalue,
     } = form;
     const { formid } = match.params;
     const sendObj = {
@@ -1248,7 +1311,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       product,
       productvalue,
       ...(docsetc !== "" && { docsetc }),
-      ...(transetc !== "" && { transetc })
+      ...(transetc !== "" && { transetc }),
     };
     if (goodsDetail.business_name !== business_name) {
       Object.assign(sendObj, { business_name });
@@ -1261,17 +1324,17 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       parseInt(position)
     ) {
       Object.assign(sendObj, {
-        position: businessForm["position"][position]
+        position: businessForm["position"][position],
       });
     }
     if (_dateToAPI(goodsDetail.appointment) !== _dateToAPI(appointment)) {
       Object.assign(sendObj, {
-        appointment: _dateToAPI(appointment)
+        appointment: _dateToAPI(appointment),
       });
     }
     if (_dateToAPI(goodsDetail.auctiondate) !== _dateToAPI(auctiondate)) {
       Object.assign(sendObj, {
-        auctiondate: _dateToAPI(auctiondate)
+        auctiondate: _dateToAPI(auctiondate),
       });
     }
     if (goodsDetail.location !== location) {
@@ -1280,7 +1343,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
     const res = await _xhrPost({
       csrf,
       url: "formsystem",
-      body: sendObj
+      body: sendObj,
     });
     setCsrf(res.csrf);
     if (res.data.product === "success") {
@@ -1291,7 +1354,7 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
         } else {
           addSnackbar({
             message: "กรุณาอัพโหลดไม่เกิน 10 รูป",
-            variant: "error"
+            variant: "error",
           });
         }
       } else {
@@ -1310,8 +1373,8 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
       body: {
         action: "endofsale",
         linetoken: profileData.userId,
-        formid: parseInt(formid)
-      }
+        formid: parseInt(formid),
+      },
     });
     setCsrf(res.csrf);
     realtimeEndOfSale(profileData);
@@ -1345,8 +1408,12 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
           setAlbum,
           albumDisplay,
           setAlbumDisplay,
+          rawAlbum,
+          setRawAlbum,
           checked,
-          setChecked
+          setChecked,
+          loadBusinessForm,
+          thisFormId,
         }}
       />
       <div className={classes.buttonGroup}>
@@ -1379,9 +1446,12 @@ const GoodsForm: React.FC<any> = React.memo(({ history, match, editting }) => {
                 form.sale_condition === "" ||
                 form.product.length === 0 ||
                 _parseLocation(form.location).label === "" ||
+                _parseLocation(form.location).label ===
+                  "จังหวัด > เขต/อำเภอ > ตำบล (1)" ||
                 form.transport.length === 0 ||
                 form.document.length === 0 ||
-                (albumDisplay && albumDisplay.length > 0) ||
+                !albumDisplay ||
+                albumDisplay.length === 0 ||
                 !checked
               }
             >

@@ -210,7 +210,7 @@ export function _parseLocation(location: string) {
       }`,
       province,
       district,
-      subdistrict
+      subdistrict,
     };
   } catch (error) {
     // console.log({ error, location });
@@ -218,7 +218,7 @@ export function _parseLocation(location: string) {
       label: "จังหวัด > เขต/อำเภอ > ตำบล (รหัสไปรษณีย์)",
       province: { id: 1, name: "จังหวัด" },
       district: { id: 1, name: "เขต/อำเภอ" },
-      subdistrict: { id: 1, name: "ตำบล", zip_code: 1 }
+      subdistrict: { id: 1, name: "ตำบล", zip_code: 1 },
     };
   }
   return returned;
@@ -285,7 +285,7 @@ export async function isSupportsWebp() {
 
   const webpData =
     "data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=";
-  const blob = await fetch(webpData).then(r => r.blob());
+  const blob = await fetch(webpData).then((r) => r.blob());
   return createImageBitmap(blob).then(
     () => true,
     () => false
@@ -295,7 +295,7 @@ export async function isSupportsWebp() {
 export function getTopupImg({
   customerid,
   requestid,
-  type = "webp"
+  type = "webp",
 }: {
   customerid: number | string;
   requestid: number | string;
@@ -311,7 +311,7 @@ export function getTopupImg({
 export function getFormImg({
   userid,
   formid,
-  file
+  file,
 }: {
   userid: number | string;
   formid: number | string;
@@ -323,7 +323,7 @@ export function getFormImg({
 export const useConfirmDeleteItem = () => {
   const [state, setState] = useState<{ confirmState: boolean; item: any }>({
     confirmState: false,
-    item: null
+    item: null,
   });
 
   function onDeleteItem(props: { action: "delete" | "cancel"; item: any }) {
@@ -356,6 +356,13 @@ export function _isDesktopBrowser() {
   } else {
     return true;
   }
+}
+
+export function _isSupportMultipleFile() {
+  var inp = document.createElement("input");
+  inp.setAttribute("multiple", "true");
+  var supportsMultiple = inp.multiple === true;
+  return supportsMultiple;
 }
 
 export function _openFullScreen(e: any) {

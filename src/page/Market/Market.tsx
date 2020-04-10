@@ -8,7 +8,6 @@ import {
   Toolbar,
   IconButton,
   Theme,
-  Link as MaterialLink,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
@@ -18,7 +17,7 @@ import {
 import { LineProfileData } from "apptype";
 import { green } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
-import { RouteComponentProps, withRouter, Route } from "react-router-dom";
+import { RouteComponentProps, withRouter, Route, Link } from "react-router-dom";
 
 const AppButton = Loadable({
   loader: () =>
@@ -77,124 +76,23 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     _xhrGet,
     _isDesktopBrowser,
     _thousandSeperater,
+    checkSession,
+    getInfo,
+    profileData,
+    setProfileData,
+    handleLogout,
+    setSess,
+    userInfo,
+    setUserInfo,
   } = useContext(AppContext);
-  const [profileData, setProfileData] = useState<LineProfileData | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [sess, setSess] = useState<any | null>(null);
-  const [backDrop, setBackDrop] = useState<any | null>(null);
-  const [passedFormid, setPassedFormid] = useState<any>(null);
   const [marketList, setMarketList] = useState<any>(null);
 
   const passingProps: any = {
     ...useContext(AppContext),
-    sess,
-    getSess,
-    profileData,
-    addSnackbar,
-    handleLogout,
-    checkSession,
-    passedFormid,
     marketList,
     getMarketPlace,
-    refreshInfo,
+    refreshInfo: getInfo,
   };
-
-  function addSnackbar({ message, variant }: any) {
-    enQSnackbar({
-      message,
-      variant,
-      action,
-    });
-  }
-
-  function getProfile() {
-    liff
-      .getProfile()
-      .then((profile: any) => {
-        setProfileData(profile);
-        getSess(profile);
-      })
-      .catch((err) => console.error(err));
-  }
-
-  async function handleLogout() {
-    const res = await _xhrGet("logout");
-    setCsrf(res.csrf);
-    if (liff.isLoggedIn()) {
-      liff.logout();
-    }
-    window.location.reload();
-  }
-
-  async function checkSession() {
-    const res = await _xhrGet("logout");
-    setCsrf(res.csrf);
-    // handleFetch();
-    window.location.reload();
-  }
-
-  function handleFetch() {
-    const myLiffId = "1653861118-Pa7l4bay";
-    liff.init({ liffId: myLiffId }, async () => {
-      if (liff.isLoggedIn()) {
-        getProfile();
-      } else {
-        liff.login();
-      }
-    });
-  }
-
-  async function getInfo(profile: any) {
-    const res = await _xhrPost({
-      csrf,
-      url: "loadusersystem",
-      body: { action: "info", linetoken: profile.userId, type: "customer" },
-    });
-
-    setCsrf(res.csrf);
-    if ("status" in res.data) {
-      checkSession();
-    }
-    setUserInfo(res.data);
-  }
-
-  async function refreshInfo() {
-    const res = await _xhrPost({
-      csrf,
-      url: "loadusersystem",
-      body: {
-        action: "info",
-        linetoken: profileData && profileData.userId,
-        type: "customer",
-      },
-    });
-
-    setCsrf(res.csrf);
-    if ("status" in res.data) {
-      checkSession();
-    }
-    setUserInfo(res.data);
-  }
-
-  async function getSess(profile: any) {
-    setSess(null);
-    setBackDrop(null);
-    const res = await _xhrPost({
-      csrf,
-      url: "session",
-      body: { linetoken: profile.userId, type: "customer" },
-    });
-    setCsrf(res.csrf);
-    setSess(res.data);
-    setBackDrop(res.data);
-    if (res.data.status === "not member") {
-      history.replace("/");
-      window.location.reload();
-    }
-    if (res.data && res.data.userid) {
-      getInfo(profile);
-    }
-  }
 
   async function getMarketPlace() {
     const res = await _xhrPost({
@@ -240,13 +138,60 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
     });
   }
 
+  async function getSess(profile: any) {
+    setSess(null);
+    const res = await _xhrPost({
+      csrf,
+      url: "session",
+      body: { linetoken: profile.userId, type: "customer" },
+    });
+    setCsrf(res.csrf);
+    setSess(res.data);
+  }
+
+  async function getMarketInfo(profile: any) {
+    const res = await _xhrPost({
+      csrf,
+      url: "loadusersystem",
+      body: {
+        action: "info",
+        linetoken: profile.userId,
+        type: "customer",
+      },
+    });
+    setCsrf(res.csrf);
+    setUserInfo(res.data);
+  }
+
+  function getProfile() {
+    liff
+      .getProfile()
+      .then((profile: any) => {
+        setProfileData(profile);
+        getSess(profile);
+        getMarketInfo(profile);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  function handleFetch() {
+    const myLiffId = "1653861118-DAld6Lv2"; // customer
+    liff.init({ liffId: myLiffId }, async () => {
+      if (liff.isLoggedIn()) {
+        getProfile();
+      } else {
+        liff.login({
+          redirectUri: "https://easyrecycle.ml/market",
+        });
+      }
+    });
+  }
+
   useEffect(() => {
     if (profileData) {
-      if (passedFormid && new URLSearchParams(location.search).get("formid")) {
-        history.replace(`/market/${passedFormid}`);
-      } else {
-        getMarketPlace();
-      }
+      getMarketPlace();
+    } else {
+      handleFetch();
     }
   }, [profileData]);
 
@@ -255,25 +200,12 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
   }, [marketList]);
 
   useEffect(() => {
-    if (_isDesktopBrowser()) {
-      history.replace("/admin");
-    } else {
-      handleFetch();
-      const formidFromSearchParams = new URLSearchParams(location.search).get(
-        "formid"
-      );
-      if (formidFromSearchParams) {
-        setPassedFormid(formidFromSearchParams);
-      }
-      setDense(true);
-    }
+    // if (_isDesktopBrowser()) {
+    //   history.replace("/admin");
+    // } else {
+    //   setDense(true);
+    // }
   }, []);
-
-  const action = (key: any) => (
-    <IconButton onClick={() => closeSnackbar(key)}>
-      <CloseIcon style={{ color: "white" }} />
-    </IconButton>
-  );
 
   return (
     <AppContext.Provider value={...passingProps}>
@@ -288,11 +220,11 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
               alignItems: "center",
             }}
           >
-            <MaterialLink href="/">
+            <Link to="/" style={{ color: green[600] }}>
               <Typography style={{ marginRight: 16 }} variant="h6">
                 บัญชีของฉัน
               </Typography>
-            </MaterialLink>
+            </Link>
             <Typography
               variant="h6"
               style={{

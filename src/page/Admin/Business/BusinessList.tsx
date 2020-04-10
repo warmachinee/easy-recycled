@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import socketIOClient from "socket.io-client";
 import Loadable from "react-loadable";
 import { makeStyles } from "@material-ui/styles";
 import { AppContext } from "../../../AppContext";
@@ -10,17 +11,18 @@ import {
   Avatar,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
 } from "@material-ui/core";
 import Progress from "../../../component/Utils/Progress";
 import { withRouter, Route, RouteComponentProps } from "react-router-dom";
 import Pagination from "@material-ui/lab/Pagination";
 import { red } from "@material-ui/core/colors";
+import SearchRealtime from "../../../component/Utils/SearchRealtime";
 
 const BusinessDetail = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'BusinessDetail' */ "./BusinessDetail"),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -31,14 +33,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: 16,
     width: "100%",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
-  avatar: { width: 72, height: 72, marginRight: 16 }
+  avatar: { width: 72, height: 72, marginRight: 16 },
 }));
 
 export interface BusinessListProps extends RouteComponentProps<{}> {}
 
-const BusinessItem: React.FC<any> = props => {
+const BusinessItem: React.FC<any> = (props) => {
   const classes = useStyles();
   const { _dateToString, stringToPhone } = useContext(AppContext);
   const { match, data, history, businessType } = props;
@@ -55,15 +57,15 @@ const BusinessItem: React.FC<any> = props => {
         style={{
           ...(checkStatus === 0 && {
             backgroundColor: "inherit",
-            opacity: 0.7
-          })
+            opacity: 0.7,
+          }),
         }}
       >
         <Avatar className={classes.avatar} src={data.picture} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Typography style={{ flex: 1, fontWeight: 600 }} align="left">
             {checkStatus === 1 ? "" : "(ไม่ได้ใช้งานแล้ว)"}
-            {`${data.fullname} ${data.lastname} ( ${data.displayname} )`}
+            {`${data.displayname} ( ${data.fullname} ${data.lastname} )`}
           </Typography>
           <Typography align="left" color="textSecondary">
             {data.statusmassage}
@@ -124,7 +126,7 @@ const BusinessItem: React.FC<any> = props => {
           style={{
             width: 48,
             marginRight: 16,
-            ...(data.frequencyform > 3 && { color: red[600], fontWeight: 700 })
+            ...(data.frequencyform > 3 && { color: red[600], fontWeight: 700 }),
           }}
           align="right"
         >
@@ -135,13 +137,16 @@ const BusinessItem: React.FC<any> = props => {
   );
 };
 
-const DefaultComponent: React.FC<any> = props => {
+const DefaultComponent: React.FC<any> = (props) => {
   const classes = useStyles();
   const { location, match, history } = props;
-  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const { sess, csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(
+    AppContext
+  );
   const [business, setBusiness] = useState<any>(null);
   const [businessPage, setBusinessPage] = useState(getHash());
   const [businessType, setBusinessType] = useState<any>(10);
+  const [search, setSearch] = useState<any>("");
 
   function getHash() {
     const hash = location.hash;
@@ -167,7 +172,7 @@ const DefaultComponent: React.FC<any> = props => {
       action: "base_list",
       startindex: (businessPage - 1) * 10,
       lastindex: businessPage * 10,
-      ...(status !== 10 && { status })
+      ...(status !== 10 && { status }),
     };
     if (status === 0) {
       setBusiness(null);
@@ -175,7 +180,7 @@ const DefaultComponent: React.FC<any> = props => {
     const res = await _xhrPost({
       csrf,
       url: "aloadbusiness",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -185,6 +190,41 @@ const DefaultComponent: React.FC<any> = props => {
   useEffect(() => {
     getBaseList(businessType);
   }, [businessPage]);
+
+  function realtimeSearch(value: any) {
+    setSearch(value);
+    if (value === "") {
+      location.hash = "#";
+      setBusinessType(10);
+      getBaseList(10);
+    } else {
+      const socket = socketIOClient("https://easyrecycle.ml", {
+        transports: ["websocket", "polling"],
+      });
+      const sendObj = {
+        action: "business",
+        adminid: sess.userid,
+        inputtext: value,
+      };
+      socket.emit("adminsearch", sendObj);
+    }
+  }
+
+  function realtimeResult() {
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"],
+    });
+    socket.on(`business-${sess.userid}`, (messageNew: any) => {
+      if (messageNew && messageNew.status === "success") {
+        const thisData = messageNew.result;
+        setBusiness(thisData);
+      }
+    });
+  }
+
+  useEffect(() => {
+    realtimeResult();
+  }, []);
 
   return (
     <div style={{ padding: 12 }}>
@@ -204,9 +244,15 @@ const DefaultComponent: React.FC<any> = props => {
           </Select>
         </FormControl>
       </div>
+      <SearchRealtime
+        label="ค้นหาผู้ขาย"
+        {...{ search, setSearch }}
+        onChange={realtimeSearch}
+        padding="16px 0"
+      />
       {business ? (
-        business.list.length > 0 ? (
-          business.list.map((d: any) => (
+        ("list" in business ? business.list : business).length > 0 ? (
+          ("list" in business ? business.list : business).map((d: any) => (
             <BusinessItem
               key={d.businessid}
               data={d}
@@ -227,7 +273,7 @@ const DefaultComponent: React.FC<any> = props => {
       ) : (
         <Progress />
       )}
-      {business && Math.ceil(business.count / 10) > 1 && (
+      {business && "count" in business && Math.ceil(business.count / 10) > 1 && (
         <div
           style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
         >
@@ -253,4 +299,4 @@ const BusinessList: React.FC<BusinessListProps> = ({ match }) => {
   );
 };
 
-export default withRouter(props => <BusinessList {...props} />);
+export default withRouter((props) => <BusinessList {...props} />);

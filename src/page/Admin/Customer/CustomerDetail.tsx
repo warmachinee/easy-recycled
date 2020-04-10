@@ -10,19 +10,21 @@ import {
   IconButton,
   TextField,
   Divider,
-  Chip
+  Chip,
+  Button,
 } from "@material-ui/core";
 import { ArrowBackIos, Settings } from "@material-ui/icons";
 import { red, green } from "@material-ui/core/colors";
 import MaskedInput from "react-text-mask";
 import AppButton from "../../../AppComponent/AppButton";
+import ConfirmDialog from "../../../component/Dialog/ConfirmDialog";
 
 const GeneralDialog = Loadable({
   loader: () =>
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -30,17 +32,25 @@ const useStyles = makeStyles((theme: Theme) => ({
   itemGrid: {
     margin: theme.spacing(1, 0),
     minWidth: 800,
-    padding: 12
+    padding: 12,
   },
   itemPaper: {
     position: "relative",
     padding: 16,
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   avatar: { width: 72, height: 72, marginRight: 16 },
   textField: { marginBottom: 12 },
-  itemDescription: { display: "flex", marginBottom: 8 }
+  itemDescription: { display: "flex", marginBottom: 8 },
+  docsItem: {
+    padding: 0,
+    minWidth: "auto",
+    textDecoration: "none",
+    "&:hover": {
+      textDecoration: "underline",
+    },
+  },
 }));
 
 export interface CustomerDetailProps {}
@@ -72,20 +82,134 @@ function TextMaskCustom(props: TextMaskCustomProps) {
         /\d/,
         /\d/,
         /\d/,
-        /\d/
+        /\d/,
       ]}
       placeholderChar={"\u2000"}
     />
   );
 }
 
-const DetailCard: React.FC<any> = props => {
+const docsArr = [
+  "id_card",
+  "house_regist",
+  "access",
+  "cert_book",
+  "doc_20",
+  "doc_105",
+  "doc_106",
+];
+
+const docsArrString = [
+  "บัตรประชาชน",
+  "สำเนาทะเบียนบ้าน",
+  "ใบอนุญาติค้าของเก่า",
+  "หนังสือรับรองบริษัท",
+  "ภพ. 20",
+  "ใบรง. 4 ลำดับที่ 105",
+  "ใบรง. 4 ลำดับที่ 106",
+];
+
+const docsLabel: any = {
+  id_card: "บัตรประชาชน",
+  house_regist: "สำเนาทะเบียนบ้าน",
+  access: "ใบอนุญาติค้าของเก่า",
+  cert_book: "หนังสือรับรองบริษัท",
+  doc_20: "ภพ. 20",
+  doc_105: "ใบรง. 4 ลำดับที่ 105",
+  doc_106: "ใบรง. 4 ลำดับที่ 106",
+};
+
+const UserDocs: React.FC<any> = ({ data, customerid, getBaseDetail }) => {
+  const classes = useStyles();
+  const keys: any = data.split(".")[0];
+  const { sess, _xhrPost, csrf, setCsrf } = useContext(AppContext);
+  const [open, setOpen] = useState<any>(false);
+  const [onDeleteState, setOnDeleteState] = useState<any>(false);
+
+  function onDeleteImage() {
+    setOnDeleteState(true);
+  }
+
+  function onCancelDelete() {
+    setOnDeleteState(false);
+  }
+
+  async function onDeletePic() {
+    const sendObj = {
+      action: "deldocs",
+      customerid,
+      docstype: keys,
+    };
+    const res = await _xhrPost({
+      csrf,
+      url: "acustomersystem",
+      body: sendObj,
+    });
+    setCsrf(res.csrf);
+    if (res.data.status === "success") {
+      getBaseDetail();
+      onCancelDelete();
+    }
+  }
+
+  return (
+    <React.Fragment>
+      <div onClick={() => setOpen(true)}>
+        <Button variant="text" color="primary" className={classes.docsItem}>
+          {docsLabel[keys]}
+        </Button>
+      </div>
+      <GeneralDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title={docsLabel[keys]}
+        maxWidth="md"
+      >
+        <div
+          style={{
+            marginBottom: 16,
+          }}
+        >
+          <AppButton
+            buttonColor={red}
+            variant="contained"
+            onClick={onDeleteImage}
+          >
+            ลบเอกสาร
+          </AppButton>
+        </div>
+        <img
+          style={{ width: "100%", maxHeight: "calc(100% - 64px)" }}
+          src={`https://easyrecycle.ml/customer/${customerid}/${data}`}
+          alt={docsLabel[keys]}
+        />
+      </GeneralDialog>
+      <ConfirmDialog
+        type="delete"
+        open={onDeleteState}
+        onClose={onCancelDelete}
+        onCancel={onCancelDelete}
+        onSubmit={onDeletePic}
+        title="คุณแน่ใจหรือไม่ว่าต้องการจะลบเอกสาร ?"
+      >
+        <img
+          style={{ width: "100%" }}
+          src={`https://easyrecycle.ml/customer/${customerid}/${data}`}
+          alt={docsLabel[keys]}
+        />
+      </ConfirmDialog>
+    </React.Fragment>
+  );
+};
+
+const DetailCard: React.FC<any> = (props) => {
   const classes = useStyles();
   const { _dateToString, stringToPhone, _thousandSeperater } = useContext(
     AppContext
   );
   const { detail, setEditing } = props;
   const data = detail.info;
+  const userDocs = detail.docs;
 
   return (
     <Paper
@@ -93,8 +217,8 @@ const DetailCard: React.FC<any> = props => {
       style={{
         ...(data.status === 0 && {
           backgroundColor: "inherit",
-          opacity: 0.7
-        })
+          opacity: 0.7,
+        }),
       }}
     >
       <div className={classes.itemPaper}>
@@ -154,7 +278,7 @@ const DetailCard: React.FC<any> = props => {
           style={{
             width: 100,
             marginRight: 16,
-            ...(data.frequencyform > 3 && { color: red[600], fontWeight: 700 })
+            ...(data.frequencyform > 3 && { color: red[600], fontWeight: 700 }),
           }}
           align="right"
         >
@@ -171,7 +295,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               ชื่อกิจการ
             </Typography>
@@ -188,7 +312,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               ประเภทกิจการ
             </Typography>
@@ -205,7 +329,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               สถานที่
             </Typography>
@@ -222,7 +346,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               ขนาดองค์กร
             </Typography>
@@ -239,7 +363,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               รถที่ใช้ขนส่ง
             </Typography>
@@ -283,7 +407,7 @@ const DetailCard: React.FC<any> = props => {
               align="left"
               variant="body2"
               color="textSecondary"
-              style={{ width: 100 }}
+              style={{ minWidth: 100 }}
             >
               เอกสาร
             </Typography>
@@ -322,13 +446,49 @@ const DetailCard: React.FC<any> = props => {
                 )}
             </div>
           </div>
+          <div className={classes.itemDescription}>
+            <Typography
+              align="left"
+              variant="body2"
+              color="textSecondary"
+              style={{ minWidth: 100 }}
+            >
+              ไฟล์
+            </Typography>
+            {userDocs &&
+              (userDocs.filter(
+                (d: any) =>
+                  d.split(".")[1] !== "webp" && d !== "topup" && d !== "log.txt"
+              ).length > 0 ? (
+                <div>
+                  {userDocs
+                    .filter(
+                      (d: any) =>
+                        d.split(".")[1] !== "webp" &&
+                        d !== "topup" &&
+                        d !== "log.txt"
+                    )
+                    .map((d: any, i: number) => (
+                      <UserDocs key={d} data={d} {...props} />
+                    ))}
+                </div>
+              ) : (
+                <Typography
+                  align="left"
+                  variant="body2"
+                  style={{ fontWeight: 700 }}
+                >
+                  ไม่มีไฟล์
+                </Typography>
+              ))}
+          </div>
         </div>
       </div>
     </Paper>
   );
 };
 
-const EditDetail: React.FC<any> = props => {
+const EditDetail: React.FC<any> = (props) => {
   const classes = useStyles();
   const {
     csrf,
@@ -336,14 +496,14 @@ const EditDetail: React.FC<any> = props => {
     _xhrPost,
     _dateToString,
     stringToPhone,
-    phoneFormatToNumber
+    phoneFormatToNumber,
   } = useContext(AppContext);
   const { data, setEditing, getBaseDetail, match } = props;
   const { info } = data;
   const { customerid } = match.params;
   const [thisData, setThisData] = useState<any>({
     ...info,
-    tel: stringToPhone(`0${info.tel}`)
+    tel: stringToPhone(`0${info.tel}`),
   });
 
   function checkDisabled() {
@@ -364,7 +524,7 @@ const EditDetail: React.FC<any> = props => {
     const { params } = match;
     const sendObj = {
       action: "base_edit",
-      customerid
+      customerid,
     };
     const keyArr = ["displayname", "fullname", "lastname", "business_name"];
     for (var i = 0; i < keyArr.length; i++) {
@@ -378,7 +538,7 @@ const EditDetail: React.FC<any> = props => {
     const res = await _xhrPost({
       csrf,
       url: "acustomersystem",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -391,12 +551,12 @@ const EditDetail: React.FC<any> = props => {
     const sendObj = {
       action: "base_edit",
       customerid,
-      status
+      status,
     };
     const res = await _xhrPost({
       csrf,
       url: "acustomersystem",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -409,13 +569,13 @@ const EditDetail: React.FC<any> = props => {
       <div
         style={{ display: "flex", marginBottom: 12, alignItems: "baseline" }}
       >
-        <Typography style={{ width: 100 }}>สถานะบัญชี</Typography>
+        <Typography style={{ minWidth: 100 }}>สถานะบัญชี</Typography>
         <div style={{ display: "flex" }}>
           <Chip
             label="เปิดการใช้งาน"
             style={{
               marginRight: 4,
-              ...(info.status === 1 && { color: "white" })
+              ...(info.status === 1 && { color: "white" }),
             }}
             {...(info.status === 0 && { variant: "outlined" })}
             {...(info.status === 1 && { color: "primary" })}
@@ -436,7 +596,7 @@ const EditDetail: React.FC<any> = props => {
         fullWidth
         label="ชื่อที่แสดง"
         value={thisData.displayname}
-        onChange={e =>
+        onChange={(e) =>
           setThisData({ ...thisData, displayname: e.target.value })
         }
       />
@@ -445,14 +605,14 @@ const EditDetail: React.FC<any> = props => {
         fullWidth
         label="ชื่อ"
         value={thisData.fullname}
-        onChange={e => setThisData({ ...thisData, fullname: e.target.value })}
+        onChange={(e) => setThisData({ ...thisData, fullname: e.target.value })}
       />
       <TextField
         className={classes.textField}
         fullWidth
         label="นามสกุล"
         value={thisData.lastname}
-        onChange={e => setThisData({ ...thisData, lastname: e.target.value })}
+        onChange={(e) => setThisData({ ...thisData, lastname: e.target.value })}
       />
       <Divider style={{ margin: "16px 0" }} />
       <TextField
@@ -460,10 +620,10 @@ const EditDetail: React.FC<any> = props => {
         fullWidth
         label="เบอร์โทรศัพท์"
         InputProps={{
-          inputComponent: TextMaskCustom as any
+          inputComponent: TextMaskCustom as any,
         }}
         value={thisData.tel}
-        onChange={e => setThisData({ ...thisData, tel: e.target.value })}
+        onChange={(e) => setThisData({ ...thisData, tel: e.target.value })}
       />
       <Divider style={{ margin: "12px 0" }} />
       <div style={{ display: "flex" }}>
@@ -474,7 +634,7 @@ const EditDetail: React.FC<any> = props => {
           onClick={() => {
             setThisData({
               ...data,
-              tel: `0${info.tel}`
+              tel: `0${info.tel}`,
             });
             setEditing(false);
           }}
@@ -495,9 +655,11 @@ const EditDetail: React.FC<any> = props => {
   );
 };
 
-const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
+const CustomerDetail: React.FC<CustomerDetailProps | any> = (props) => {
   const classes = useStyles();
   const { match, history } = props;
+  const { params } = match;
+  const customerid = parseInt(params.customerid);
   const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
   const [detail, setDetail] = useState<any>(null);
   const [editing, setEditing] = useState<any>(false);
@@ -509,22 +671,21 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
       url: "aloadcustomer",
       body: {
         action: "accessformlist",
-        customerid: parseInt(params.customerid)
-      }
+        customerid: parseInt(params.customerid),
+      },
     });
 
     setCsrf(res.csrf);
   }
 
   async function getBaseDetail() {
-    const { params } = match;
     const res = await _xhrPost({
       csrf,
       url: "aloadcustomer",
       body: {
         action: "base_detail",
-        customerid: parseInt(params.customerid)
-      }
+        customerid,
+      },
     });
 
     setCsrf(res.csrf);
@@ -533,7 +694,7 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
 
   useEffect(() => {
     getBaseDetail();
-    getFormList();
+    // getFormList();
   }, []);
 
   return (
@@ -542,7 +703,9 @@ const CustomerDetail: React.FC<CustomerDetailProps | any> = props => {
         <ArrowBackIos />
       </IconButton>
       <div className={classes.itemGrid}>
-        {detail && <DetailCard {...{ detail, setEditing }} />}
+        {detail && (
+          <DetailCard {...{ detail, setEditing, customerid, getBaseDetail }} />
+        )}
       </div>
       <GeneralDialog
         open={editing}

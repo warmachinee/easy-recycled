@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import socketIOClient from "socket.io-client";
 import Loadable from "react-loadable";
 import { makeStyles } from "@material-ui/styles";
 import { AppContext } from "../../../AppContext";
@@ -10,16 +11,17 @@ import {
   Avatar,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
 } from "@material-ui/core";
 import Progress from "../../../component/Utils/Progress";
 import { withRouter, Route, RouteComponentProps } from "react-router-dom";
 import Pagination from "@material-ui/lab/Pagination";
+import SearchRealtime from "../../../component/Utils/SearchRealtime";
 
 const CustomerDetail = Loadable({
   loader: () =>
     import(/* webpackChunkName: 'CustomerDetail' */ "./CustomerDetail"),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -30,14 +32,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: 16,
     width: "100%",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
-  avatar: { width: 48, height: 48, marginRight: 16 }
+  avatar: { width: 48, height: 48, marginRight: 16 },
 }));
 
 export interface CustomerListProps extends RouteComponentProps<{}> {}
 
-const CustomersItem: React.FC<any> = props => {
+const CustomersItem: React.FC<any> = (props) => {
   const classes = useStyles();
   const { _thousandSeperater } = useContext(AppContext);
   const { match, data, history, customerType } = props;
@@ -54,14 +56,14 @@ const CustomersItem: React.FC<any> = props => {
         style={{
           ...(checkStatus === 0 && {
             backgroundColor: "inherit",
-            opacity: 0.7
-          })
+            opacity: 0.7,
+          }),
         }}
       >
         <Avatar className={classes.avatar} src={data.picture} />
         <Typography style={{ flex: 1, fontWeight: 600 }} align="left">
           {checkStatus === 1 ? "" : "(ไม่ได้ใช้งานแล้ว)"}
-          {`${data.fullname} ${data.lastname} ( ${data.displayname} )`}
+          {`${data.displayname} ( ${data.fullname} ${data.lastname} )`}
         </Typography>
         <Typography align="left">เงินคงเหลือ</Typography>
         <Typography
@@ -77,13 +79,16 @@ const CustomersItem: React.FC<any> = props => {
   );
 };
 
-const DefaultComponent: React.FC<any> = props => {
+const DefaultComponent: React.FC<any> = (props) => {
   const classes = useStyles();
   const { location, match, history } = props;
-  const { csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(AppContext);
+  const { sess, csrf, setCsrf, _xhrPost, _onLocalhostFn } = useContext(
+    AppContext
+  );
   const [customers, setCustomers] = useState<any>(null);
   const [customerPage, setCustomerPage] = useState(getHash());
   const [customerType, setCustomerType] = useState<any>(10);
+  const [search, setSearch] = useState<any>("");
 
   function getHash() {
     const hash = location.hash;
@@ -109,7 +114,7 @@ const DefaultComponent: React.FC<any> = props => {
       action: "base_list",
       startindex: (customerPage - 1) * 10,
       lastindex: customerPage * 10,
-      ...(status !== 10 && { status })
+      ...(status !== 10 && { status }),
     };
     if (status === 0) {
       setCustomers(null);
@@ -117,7 +122,7 @@ const DefaultComponent: React.FC<any> = props => {
     const res = await _xhrPost({
       csrf,
       url: "aloadcustomer",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -127,6 +132,41 @@ const DefaultComponent: React.FC<any> = props => {
   useEffect(() => {
     getBaseList(customerType);
   }, [customerPage]);
+
+  function realtimeSearch(value: any) {
+    setSearch(value);
+    if (value === "") {
+      location.hash = "#";
+      setCustomerType(10);
+      getBaseList(10);
+    } else {
+      const socket = socketIOClient("https://easyrecycle.ml", {
+        transports: ["websocket", "polling"],
+      });
+      const sendObj = {
+        action: "customer",
+        adminid: sess.userid,
+        inputtext: value,
+      };
+      socket.emit("adminsearch", sendObj);
+    }
+  }
+
+  function realtimeResult() {
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"],
+    });
+    socket.on(`customer-${sess.userid}`, (messageNew: any) => {
+      if (messageNew && messageNew.status === "success") {
+        const thisData = messageNew.result;
+        setCustomers(thisData);
+      }
+    });
+  }
+
+  useEffect(() => {
+    realtimeResult();
+  }, []);
 
   return (
     <div style={{ padding: 12 }}>
@@ -146,9 +186,15 @@ const DefaultComponent: React.FC<any> = props => {
           </Select>
         </FormControl>
       </div>
+      <SearchRealtime
+        label="ค้นหาลูกค้า"
+        {...{ search, setSearch }}
+        onChange={realtimeSearch}
+        padding="16px 0"
+      />
       {customers ? (
-        customers.list.length > 0 ? (
-          customers.list.map((d: any) => (
+        ("list" in customers ? customers.list : customers).length > 0 ? (
+          ("list" in customers ? customers.list : customers).map((d: any) => (
             <CustomersItem
               key={d.customerid}
               data={d}
@@ -169,19 +215,21 @@ const DefaultComponent: React.FC<any> = props => {
       ) : (
         <Progress />
       )}
-      {customers && Math.ceil(customers.count / 10) > 1 && (
-        <div
-          style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
-        >
-          <Pagination
-            count={Math.ceil(customers.count / 10)}
-            page={customerPage}
-            variant="outlined"
-            shape="rounded"
-            onChange={paginationChange}
-          />
-        </div>
-      )}
+      {customers &&
+        "count" in customers &&
+        Math.ceil(customers.count / 10) > 1 && (
+          <div
+            style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
+          >
+            <Pagination
+              count={Math.ceil(customers.count / 10)}
+              page={customerPage}
+              variant="outlined"
+              shape="rounded"
+              onChange={paginationChange}
+            />
+          </div>
+        )}
     </div>
   );
 };
@@ -195,4 +243,4 @@ const CustomerList: React.FC<CustomerListProps> = ({ match }) => {
   );
 };
 
-export default withRouter(props => <CustomerList {...props} />);
+export default withRouter((props) => <CustomerList {...props} />);

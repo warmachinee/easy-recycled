@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Loadable from "react-loadable";
+import socketIOClient from "socket.io-client";
 import { makeStyles } from "@material-ui/styles";
 import { AppContext } from "../../../AppContext";
 import {
@@ -15,19 +16,20 @@ import {
   Divider,
   Link,
   Menu,
-  Chip
+  Chip,
 } from "@material-ui/core";
 import { red, green, grey } from "@material-ui/core/colors";
 import { MoreVert, Storefront } from "@material-ui/icons";
 import { RouteComponentProps, withRouter } from "react-router-dom";
 import Pagination from "@material-ui/lab/Pagination";
+import SearchRealtime from "../../../component/Utils/SearchRealtime";
 
 const Progress = Loadable({
   loader: () =>
     import(
       /* webpackChunkName: 'Progress' */ "../../../component/Utils/Progress"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const ConfirmDialog = Loadable({
@@ -35,7 +37,7 @@ const ConfirmDialog = Loadable({
     import(
       /* webpackChunkName: 'ConfirmDialog' */ "../../../component/Dialog/ConfirmDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GeneralDialog = Loadable({
@@ -43,12 +45,12 @@ const GeneralDialog = Loadable({
     import(
       /* webpackChunkName: 'GeneralDialog' */ "../../../component/Dialog/GeneralDialog"
     ),
-  loading: () => null
+  loading: () => null,
 });
 
 const GoodsDetail = Loadable({
   loader: () => import(/* webpackChunkName: 'GoodsDetail' */ "./GoodsDetail"),
-  loading: () => null
+  loading: () => null,
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -57,30 +59,30 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: "relative",
     margin: theme.spacing(2, 0),
     padding: 16,
-    minWidth: 650
-  }
+    minWidth: 650,
+  },
 }));
 
 export type GoodsListProps = RouteComponentProps<{}>;
 
-const GoodsItemList: React.FC<any> = props => {
-  const { goods, goodsType } = props;
+const GoodsItemList: React.FC<any> = (props) => {
+  const { item, goodsType } = props;
   const arr = getArr();
 
   function getArr() {
     switch (goodsType) {
       case 10:
-        return goods.list;
+        return item;
       case 1:
-        return goods.list.filter((item: any) => item.boarddisplay === 1);
+        return item.filter((item: any) => item.boarddisplay === 1);
       case -1:
-        return goods.list.filter((item: any) => item.boarddisplay === 0);
+        return item.filter((item: any) => item.boarddisplay === 0);
       case 2:
-        return goods.list.filter((item: any) => item.endofsale === 0);
+        return item.filter((item: any) => item.endofsale === 0);
       case -2:
-        return goods.list.filter((item: any) => item.endofsale === 1);
+        return item.filter((item: any) => item.endofsale === 1);
       default:
-        return goods.list;
+        return item;
     }
   }
 
@@ -99,7 +101,7 @@ const GoodsItemList: React.FC<any> = props => {
   );
 };
 
-const GoodsItem: React.FC<any> = props => {
+const GoodsItem: React.FC<any> = (props) => {
   const classes = useStyles();
   const { data, onDeleteGoods, onClickGoods } = props;
   const { _dateToString, _parseLocation } = useContext(AppContext);
@@ -121,8 +123,8 @@ const GoodsItem: React.FC<any> = props => {
       style={{
         ...(data.endofsale === 1 && {
           backgroundColor: "inherit",
-          opacity: 0.7
-        })
+          opacity: 0.7,
+        }),
       }}
     >
       <IconButton
@@ -139,7 +141,7 @@ const GoodsItem: React.FC<any> = props => {
             style={{
               marginRight: 16,
               color: "white",
-              backgroundColor: green[700]
+              backgroundColor: green[700],
             }}
           />
         )}
@@ -158,7 +160,7 @@ const GoodsItem: React.FC<any> = props => {
           variant="h6"
           style={{
             color: data.accessremain === 0 ? red[600] : green[600],
-            marginRight: 24
+            marginRight: 24,
           }}
         >{`${data.accessremain}/${data.accesstotal}`}</Typography>
         <Typography style={{ marginRight: 8 }}>วันนัดดูสินค้า</Typography>
@@ -171,7 +173,7 @@ const GoodsItem: React.FC<any> = props => {
         </Typography>
       </div>
       <div style={{ display: "flex" }}>
-        <Typography style={{ width: 100 }}>เขตพิ้นที่รับ</Typography>
+        <Typography style={{ width: 100 }}>เขตพื้นที่รับ</Typography>
         <Typography style={{ fontWeight: 600 }}>
           {_parseLocation(data.location).label}
         </Typography>
@@ -201,21 +203,23 @@ const GoodsItem: React.FC<any> = props => {
 const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
   const classes = useStyles();
   const {
+    sess,
     csrf,
     setCsrf,
     _xhrPost,
     _onLocalhostFn,
-    useConfirmDeleteItem
+    useConfirmDeleteItem,
   } = useContext(AppContext);
   const [goods, setGoods] = useState<any>(null);
   const [goodsType, setGoodsType] = useState<any>(10);
   const [
     { confirmState, item: itemOnDelete },
-    onDeleteGoods
+    onDeleteGoods,
   ] = useConfirmDeleteItem();
   const [goodsDetail, setGoodsDetail] = useState<any>(null);
   const [goodsDetailState, setGoodsDetailState] = useState<boolean>(false);
   const [goodsPage, setGoodsPage] = React.useState(getHash());
+  const [search, setSearch] = useState<any>("");
 
   function getHash() {
     const hash = location.hash;
@@ -251,8 +255,8 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       url: "abusinesssystem",
       body: {
         action: "form_delete",
-        formid: itemOnDelete.formid
-      }
+        formid: itemOnDelete.formid,
+      },
     });
     setCsrf(res.csrf);
 
@@ -267,8 +271,8 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       body: {
         action: "form_list",
         startindex: (goodsPage - 1) * 10,
-        lastindex: goodsPage * 10
-      }
+        lastindex: goodsPage * 10,
+      },
     });
 
     setCsrf(res.csrf);
@@ -280,6 +284,43 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       getGoodsList();
     }
   }, [goodsPage, goodsDetailState]);
+
+  function realtimeSearch(value: any) {
+    setSearch(value);
+    if (value === "") {
+      location.hash = "#";
+      if (!goodsDetailState) {
+        getGoodsList();
+      }
+    } else {
+      const socket = socketIOClient("https://easyrecycle.ml", {
+        transports: ["websocket", "polling"],
+      });
+      const sendObj = {
+        action: "form",
+        adminid: sess.userid,
+        inputtext: value,
+      };
+      socket.emit("adminsearch", sendObj);
+    }
+  }
+
+  function realtimeResult() {
+    const socket = socketIOClient("https://easyrecycle.ml", {
+      transports: ["websocket", "polling"],
+    });
+    socket.on(`form-${sess.userid}`, (messageNew: any) => {
+      console.log(messageNew);
+      if (messageNew && messageNew.status === "success") {
+        const thisData = messageNew.result;
+        setGoods(thisData);
+      }
+    });
+  }
+
+  useEffect(() => {
+    realtimeResult();
+  }, []);
 
   return (
     <div style={{ padding: 12 }}>
@@ -297,16 +338,22 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
           </Select>
         </FormControl>
       </div>
+      <SearchRealtime
+        label="ค้นหาสินค้า"
+        {...{ search, setSearch }}
+        onChange={realtimeSearch}
+        padding="16px 0"
+      />
       {goods ? (
-        goods.list.length > 0 ? (
+        ("list" in goods ? goods.list : goods).length > 0 ? (
           <GoodsItemList
+            item={"list" in goods ? goods.list : goods}
             {...{
-              goods,
               goodsType,
               onDeleteGoods,
               onClickGoods,
               paginationChange,
-              goodsPage
+              goodsPage,
             }}
           />
         ) : (
@@ -322,7 +369,7 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
       ) : (
         <Progress />
       )}
-      {goods && Math.ceil(goods.count / 10) > 1 && (
+      {goods && "count" in goods && Math.ceil(goods.count / 10) > 1 && (
         <div
           style={{ marginTop: 16, display: "flex", justifyContent: "center" }}
         >
@@ -358,4 +405,4 @@ const GoodsList: React.FC<GoodsListProps> = ({ location, history, match }) => {
     </div>
   );
 };
-export default withRouter(props => <GoodsList {...props} />);
+export default withRouter((props) => <GoodsList {...props} />);
