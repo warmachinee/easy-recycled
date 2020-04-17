@@ -295,10 +295,10 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
       const thisData = res.data;
       const thisInfo = thisData.info;
       if (
-        // thisInfo.statusmassage !== profileData.statusMessage ||
+        thisInfo.displayname !== profileData.displayName ||
         thisInfo.picture !== profileData.pictureUrl
       ) {
-        updateProfile();
+        updateProfile(thisInfo);
       } else {
         setUserInfo(thisData);
         getBankDetail();
@@ -306,17 +306,25 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     }
   }
 
-  async function updateProfile() {
+  async function updateProfile(thisInfo: any) {
+    const sendObj = {
+      action: "editprofile",
+      linetoken: profileData.userId,
+      type: "customer",
+    };
+
+    if (thisInfo.displayname !== profileData.displayName) {
+      Object.assign(sendObj, { displayname: profileData.displayName });
+    }
+
+    if (thisInfo.picture !== profileData.pictureUrl) {
+      Object.assign(sendObj, { picture: profileData.pictureUrl });
+    }
+
     const res = await _xhrPost({
       csrf,
       url: "usersystem",
-      body: {
-        action: "editprofile",
-        linetoken: profileData.userId,
-        type: "customer",
-        picture: profileData.pictureUrl,
-        statusmassage: profileData.statusMessage,
-      },
+      body: sendObj,
     });
     setCsrf(res.csrf);
     liffLogin();

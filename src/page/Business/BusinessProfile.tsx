@@ -5,7 +5,7 @@ import {
   Avatar,
   Divider,
   IconButton,
-  TextField
+  TextField,
 } from "@material-ui/core";
 import { Settings, ArrowBackIos, Close } from "@material-ui/icons";
 import MaskedInput from "react-text-mask";
@@ -14,17 +14,17 @@ import { green, grey } from "@material-ui/core/colors";
 import { AppContext } from "../../AppContext";
 import { RouteComponentProps, withRouter } from "react-router-dom";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   content: {
     position: "relative",
     padding: "16px 24px",
     borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)"
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
   },
   avatar: { height: 128, width: 128, margin: "auto" },
   label: { fontWeight: 700, width: "30%" },
   text: { width: "70%" },
-  textField: { marginBottom: 12 }
+  textField: { marginBottom: 12 },
 }));
 
 export interface BusinessProfileProps extends RouteComponentProps<{}> {}
@@ -56,7 +56,7 @@ function TextMaskCustom(props: TextMaskCustomProps) {
         /\d/,
         /\d/,
         /\d/,
-        /\d/
+        /\d/,
       ]}
       placeholderChar={"\u2000"}
     />
@@ -74,12 +74,12 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
     phoneFormatToNumber,
     stringToPhone,
     getInfo,
-    realtimeAccess
+    realtimeAccess,
   } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState<any>(false);
   const [thisData, setThisData] = useState<any>({
     ...data,
-    tel: stringToPhone(`0${data.tel}`)
+    tel: stringToPhone(`0${data.tel}`),
   });
 
   function checkDisabled() {
@@ -101,7 +101,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
       action: "editprofile",
       linetoken: profileData.userId,
       type: "business",
-      picture: profileData.pictureUrl
+      picture: profileData.pictureUrl,
     };
     const keyArr = ["displayname", "fullname", "lastname", "email"];
     for (var i = 0; i < keyArr.length; i++) {
@@ -115,7 +115,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
     const res = await _xhrPost({
       csrf,
       url: "usersystem",
-      body: sendObj
+      body: sendObj,
     });
 
     setCsrf(res.csrf);
@@ -125,7 +125,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
     ) {
       checkSession();
     } else {
-      getInfo();
+      getInfo(profileData);
       setIsEditing(false);
     }
     realtimeAccess();
@@ -143,7 +143,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
       }
       {isEditing ? (
         <React.Fragment>
-          <TextField
+          {/* <TextField
             className={classes.textField}
             fullWidth
             label="ชื่อที่แสดง"
@@ -151,13 +151,13 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
             onChange={e =>
               setThisData({ ...thisData, displayname: e.target.value })
             }
-          />
+          /> */}
           <TextField
             className={classes.textField}
             fullWidth
             label="ชื่อ"
             value={thisData.fullname}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, fullname: e.target.value })
             }
           />
@@ -166,7 +166,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
             fullWidth
             label="นามสกุล"
             value={thisData.lastname}
-            onChange={e =>
+            onChange={(e) =>
               setThisData({ ...thisData, lastname: e.target.value })
             }
           />
@@ -176,17 +176,19 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
             fullWidth
             label="เบอร์โทรศัพท์"
             InputProps={{
-              inputComponent: TextMaskCustom as any
+              inputComponent: TextMaskCustom as any,
             }}
             value={thisData.tel}
-            onChange={e => setThisData({ ...thisData, tel: e.target.value })}
+            onChange={(e) => setThisData({ ...thisData, tel: e.target.value })}
           />
           <TextField
             className={classes.textField}
             fullWidth
             label="อีเมล"
             value={thisData.email}
-            onChange={e => setThisData({ ...thisData, email: e.target.value })}
+            onChange={(e) =>
+              setThisData({ ...thisData, email: e.target.value })
+            }
           />
           <Divider style={{ margin: "12px 0" }} />
           <div style={{ display: "flex" }}>
@@ -197,7 +199,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
               onClick={() => {
                 setThisData({
                   ...data,
-                  tel: `0${data.tel}`
+                  tel: `0${data.tel}`,
                 });
                 setIsEditing(false);
               }}
@@ -240,7 +242,7 @@ const ProfileComponent: React.FC<any> = ({ data }) => {
   );
 };
 
-const BusinessProfile: React.FC<BusinessProfileProps | any> = props => {
+const BusinessProfile: React.FC<BusinessProfileProps | any> = (props) => {
   const classes = useStyles();
   const { userInfo } = useContext(AppContext);
   const { history } = props;
@@ -262,4 +264,4 @@ const BusinessProfile: React.FC<BusinessProfileProps | any> = props => {
     </div>
   );
 };
-export default withRouter(props => <BusinessProfile {...props} />);
+export default withRouter((props) => <BusinessProfile {...props} />);

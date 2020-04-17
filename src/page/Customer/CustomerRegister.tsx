@@ -234,7 +234,7 @@ const Component1: React.FC<any> = (props) => {
         value={form.business_name}
         onChange={onFormChange}
       />
-      <TextField
+      {/* <TextField
         style={{ marginBottom: 16 }}
         className={classes.textField}
         fullWidth
@@ -247,8 +247,8 @@ const Component1: React.FC<any> = (props) => {
             location: (e.target as HTMLInputElement).value,
           })
         }
-      />
-      {/* <Typography variant="h6">เขตพื้นที่รับเศษวัสดุเหลือใช้</Typography>
+      /> */}
+      <Typography variant="h6">สถานที่</Typography>
       {(province || district || subdistrict) && (
         <Typography>
           {province.name}
@@ -261,7 +261,7 @@ const Component1: React.FC<any> = (props) => {
       <div style={{ height: 12 }} />
       <Province {...locationProps} />
       {province && <District {...locationProps} />}
-      {province && district && <Subdistrict {...locationProps} />} */}
+      {province && district && <Subdistrict {...locationProps} />}
 
       <FormControl
         component="fieldset"
@@ -615,9 +615,11 @@ const Component3: React.FC<any> = ({
       </Typography>
       <MarginDivider />
       <Typography variant="h6" style={{ flex: 1 }}>
-        สถานที่ตั้ง
+        สถานที่
       </Typography>
-      {form.location === "" ? (
+      {_parseLocation(form.location).label === "" ||
+      _parseLocation(form.location).label ===
+        "จังหวัด > เขต/อำเภอ > ตำบล (1)" ? (
         <Typography gutterBottom style={{ flex: 1 }}>
           <MaterialLink
             style={{ color: red[600] }}
@@ -628,8 +630,8 @@ const Component3: React.FC<any> = ({
         </Typography>
       ) : (
         <Typography gutterBottom style={{ flex: 1 }}>
-          {/* {_parseLocation(form.location).label} */}
-          {form.location}
+          {_parseLocation(form.location).label}
+          {/* {form.location} */}
         </Typography>
       )}
       <MarginDivider />
@@ -773,22 +775,23 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     phoneFormatToNumber,
     getSess,
     _parseLocation,
+    addSnackbar,
   } = useContext(AppContext);
   const [form, setForm] = useState<any>(null);
   const [activeStep, setActiveStep] = React.useState<any>(0);
   const [inputForm, setInputForm] = useState<any | null>(null);
   const [checked, setChecked] = useState<any>(false);
-  // const [province, setProvince] = useState<any>(null);
-  // const [district, setDistrict] = useState<any>(null);
-  // const [subdistrict, setSubdistrict] = useState<any>(null);
-  // const locationProps: any = {
-  //   province,
-  //   setProvince,
-  //   district,
-  //   setDistrict,
-  //   subdistrict,
-  //   setSubdistrict
-  // };
+  const [province, setProvince] = useState<any>(null);
+  const [district, setDistrict] = useState<any>(null);
+  const [subdistrict, setSubdistrict] = useState<any>(null);
+  const locationProps: any = {
+    province,
+    setProvince,
+    district,
+    setDistrict,
+    subdistrict,
+    setSubdistrict,
+  };
 
   async function loadForm() {
     const res = await _xhrPost({
@@ -803,6 +806,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
 
   async function onRegister() {
     const { tel, business_type, org_size, docsetc, transetc } = form;
+
     const sendObj = {
       linetoken: profileData.userId,
       type: "customer",
@@ -813,6 +817,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
       ...(docsetc !== "" && { docsetc }),
       ...(transetc !== "" && { transetc }),
     };
+    console.log(sendObj);
     const res = await _xhrPost({
       csrf,
       url: "register",
@@ -820,7 +825,16 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     });
 
     setCsrf(res.csrf);
-    getSess(profileData);
+    console.log(res.data);
+    if (res.data.status === "success") {
+      addSnackbar({ message: "สมัครสำเร็จ", variant: "success" });
+      getSess(profileData);
+    } else {
+      addSnackbar({
+        message: `สมัครไม่สำเร็จ : ${res.data.status}`,
+        variant: "error",
+      });
+    }
   }
 
   useEffect(() => {
@@ -830,10 +844,12 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
         email: "",
         fullname: "",
         lastname: "",
-        displayname: profileData.displayName,
+        displayname: profileData.displayName ? profileData.displayName : "-",
         tel: "",
-        statusmassage: profileData.statusMessage,
-        picture: profileData.pictureUrl,
+        statusmassage: profileData.statusMessage
+          ? profileData.statusMessage
+          : "-",
+        picture: profileData.pictureUrl ? profileData.pictureUrl : "-",
         business_name: "",
         business_type: 0,
         location: "",
@@ -846,15 +862,15 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
     }
   }, [profileData]);
 
-  // useEffect(() => {
-  //   if (province || district || subdistrict) {
-  //     setForm({
-  //       ...form,
-  //       location: JSON.stringify({ province, district, subdistrict })
-  //       // location: `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
-  //     });
-  //   }
-  // }, [province, district, subdistrict]);
+  useEffect(() => {
+    if (province || district || subdistrict) {
+      setForm({
+        ...form,
+        location: JSON.stringify({ province, district, subdistrict }),
+        // location: `${province.name} > ${district.name} > ${subdistrict.name} (${subdistrict.zip_code})`
+      });
+    }
+  }, [province, district, subdistrict]);
 
   return (
     <div className={classes.root}>
@@ -871,7 +887,7 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
             checked,
             setChecked,
           }}
-          // {...locationProps}
+          {...locationProps}
         />
       )}
 
@@ -888,7 +904,9 @@ const CustomerRegister: React.FC<any> = ({ profileData }) => {
               form.tel === "" ||
               form.business_name === "" ||
               form.location === "" ||
-              // _parseLocation(form.location).label === "" ||
+              _parseLocation(form.location).label === "" ||
+              _parseLocation(form.location).label ===
+                "จังหวัด > เขต/อำเภอ > ตำบล (1)" ||
               form.transport.length === 0 ||
               form.document.length === 0 ||
               !checked

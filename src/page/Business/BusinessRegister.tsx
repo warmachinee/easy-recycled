@@ -8,7 +8,7 @@ import {
   Avatar,
   Typography,
   Button,
-  Checkbox
+  Checkbox,
 } from "@material-ui/core";
 import { AppContext } from "../../AppContext";
 import GeneralDialog from "../../component/Dialog/GeneralDialog";
@@ -21,12 +21,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    padding: 16
+    padding: 16,
   },
   avatar: { width: 100, height: 100, margin: "8px auto" },
   displayName: { fontWeight: 600 },
   status: {},
-  textField: { marginBottom: 8 }
+  textField: { marginBottom: 8 },
 }));
 
 interface TextMaskCustomProps {
@@ -56,7 +56,7 @@ function TextMaskCustom(props: TextMaskCustomProps) {
         /\d/,
         /\d/,
         /\d/,
-        /\d/
+        /\d/,
       ]}
       placeholderChar={"\u2000"}
     />
@@ -91,10 +91,12 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
     phoneFormatToNumber,
     _xhrPost,
     profileData,
-    getSess
+    getSess,
+    addSnackbar,
   } = useContext(AppContext);
   const [conState, setConState] = useState<any>(false);
   const [checked, setChecked] = useState<any>(false);
+  const [loadingRegis, setLoadingRegis] = useState<any>(false);
 
   function onFormChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -107,18 +109,32 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
   }
 
   async function handleRegister() {
+    setLoadingRegis(true);
+    const sendObj = {
+      linetoken: profileData.userId,
+      type: "business",
+      ...form,
+      tel: phoneFormatToNumber(form.tel),
+    };
+    console.log(sendObj);
     const res = await _xhrPost({
       csrf,
       url: "register",
-      body: {
-        linetoken: profileData.userId,
-        type: "business",
-        ...form,
-        tel: phoneFormatToNumber(form.tel)
-      }
+      body: sendObj,
     });
+    console.log(res.data);
     setCsrf(res.csrf);
-    getSess(profileData);
+    if (res.data.status === "success") {
+      addSnackbar({ message: "สมัครสำเร็จ", variant: "success" });
+      getSess(profileData);
+      setLoadingRegis(false);
+    } else {
+      addSnackbar({
+        message: `สมัครไม่สำเร็จ : ${res.data.status}`,
+        variant: "error",
+      });
+      setLoadingRegis(false);
+    }
   }
 
   return (
@@ -159,7 +175,7 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
         name="tel"
         label="เบอร์โทรศัพท์"
         InputProps={{
-          inputComponent: TextMaskCustom as any
+          inputComponent: TextMaskCustom as any,
         }}
         value={form.tel}
         onChange={onFormChange}
@@ -187,14 +203,15 @@ const RegisterForm: React.FC<any> = ({ form, setForm, businessForm }) => {
           form.fullname === "" ||
           form.lastname === "" ||
           form.tel === "" ||
-          !checked
+          !checked ||
+          loadingRegis
         }
         color="primary"
         variant="contained"
         style={{ width: "100%", marginTop: 8 }}
         onClick={handleRegister}
       >
-        สมัคร
+        {loadingRegis ? "กรุณารอสักครู่" : "สมัคร"}
       </Button>
       <GeneralDialog
         open={conState}
@@ -221,7 +238,7 @@ const BusinessRegister: React.FC<any> = ({ profileData }) => {
     const res = await _xhrPost({
       csrf,
       url: "loadregister",
-      body: { action: "business_form", type: "business" }
+      body: { action: "business_form", type: "business" },
     });
     setCsrf(res.csrf);
 
@@ -234,10 +251,12 @@ const BusinessRegister: React.FC<any> = ({ profileData }) => {
         email: "",
         fullname: "",
         lastname: "",
-        displayname: profileData.displayName,
+        displayname: profileData.displayName ? profileData.displayName : "-",
         tel: "",
-        statusmassage: profileData.statusMessage,
-        picture: profileData.pictureUrl
+        statusmassage: profileData.statusMessage
+          ? profileData.statusMessage
+          : "-",
+        picture: profileData.pictureUrl ? profileData.pictureUrl : "-",
       });
     }
     loadBusinessForm();

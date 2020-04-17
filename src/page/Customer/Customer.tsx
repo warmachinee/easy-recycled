@@ -194,7 +194,7 @@ const DefaultComponent: React.FC<any> = () => {
           ) : (
             <CustomerRegister {...{ profileData }} />
           ))}
-        <CustomerBackdrop {...{ backDrop, setBackDrop }} />
+        {/* <CustomerBackdrop {...{ backDrop, setBackDrop }} /> */}
       </div>
     </AppContext.Provider>
   );
@@ -308,20 +308,17 @@ const Customer: React.FC<CustomerProps> = ({ location, history, match }) => {
   }
 
   useEffect(() => {
-    // if (_isDesktopBrowser()) {
-    //   history.replace("/admin");
-    // } else {
-    //   handleFetch();
-    //   setDense(true);
-    // }
-    if (profileData) {
-      // getSess(profileData);
-      setBackDrop(true);
+    if (_isDesktopBrowser()) {
+      history.replace("/admin");
     } else {
-      handleFetch();
+      if (profileData) {
+        // getSess(profileData);
+        setBackDrop(true);
+      } else {
+        handleFetch();
+        setDense(true);
+      }
     }
-
-    setDense(true);
   }, []);
 
   const action = (key: any) => (

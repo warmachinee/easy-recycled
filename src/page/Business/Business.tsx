@@ -129,7 +129,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     });
   }
 
-  async function getInfo() {
+  async function getInfo(thisProfile: any) {
     const res = await _xhrPost({
       csrf,
       url: "loadusersystem",
@@ -139,8 +139,41 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     if ("status" in res.data) {
       checkSession();
     } else {
-      setUserInfo(res.data);
+      const thisData = res.data;
+      const thisInfo = thisData;
+      if (
+        thisInfo.displayname !== thisProfile.displayName ||
+        thisInfo.picture !== thisProfile.pictureUrl
+      ) {
+        updateProfile(thisInfo, thisProfile);
+      } else {
+        setUserInfo(thisData);
+      }
     }
+  }
+
+  async function updateProfile(thisInfo: any, thisProfile: any) {
+    const sendObj = {
+      action: "editprofile",
+      linetoken: thisProfile.userId,
+      type: "business",
+    };
+
+    if (thisInfo.displayname !== thisProfile.displayName) {
+      Object.assign(sendObj, { displayname: thisProfile.displayName });
+    }
+
+    if (thisInfo.picture !== thisProfile.pictureUrl) {
+      Object.assign(sendObj, { picture: thisProfile.pictureUrl });
+    }
+
+    const res = await _xhrPost({
+      csrf,
+      url: "usersystem",
+      body: sendObj,
+    });
+    setCsrf(res.csrf);
+    handleFetch();
   }
 
   async function getSess(profile: any) {
@@ -155,7 +188,7 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
     setSess(res.data);
     setBackDrop(res.data);
     if (res.data.status !== "not member") {
-      getInfo();
+      getInfo(profile);
       getNotifications(profile);
     }
   }
@@ -283,13 +316,13 @@ const Business: React.FC<BusinessProps> = ({ location, history, match }) => {
         {sess &&
           (sess.status !== "not member" ? (
             <React.Fragment>
-              <Header {...{ profileData, handleLogout }} />
+              <Header />
               <GoodsList />
             </React.Fragment>
           ) : (
             <BusinessRegister {...{ profileData }} />
           ))}
-        <BussinessBackdrop {...{ backDrop, setBackDrop }} />
+        {/* <BussinessBackdrop {...{ backDrop, setBackDrop }} /> */}
         <GeneralDialog
           open={noti}
           onClose={() => booleanDispatch({ type: "false", key: "noti" })}

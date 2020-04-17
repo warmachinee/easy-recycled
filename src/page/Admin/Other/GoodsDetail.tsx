@@ -752,7 +752,13 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
         เขตพื้นที่รับเศษวัสดุเหลือใช้
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing((prev) => !prev)}
+          onClick={() => {
+            setEditing((prev) => !prev);
+            setThisValue(value);
+            setProvince(_parseLocation(value).province);
+            setDistrict(_parseLocation(value).district);
+            setSubdistrict(_parseLocation(value).subdistrict);
+          }}
         >
           <Create fontSize="small" />
         </IconButton>

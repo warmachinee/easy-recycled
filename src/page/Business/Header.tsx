@@ -26,13 +26,20 @@ const ConfirmDialog = Loadable({
 
 const useStyles = makeStyles((theme) => ({ title: { flexGrow: 1 } }));
 
-const Header: React.FC<any> = ({ profileData, handleLogout }) => {
+const Header: React.FC<any> = () => {
   const classes = useStyles();
   const {
+    csrf,
+    setCsrf,
+    _xhrPost,
     useConfirmDeleteItem,
     notifications,
     readNotifications,
     booleanDispatch,
+    sess,
+    userInfo,
+    profileData,
+    handleLogout,
   } = useContext(AppContext);
   const [{ confirmState }, onLogout] = useConfirmDeleteItem();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -46,6 +53,21 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
     setAnchorEl(null);
   };
 
+  // async function onDelete() {
+  //   const res = await _xhrPost({
+  //     csrf,
+  //     url: "deluser",
+  //     body: {
+  //       cert: "caviz",
+  //       userid: sess.userid,
+  //       type: "business",
+  //     },
+  //   });
+  //   console.log(res.data);
+  //   setCsrf(res.csrf);
+  //   window.location.reload();
+  // }
+
   return (
     <AppBar position="static" color="inherit">
       <Toolbar style={{ paddingRight: 0 }}>
@@ -55,6 +77,9 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
         >
           <IconButton style={{ padding: 0, marginRight: 16 }}>
             {profileData && <Avatar src={profileData.pictureUrl} />}
+            {/* {userInfo && userInfo.info && (
+              <Avatar src={userInfo.info.picture} />
+            )} */}
           </IconButton>
         </Link>
 
@@ -86,8 +111,8 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
 
         {/* <IconButton edge="start" color="primary" onClick={handleClick}>
           <MoreVert style={{ color: grey[700] }} />
-        </IconButton> */}
-        {/* <ConfirmDialog
+        </IconButton>
+        <ConfirmDialog
           type="delete"
           open={confirmState}
           onClose={() => onLogout({ action: "cancel" })}
@@ -107,9 +132,10 @@ const Header: React.FC<any> = ({ profileData, handleLogout }) => {
           >
             <MenuItem onClick={handleClose}>โปรไฟล์</MenuItem>
           </Link>
-          {/* <MenuItem onClick={() => onLogout({ action: "delete" })}>
+          <MenuItem onClick={() => onLogout({ action: "delete" })}>
             ลงชื่อออก
-          </MenuItem> */}
+          </MenuItem>
+          {/* <MenuItem onClick={onDelete}>ลบ Account</MenuItem> */}
         </Menu>
       </Toolbar>
     </AppBar>

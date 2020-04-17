@@ -254,6 +254,7 @@ const ProfileComponent: React.FC<any> = ({
     phoneFormatToNumber,
     stringToPhone,
     realtimeAccess,
+    _parseLocation,
   } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState<any>(false);
   const [thisData, setThisData] = useState<any>({
@@ -337,7 +338,7 @@ const ProfileComponent: React.FC<any> = ({
       }
       {isEditing ? (
         <React.Fragment>
-          <TextField
+          {/* <TextField
             style={{ marginTop: 24 }}
             className={classes.textField}
             fullWidth
@@ -346,8 +347,9 @@ const ProfileComponent: React.FC<any> = ({
             onChange={(e) =>
               setThisData({ ...thisData, displayname: e.target.value })
             }
-          />
+          /> */}
           <TextField
+            style={{ marginTop: 24 }}
             className={classes.textField}
             fullWidth
             label="ชื่อ"
@@ -445,7 +447,9 @@ const ProfileComponent: React.FC<any> = ({
           </div>
           <div style={{ display: "flex" }}>
             <Typography className={classes.label}>สถานที่</Typography>
-            <Typography className={classes.text}>{data.location}</Typography>
+            <Typography className={classes.text}>
+              {_parseLocation(data.location).label}
+            </Typography>
           </div>
           <Divider style={{ margin: "12px 0" }} />
           <div style={{ margin: "8px 0" }}>

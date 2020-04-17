@@ -1,6 +1,7 @@
 import * as Handler from "./Handler";
 import * as NotificationsHandler from "./NotificationsHandler";
 const api: any = {
+  deluser: "/deluser",
   /**---------- /user ----------*/
   session: "/user/session",
   login: "/user/login",
@@ -25,7 +26,7 @@ const api: any = {
   abusinesssystem: "/admin/businesssystem",
   aloadtopup: "/admin/loadtopup",
   atopupsystem: "/admin/topupsystem",
-  "": "/"
+  "": "/",
 };
 
 const apiUrl = (url: string) => {
@@ -33,25 +34,25 @@ const apiUrl = (url: string) => {
 };
 
 function _xhrGet(url: string) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     var req = new XMLHttpRequest();
     req.open("GET", apiUrl(url), false);
     req.send(null);
     resolve({
       csrf: req.getResponseHeader("csrf-token"),
-      data: JSON.parse(req.responseText)
+      data: JSON.parse(req.responseText),
     });
   });
 }
 
 function _xhrGetP(url: string) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     var req = new XMLHttpRequest();
     req.open("GET", url, false);
     req.send(null);
     resolve({
       csrf: req.getResponseHeader("csrf-token"),
-      data: JSON.parse(req.responseText)
+      data: JSON.parse(req.responseText),
     });
   });
 }
@@ -62,7 +63,7 @@ interface _xhrPostProps {
   body?: any;
 }
 function _xhrPost(props: _xhrPostProps) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const { csrf, url, body } = props;
     var req = new XMLHttpRequest();
     req.open("POST", apiUrl(url), true);
@@ -74,7 +75,7 @@ function _xhrPost(props: _xhrPostProps) {
         if (req.responseText) {
           resolve({
             csrf: req.getResponseHeader("csrf-token"),
-            data: JSON.parse(req.responseText)
+            data: JSON.parse(req.responseText),
           });
         } else {
           console.log(req.responseText);
@@ -84,7 +85,7 @@ function _xhrPost(props: _xhrPostProps) {
     req.send(
       JSON.stringify({
         _csrf: csrf,
-        ...body
+        ...body,
       })
     );
   });
@@ -97,7 +98,7 @@ interface _fetchFileProps {
   body?: any;
 }
 function _fetchFile(props: _fetchFileProps) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const { url, csrf, headers, body } = props;
     const formData = new FormData();
     const objKeys = Object.keys(body)[0];
@@ -107,14 +108,14 @@ function _fetchFile(props: _fetchFileProps) {
       crossDomain: true,
       method: "post",
       headers,
-      body: formData
+      body: formData,
     };
     const res = await fetch(`${apiUrl(url)}?_csrf=${csrf}`, options);
     const json = await res.json();
     const thisCsrf: any = await getCSRF();
     resolve({
       csrf: thisCsrf,
-      data: json
+      data: json,
     });
   });
 }
@@ -126,7 +127,7 @@ interface _fetchFileMultipleProps {
   body?: any;
 }
 function _fetchFileMultiple(props: _fetchFileMultipleProps) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve) => {
     const { url, csrf, headers, body } = props;
     const formData = new FormData();
     const objKeys = Object.keys(body)[0];
@@ -142,20 +143,20 @@ function _fetchFileMultiple(props: _fetchFileMultipleProps) {
       crossDomain: true,
       method: "post",
       headers,
-      body: formData
+      body: formData,
     };
     const res = await fetch(`${apiUrl(url)}?_csrf=${csrf}`, options);
     const json = await res.json();
     const thisCsrf: any = await getCSRF();
     resolve({
       csrf: thisCsrf,
-      data: json
+      data: json,
     });
   });
 }
 
 function getCSRF() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     var req = new XMLHttpRequest();
     req.open("GET", window.location.origin, false);
     req.send(null);
@@ -171,5 +172,5 @@ export const exportApi = {
   _xhrGetP,
   _xhrPost,
   _fetchFile,
-  _fetchFileMultiple
+  _fetchFileMultiple,
 };

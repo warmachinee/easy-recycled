@@ -188,24 +188,21 @@ const Market: React.FC<MarketProps> = ({ match, location, history }) => {
   }
 
   useEffect(() => {
-    if (profileData) {
-      getMarketPlace();
+    if (_isDesktopBrowser()) {
+      history.replace("/admin");
     } else {
-      handleFetch();
+      if (profileData) {
+        getMarketPlace();
+      } else {
+        handleFetch();
+      }
+      setDense(true);
     }
   }, [profileData]);
 
   useEffect(() => {
     realtimeBoard(marketList);
   }, [marketList]);
-
-  useEffect(() => {
-    // if (_isDesktopBrowser()) {
-    //   history.replace("/admin");
-    // } else {
-    //   setDense(true);
-    // }
-  }, []);
 
   return (
     <AppContext.Provider value={...passingProps}>

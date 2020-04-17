@@ -737,7 +737,13 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
         เขตพื้นที่รับเศษวัสดุเหลือใช้
         <IconButton
           className={classes.editButton}
-          onClick={() => setEditing((prev) => !prev)}
+          onClick={() => {
+            setEditing((prev) => !prev);
+            setThisValue(value);
+            setProvince(_parseLocation(value).province);
+            setDistrict(_parseLocation(value).district);
+            setSubdistrict(_parseLocation(value).subdistrict);
+          }}
         >
           <Create fontSize="small" />
         </IconButton>
@@ -767,14 +773,7 @@ const BusinessLocation: React.FC<any> = ({ value }) => {
             >
               บันทึก
             </AppButton>
-            <AppButton
-              variant="text"
-              buttonColor={green}
-              onClick={() => {
-                setEditing(false);
-                setThisValue(value);
-              }}
-            >
+            <AppButton variant="text" buttonColor={green} onClick={onCancel}>
               ยกเลิก
             </AppButton>
           </div>

@@ -105,10 +105,10 @@ const CustomerHeader: React.FC<any> = ({
             </Badge>
           </IconButton>
         )}
-        {/* <IconButton edge="start" color="primary">
+        <IconButton edge="start" color="primary">
           <MoreVert style={{ color: grey[700] }} />
-        </IconButton> */}
-        {/* <ConfirmDialog
+        </IconButton>
+        <ConfirmDialog
           type="delete"
           open={confirmState}
           onClose={() => onLogout({ action: "cancel" })}
@@ -120,7 +120,7 @@ const CustomerHeader: React.FC<any> = ({
           title="คุณแน่ใจหรือไม่ว่าต้องการจะลงชื่อออกหรือไม่ ?"
           submitText="ลงชื่อออก"
           headIcon={ExitToApp}
-        /> */}
+        />
         <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
           <MenuItem
             onClick={() => {
@@ -133,9 +133,9 @@ const CustomerHeader: React.FC<any> = ({
           >
             โปรไฟล์
           </MenuItem>
-          {/* <MenuItem onClick={() => onLogout({ action: "delete" })}>
+          <MenuItem onClick={() => onLogout({ action: "delete" })}>
             ลงชื่อออก
-          </MenuItem> */}
+          </MenuItem>
         </Menu>
       </Toolbar>
     </AppBar>
